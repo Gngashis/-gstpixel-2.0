@@ -15,17 +15,21 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ServicesRouteImport } from './routes/services'
-import { Route as SolutionsRouteImport } from './routes/solutions'
+import { Route as ServicesRouteRouteImport } from './routes/services.route'
+import { Route as SolutionsRouteRouteImport } from './routes/solutions.route'
 import { Route as StartYourProjectRouteImport } from './routes/start-your-project'
-import { Route as ToolsRouteImport } from './routes/tools'
-import { Route as WorkRouteImport } from './routes/work'
+import { Route as ToolsRouteRouteImport } from './routes/tools.route'
+import { Route as WorkRouteRouteImport } from './routes/work.route'
+import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as SolutionsIndexRouteImport } from './routes/solutions.index'
 import { Route as SolutionsSlugRouteImport } from './routes/solutions.$slug'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsBusinessChecklistRouteImport } from './routes/tools.business-checklist'
 import { Route as ToolsGstCalculatorRouteImport } from './routes/tools.gst-calculator'
 import { Route as ToolsProjectEstimatorRouteImport } from './routes/tools.project-estimator'
 import { Route as ToolsServiceFinderRouteImport } from './routes/tools.service-finder'
+import { Route as WorkIndexRouteImport } from './routes/work.index'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -58,12 +62,12 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ServicesRoute = ServicesRouteImport.update({
+const ServicesRouteRoute = ServicesRouteRouteImport.update({
   id: '/services',
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SolutionsRoute = SolutionsRouteImport.update({
+const SolutionsRouteRoute = SolutionsRouteRouteImport.update({
   id: '/solutions',
   path: '/solutions',
   getParentRoute: () => rootRouteImport,
@@ -73,64 +77,84 @@ const StartYourProjectRoute = StartYourProjectRouteImport.update({
   path: '/start-your-project',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ToolsRoute = ToolsRouteImport.update({
+const ToolsRouteRoute = ToolsRouteRouteImport.update({
   id: '/tools',
   path: '/tools',
   getParentRoute: () => rootRouteImport,
 } as any)
-const WorkRoute = WorkRouteImport.update({
+const WorkRouteRoute = WorkRouteRouteImport.update({
   id: '/work',
   path: '/work',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ServicesRouteRoute,
+} as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
-  getParentRoute: () => ServicesRoute,
+  getParentRoute: () => ServicesRouteRoute,
+} as any)
+const SolutionsIndexRoute = SolutionsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SolutionsRouteRoute,
 } as any)
 const SolutionsSlugRoute = SolutionsSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
-  getParentRoute: () => SolutionsRoute,
+  getParentRoute: () => SolutionsRouteRoute,
+} as any)
+const ToolsIndexRoute = ToolsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ToolsRouteRoute,
 } as any)
 const ToolsBusinessChecklistRoute = ToolsBusinessChecklistRouteImport.update({
   id: '/business-checklist',
   path: '/business-checklist',
-  getParentRoute: () => ToolsRoute,
+  getParentRoute: () => ToolsRouteRoute,
 } as any)
 const ToolsGstCalculatorRoute = ToolsGstCalculatorRouteImport.update({
   id: '/gst-calculator',
   path: '/gst-calculator',
-  getParentRoute: () => ToolsRoute,
+  getParentRoute: () => ToolsRouteRoute,
 } as any)
 const ToolsProjectEstimatorRoute = ToolsProjectEstimatorRouteImport.update({
   id: '/project-estimator',
   path: '/project-estimator',
-  getParentRoute: () => ToolsRoute,
+  getParentRoute: () => ToolsRouteRoute,
 } as any)
 const ToolsServiceFinderRoute = ToolsServiceFinderRouteImport.update({
   id: '/service-finder',
   path: '/service-finder',
-  getParentRoute: () => ToolsRoute,
+  getParentRoute: () => ToolsRouteRoute,
+} as any)
+const WorkIndexRoute = WorkIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WorkRouteRoute,
 } as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
-  getParentRoute: () => WorkRoute,
+  getParentRoute: () => WorkRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/services': typeof ServicesRouteRouteWithChildren
+  '/solutions': typeof SolutionsRouteRouteWithChildren
+  '/tools': typeof ToolsRouteRouteWithChildren
+  '/work': typeof WorkRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
-  '/services': typeof ServicesRouteWithChildren
-  '/solutions': typeof SolutionsRouteWithChildren
   '/start-your-project': typeof StartYourProjectRoute
-  '/tools': typeof ToolsRouteWithChildren
-  '/work': typeof WorkRouteWithChildren
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
@@ -138,6 +162,10 @@ export interface FileRoutesByFullPath {
   '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
   '/work/$slug': typeof WorkSlugRoute
+  '/services/': typeof ServicesIndexRoute
+  '/solutions/': typeof SolutionsIndexRoute
+  '/tools/': typeof ToolsIndexRoute
+  '/work/': typeof WorkIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -146,11 +174,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
-  '/services': typeof ServicesRouteWithChildren
-  '/solutions': typeof SolutionsRouteWithChildren
   '/start-your-project': typeof StartYourProjectRoute
-  '/tools': typeof ToolsRouteWithChildren
-  '/work': typeof WorkRouteWithChildren
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
@@ -158,20 +182,24 @@ export interface FileRoutesByTo {
   '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
   '/work/$slug': typeof WorkSlugRoute
+  '/services': typeof ServicesIndexRoute
+  '/solutions': typeof SolutionsIndexRoute
+  '/tools': typeof ToolsIndexRoute
+  '/work': typeof WorkIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/services': typeof ServicesRouteRouteWithChildren
+  '/solutions': typeof SolutionsRouteRouteWithChildren
+  '/tools': typeof ToolsRouteRouteWithChildren
+  '/work': typeof WorkRouteRouteWithChildren
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
-  '/services': typeof ServicesRouteWithChildren
-  '/solutions': typeof SolutionsRouteWithChildren
   '/start-your-project': typeof StartYourProjectRoute
-  '/tools': typeof ToolsRouteWithChildren
-  '/work': typeof WorkRouteWithChildren
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
@@ -179,21 +207,25 @@ export interface FileRoutesById {
   '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
   '/work/$slug': typeof WorkSlugRoute
+  '/services/': typeof ServicesIndexRoute
+  '/solutions/': typeof SolutionsIndexRoute
+  '/tools/': typeof ToolsIndexRoute
+  '/work/': typeof WorkIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/services'
+    | '/solutions'
+    | '/tools'
+    | '/work'
     | '/$'
     | '/about'
     | '/contact'
     | '/insights'
     | '/privacy'
-    | '/services'
-    | '/solutions'
     | '/start-your-project'
-    | '/tools'
-    | '/work'
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
@@ -201,6 +233,10 @@ export interface FileRouteTypes {
     | '/tools/project-estimator'
     | '/tools/service-finder'
     | '/work/$slug'
+    | '/services/'
+    | '/solutions/'
+    | '/tools/'
+    | '/work/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -209,11 +245,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/insights'
     | '/privacy'
-    | '/services'
-    | '/solutions'
     | '/start-your-project'
-    | '/tools'
-    | '/work'
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
@@ -221,19 +253,23 @@ export interface FileRouteTypes {
     | '/tools/project-estimator'
     | '/tools/service-finder'
     | '/work/$slug'
+    | '/services'
+    | '/solutions'
+    | '/tools'
+    | '/work'
   id:
     | '__root__'
     | '/'
+    | '/services'
+    | '/solutions'
+    | '/tools'
+    | '/work'
     | '/$'
     | '/about'
     | '/contact'
     | '/insights'
     | '/privacy'
-    | '/services'
-    | '/solutions'
     | '/start-your-project'
-    | '/tools'
-    | '/work'
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
@@ -241,20 +277,24 @@ export interface FileRouteTypes {
     | '/tools/project-estimator'
     | '/tools/service-finder'
     | '/work/$slug'
+    | '/services/'
+    | '/solutions/'
+    | '/tools/'
+    | '/work/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ServicesRouteRoute: typeof ServicesRouteRouteWithChildren
+  SolutionsRouteRoute: typeof SolutionsRouteRouteWithChildren
+  ToolsRouteRoute: typeof ToolsRouteRouteWithChildren
+  WorkRouteRoute: typeof WorkRouteRouteWithChildren
   SplatRoute: typeof SplatRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
   InsightsRoute: typeof InsightsRoute
   PrivacyRoute: typeof PrivacyRoute
-  ServicesRoute: typeof ServicesRouteWithChildren
-  SolutionsRoute: typeof SolutionsRouteWithChildren
   StartYourProjectRoute: typeof StartYourProjectRoute
-  ToolsRoute: typeof ToolsRouteWithChildren
-  WorkRoute: typeof WorkRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -305,14 +345,14 @@ declare module '@tanstack/react-router' {
       id: '/services'
       path: '/services'
       fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
+      preLoaderRoute: typeof ServicesRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/solutions': {
       id: '/solutions'
       path: '/solutions'
       fullPath: '/solutions'
-      preLoaderRoute: typeof SolutionsRouteImport
+      preLoaderRoute: typeof SolutionsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/start-your-project': {
@@ -326,130 +366,170 @@ declare module '@tanstack/react-router' {
       id: '/tools'
       path: '/tools'
       fullPath: '/tools'
-      preLoaderRoute: typeof ToolsRouteImport
+      preLoaderRoute: typeof ToolsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/work': {
       id: '/work'
       path: '/work'
       fullPath: '/work'
-      preLoaderRoute: typeof WorkRouteImport
+      preLoaderRoute: typeof WorkRouteRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/services/': {
+      id: '/services/'
+      path: '/'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof ServicesRouteRoute
     }
     '/services/$slug': {
       id: '/services/$slug'
       path: '/$slug'
       fullPath: '/services/$slug'
       preLoaderRoute: typeof ServicesSlugRouteImport
-      parentRoute: typeof ServicesRoute
+      parentRoute: typeof ServicesRouteRoute
+    }
+    '/solutions/': {
+      id: '/solutions/'
+      path: '/'
+      fullPath: '/solutions/'
+      preLoaderRoute: typeof SolutionsIndexRouteImport
+      parentRoute: typeof SolutionsRouteRoute
     }
     '/solutions/$slug': {
       id: '/solutions/$slug'
       path: '/$slug'
       fullPath: '/solutions/$slug'
       preLoaderRoute: typeof SolutionsSlugRouteImport
-      parentRoute: typeof SolutionsRoute
+      parentRoute: typeof SolutionsRouteRoute
+    }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRouteRoute
     }
     '/tools/business-checklist': {
       id: '/tools/business-checklist'
       path: '/business-checklist'
       fullPath: '/tools/business-checklist'
       preLoaderRoute: typeof ToolsBusinessChecklistRouteImport
-      parentRoute: typeof ToolsRoute
+      parentRoute: typeof ToolsRouteRoute
     }
     '/tools/gst-calculator': {
       id: '/tools/gst-calculator'
       path: '/gst-calculator'
       fullPath: '/tools/gst-calculator'
       preLoaderRoute: typeof ToolsGstCalculatorRouteImport
-      parentRoute: typeof ToolsRoute
+      parentRoute: typeof ToolsRouteRoute
     }
     '/tools/project-estimator': {
       id: '/tools/project-estimator'
       path: '/project-estimator'
       fullPath: '/tools/project-estimator'
       preLoaderRoute: typeof ToolsProjectEstimatorRouteImport
-      parentRoute: typeof ToolsRoute
+      parentRoute: typeof ToolsRouteRoute
     }
     '/tools/service-finder': {
       id: '/tools/service-finder'
       path: '/service-finder'
       fullPath: '/tools/service-finder'
       preLoaderRoute: typeof ToolsServiceFinderRouteImport
-      parentRoute: typeof ToolsRoute
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/work/': {
+      id: '/work/'
+      path: '/'
+      fullPath: '/work/'
+      preLoaderRoute: typeof WorkIndexRouteImport
+      parentRoute: typeof WorkRouteRoute
     }
     '/work/$slug': {
       id: '/work/$slug'
       path: '/$slug'
       fullPath: '/work/$slug'
       preLoaderRoute: typeof WorkSlugRouteImport
-      parentRoute: typeof WorkRoute
+      parentRoute: typeof WorkRouteRoute
     }
   }
 }
 
-interface ServicesRouteChildren {
+interface ServicesRouteRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
 }
 
-const ServicesRouteChildren: ServicesRouteChildren = {
+const ServicesRouteRouteChildren: ServicesRouteRouteChildren = {
   ServicesSlugRoute: ServicesSlugRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
 }
 
-const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
-  ServicesRouteChildren,
+const ServicesRouteRouteWithChildren = ServicesRouteRoute._addFileChildren(
+  ServicesRouteRouteChildren,
 )
 
-interface SolutionsRouteChildren {
+interface SolutionsRouteRouteChildren {
   SolutionsSlugRoute: typeof SolutionsSlugRoute
+  SolutionsIndexRoute: typeof SolutionsIndexRoute
 }
 
-const SolutionsRouteChildren: SolutionsRouteChildren = {
+const SolutionsRouteRouteChildren: SolutionsRouteRouteChildren = {
   SolutionsSlugRoute: SolutionsSlugRoute,
+  SolutionsIndexRoute: SolutionsIndexRoute,
 }
 
-const SolutionsRouteWithChildren = SolutionsRoute._addFileChildren(
-  SolutionsRouteChildren,
+const SolutionsRouteRouteWithChildren = SolutionsRouteRoute._addFileChildren(
+  SolutionsRouteRouteChildren,
 )
 
-interface ToolsRouteChildren {
+interface ToolsRouteRouteChildren {
   ToolsBusinessChecklistRoute: typeof ToolsBusinessChecklistRoute
   ToolsGstCalculatorRoute: typeof ToolsGstCalculatorRoute
   ToolsProjectEstimatorRoute: typeof ToolsProjectEstimatorRoute
   ToolsServiceFinderRoute: typeof ToolsServiceFinderRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
-const ToolsRouteChildren: ToolsRouteChildren = {
+const ToolsRouteRouteChildren: ToolsRouteRouteChildren = {
   ToolsBusinessChecklistRoute: ToolsBusinessChecklistRoute,
   ToolsGstCalculatorRoute: ToolsGstCalculatorRoute,
   ToolsProjectEstimatorRoute: ToolsProjectEstimatorRoute,
   ToolsServiceFinderRoute: ToolsServiceFinderRoute,
+  ToolsIndexRoute: ToolsIndexRoute,
 }
 
-const ToolsRouteWithChildren = ToolsRoute._addFileChildren(ToolsRouteChildren)
+const ToolsRouteRouteWithChildren = ToolsRouteRoute._addFileChildren(
+  ToolsRouteRouteChildren,
+)
 
-interface WorkRouteChildren {
+interface WorkRouteRouteChildren {
   WorkSlugRoute: typeof WorkSlugRoute
+  WorkIndexRoute: typeof WorkIndexRoute
 }
 
-const WorkRouteChildren: WorkRouteChildren = {
+const WorkRouteRouteChildren: WorkRouteRouteChildren = {
   WorkSlugRoute: WorkSlugRoute,
+  WorkIndexRoute: WorkIndexRoute,
 }
 
-const WorkRouteWithChildren = WorkRoute._addFileChildren(WorkRouteChildren)
+const WorkRouteRouteWithChildren = WorkRouteRoute._addFileChildren(
+  WorkRouteRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ServicesRouteRoute: ServicesRouteRouteWithChildren,
+  SolutionsRouteRoute: SolutionsRouteRouteWithChildren,
+  ToolsRouteRoute: ToolsRouteRouteWithChildren,
+  WorkRouteRoute: WorkRouteRouteWithChildren,
   SplatRoute: SplatRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
   InsightsRoute: InsightsRoute,
   PrivacyRoute: PrivacyRoute,
-  ServicesRoute: ServicesRouteWithChildren,
-  SolutionsRoute: SolutionsRouteWithChildren,
   StartYourProjectRoute: StartYourProjectRoute,
-  ToolsRoute: ToolsRouteWithChildren,
-  WorkRoute: WorkRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

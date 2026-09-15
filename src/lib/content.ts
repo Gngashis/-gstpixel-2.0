@@ -1,12 +1,126 @@
-export type Service = { slug: string; title: string; family: string; summary: string; helps: string[] };
+export type Service = {
+  slug: string;
+  title: string;
+  family: string;
+  summary: string;
+  helps: string[];
+  whoFor: string;
+  needs: string[];
+  process: string[];
+};
 export type Solution = { slug: string; title: string; summary: string; services: string[] };
 
 export const services: Service[] = [
-  { slug: "websites-digital-platforms", title: "Websites & digital platforms", family: "Digital Development", summary: "Purposeful public websites, ecommerce experiences, and digital platforms built around real business goals.", helps: ["Website design and development", "Ecommerce and digital platforms", "Digital business systems"] },
-  { slug: "web-mobile-applications", title: "Web & mobile applications", family: "Digital Development", summary: "Usable, maintainable applications for customers, teams, and new digital products.", helps: ["Web applications", "Mobile applications", "Product interface systems"] },
-  { slug: "ai-automation", title: "AI & automation", family: "AI and Automation", summary: "Clear workflows that connect inputs, decisions, and useful outputs without hiding the logic.", helps: ["AI integrations", "Workflow automation", "Process digitization", "Custom automation"] },
-  { slug: "business-setup-compliance", title: "Business setup & compliance", family: "Business Services", summary: "Structured support for starting and operating a business with clarity around requirements and next steps.", helps: ["GST-related services", "FSSAI-related services", "Business registration", "Compliance support", "Business setup assistance"] },
-  { slug: "business-technology-consulting", title: "Business & technology consulting", family: "Consulting", summary: "Practical guidance connecting business decisions, digital transformation, technology strategy, and growth.", helps: ["Business consultancy", "Digital transformation", "Technology strategy", "Business-growth support"] },
+  {
+    slug: "websites-digital-platforms",
+    title: "Websites & digital platforms",
+    family: "Digital Development",
+    summary:
+      "Purposeful public websites, ecommerce experiences, and digital platforms built around real business goals.",
+    helps: ["Website design and development", "Ecommerce and digital platforms", "Digital business systems"],
+    whoFor:
+      "Businesses that need a credible, maintainable online presence — from a first business website to an ecommerce or content-led platform.",
+    needs: [
+      "An outdated or absent web presence",
+      "A site that is hard to update or expand",
+      "Ecommerce and product information that customers can trust",
+      "Performance, accessibility, and mobile behavior that need attention",
+    ],
+    process: [
+      "Clarify the audience, goals, and content you already have",
+      "Define structure and design direction before building",
+      "Build, review, and refine responsively across devices",
+      "Hand over with clear guidance for keeping it current",
+    ],
+  },
+  {
+    slug: "web-mobile-applications",
+    title: "Web & mobile applications",
+    family: "Digital Development",
+    summary:
+      "Usable, maintainable applications for customers, teams, and new digital products.",
+    helps: ["Web applications", "Mobile applications", "Product interface systems"],
+    whoFor:
+      "Teams and founders who need a working product — a customer-facing app, an internal tool, or the first version of a new digital product.",
+    needs: [
+      "Spreadsheets or manual steps that no longer scale",
+      "A product idea that needs a usable first version",
+      "Disconnected systems that should share one workflow",
+      "Interfaces that customers or staff find confusing",
+    ],
+    process: [
+      "Map the users and the essential workflow end to end",
+      "Define the smallest useful version before optional features",
+      "Design and build in reviewable stages",
+      "Plan how the application will be maintained and extended",
+    ],
+  },
+  {
+    slug: "ai-automation",
+    title: "AI & automation",
+    family: "AI and Automation",
+    summary:
+      "Clear workflows that connect inputs, decisions, and useful outputs without hiding the logic.",
+    helps: ["AI integrations", "Workflow automation", "Process digitization", "Custom automation"],
+    whoFor:
+      "Businesses losing time to repetitive work — data entry, document handling, follow-ups, or reporting — who want automation they can actually understand and trust.",
+    needs: [
+      "Manual copy-paste work between systems",
+      "Slow, error-prone document or data handling",
+      "Follow-ups and internal handoffs that get missed",
+      "Interest in AI where it genuinely fits, not as a gimmick",
+    ],
+    process: [
+      "Identify the tasks worth automating and measure the current effort",
+      "Design the workflow visibly, including its limits and failure paths",
+      "Integrate appropriate AI or automation where it earns its place",
+      "Review results with people still able to inspect and override",
+    ],
+  },
+  {
+    slug: "business-setup-compliance",
+    title: "Business setup & compliance",
+    family: "Business Services",
+    summary:
+      "Structured support for starting and operating a business with clarity around requirements and next steps.",
+    helps: ["GST-related services", "FSSAI-related services", "Business registration", "Compliance support", "Business setup assistance"],
+    whoFor:
+      "New and operating businesses that need practical help with registrations, GST- and FSSAI-related assistance, and staying organized around their obligations.",
+    needs: [
+      "A new business that needs the right registrations in the right order",
+      "GST- or FSSAI-related assistance and ongoing support",
+      "Records and filings that have fallen behind",
+      "Uncertainty about what applies and what to do next",
+    ],
+    process: [
+      "Understand the business activity and current status",
+      "Identify the registrations and support that may be relevant",
+      "Prepare and organize information for official processes",
+      "Flag anything that requires verification with the relevant authorities",
+    ],
+  },
+  {
+    slug: "business-technology-consulting",
+    title: "Business & technology consulting",
+    family: "Consulting",
+    summary:
+      "Practical guidance connecting business decisions, digital transformation, technology strategy, and growth.",
+    helps: ["Business consultancy", "Digital transformation", "Technology strategy", "Business-growth support"],
+    whoFor:
+      "Owners and teams at a decision point — choosing a direction, planning a digital move, or deciding which investment actually comes next.",
+    needs: [
+      "Too many options and no clear priority",
+      "A digital plan disconnected from business reality",
+      "Technology choices that need an independent, practical view",
+      "Growth plans that need concrete next steps",
+    ],
+    process: [
+      "Understand the business, constraints, and real objective",
+      "Map options with honest trade-offs and costs",
+      "Recommend a sequence, not just a wish list",
+      "Stay involved through execution where useful",
+    ],
+  },
 ];
 
 export const solutions: Solution[] = [
