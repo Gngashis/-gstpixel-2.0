@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   PageIntro,
   StartBand,
@@ -13,8 +13,8 @@ import {
   Zap,
   TrendingUp,
   Building2,
-  Clock,
   CheckCircle2,
+  ArrowRight,
 } from "lucide-react";
 
 export const Route = createFileRoute("/insights")({
@@ -95,6 +95,68 @@ function Page() {
         "FSSAI licence categories and application process",
         "Sector-specific registrations: RERA, IEC, drug license",
         "State-level compliance variations",
+      ],
+    },
+  ];
+
+  const topicActions = [
+    {
+      category: "Business Setup",
+      actions: [
+        {
+          label: "Business setup & compliance",
+          to: "/services/business-setup-compliance",
+        },
+        { label: "Business checklist tool", to: "/tools/business-checklist" },
+      ],
+    },
+    {
+      category: "GST & Compliance",
+      actions: [
+        { label: "GST calculator", to: "/tools/gst-calculator" },
+        {
+          label: "Get GST or compliance help",
+          to: "/solutions/gst-compliance-help",
+        },
+      ],
+    },
+    {
+      category: "Websites & Applications",
+      actions: [
+        {
+          label: "Websites & digital platforms",
+          to: "/services/websites-digital-platforms",
+        },
+        {
+          label: "Web & mobile applications",
+          to: "/services/web-mobile-applications",
+        },
+        { label: "Project estimator", to: "/tools/project-estimator" },
+      ],
+    },
+    {
+      category: "AI & Automation",
+      actions: [
+        { label: "AI & automation service", to: "/services/ai-automation" },
+        { label: "Automate work path", to: "/solutions/automate-work" },
+      ],
+    },
+    {
+      category: "Digital Growth",
+      actions: [
+        {
+          label: "Business & technology consulting",
+          to: "/services/business-technology-consulting",
+        },
+      ],
+    },
+    {
+      category: "FSSAI & Sector Specific",
+      actions: [
+        {
+          label: "Business setup & compliance",
+          to: "/services/business-setup-compliance",
+        },
       ],
     },
   ];
@@ -187,6 +249,44 @@ function Page() {
                 </div>
                 <strong>{s.title}</strong>
                 <p>{s.desc}</p>
+              </div>
+            ))}
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section className="content-band bg-secondary">
+        <div className="site-container">
+          <SectionHeader
+            label="From reading to doing"
+            title="Each topic connects to something you can use today."
+          />
+          <StaggeredReveal
+            baseDelay={0.08}
+            variant="fadeInUp"
+            className="topics-grid"
+          >
+            {topicActions.map((group) => (
+              <div key={group.category} className="topic-card">
+                <span className="topic-category">{group.category}</span>
+                <ul className="topic-list" style={{ marginTop: "0.75rem" }}>
+                  {group.actions.map((action) => (
+                    <li key={action.to}>
+                      <Link
+                        to={action.to}
+                        className="label text-primary"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                        }}
+                      >
+                        {action.label}{" "}
+                        <ArrowRight size={13} aria-hidden="true" />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </StaggeredReveal>

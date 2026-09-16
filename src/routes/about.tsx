@@ -17,6 +17,7 @@ import {
   Users,
   Eye,
   MapPin,
+  Mail,
   Building2,
   Globe,
   Code,
@@ -25,6 +26,7 @@ import {
   Server,
   Award,
   CheckCircle2,
+  MessageSquare,
 } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
@@ -326,7 +328,7 @@ function Page() {
                     className="flex items-center gap-0.5"
                     style={{ color: "var(--foreground)" }}
                   >
-                    <Globe size={16} aria-hidden="true" /> support@gstpixel.com
+                    <Mail size={16} aria-hidden="true" /> support@gstpixel.com
                   </a>
                   <a
                     href="https://wa.me/919046520548"
@@ -514,52 +516,3 @@ function Page() {
     </>
   );
 }
-
-// MessageSquare import needed
-import { MessageSquare } from "lucide-react";
-
-const techStack = [
-  { name: "React 19", category: "Frontend", icon: Code },
-  { name: "TanStack Start", category: "Full-stack Framework", icon: Globe },
-  { name: "TypeScript", category: "Language", icon: Code },
-  { name: "Tailwind CSS v4", category: "Styling", icon: Code },
-  { name: "Radix UI", category: "Components", icon: Database },
-  { name: "TanStack Query", category: "State Management", icon: Server },
-  { name: "TanStack Router", category: "Routing", icon: Globe },
-  { name: "Nitro / Cloudflare Workers", category: "Deployment", icon: Server },
-  { name: "Vite", category: "Build Tool", icon: Zap },
-  { name: "Zod", category: "Validation", icon: Shield },
-] as const;
-
-const trustSignals = [
-  {
-    icon: CheckCircle2,
-    title: "Zero fabricated metrics",
-    desc: "No invented client stories, testimonials, or performance claims.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Verifiable business identity",
-    desc: "Registered GSTIN, physical address, direct contact details published.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Transparent tool assumptions",
-    desc: "Every calculator and estimator shows its logic and limits.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Open source foundation",
-    desc: "Built on auditable, widely-used open source technologies.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Privacy by default",
-    desc: "No analytics, tracking, or third-party scripts without consent.",
-  },
-  {
-    icon: CheckCircle2,
-    title: "Accessibility first",
-    desc: "WCAG 2.2 AA target, semantic HTML, keyboard navigation.",
-  },
-] as const;

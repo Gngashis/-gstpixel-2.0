@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useElementEnvironment } from "@/lib/scroll-environment";
+import { businessFacts } from "@/lib/content";
 
 const nav = [
   ["Services", "/services"],
@@ -201,9 +202,24 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         <div className="site-container grid gap-10 md:grid-cols-[1fr_2fr]">
           <div>
             <Brand />
-            <p className="mt-4 max-w-xs text-sm text-ink-muted">
-              Technology, digital development, business services, and
-              consultancy—assembled as one system.
+            <p className="mt-4 text-sm text-ink-muted">
+              <strong style={{ color: "var(--ink-foreground)" }}>
+                Start Right. Stay Compliant. Grow Online.
+              </strong>
+              <br />
+              Business consulting and services, digital development, and
+              automation—assembled as one system.
+            </p>
+            <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
+              <a href={businessFacts.phone.href}>{businessFacts.phone.label}</a>
+              <a
+                href={businessFacts.whatsapp.href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                WhatsApp
+              </a>
+              <a href={businessFacts.email.href}>{businessFacts.email.label}</a>
             </p>
           </div>
           <div className="grid grid-cols-2 gap-6 text-sm sm:grid-cols-4">

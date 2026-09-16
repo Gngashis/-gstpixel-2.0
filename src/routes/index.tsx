@@ -14,26 +14,31 @@ import {
   StartBand,
   SectionHeader,
 } from "@/components/page";
-import { conceptProjects, solutions } from "@/lib/content";
+import {
+  conceptProjects,
+  solutions,
+  toolCatalog,
+  businessFacts,
+} from "@/lib/content";
 import { AssemblyVisual } from "@/components/assembly-visual";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "GSTPIXEL — Digital Systems for Business" },
+      { title: "GSTPIXEL — Start Right. Stay Compliant. Grow Online." },
       {
         name: "description",
         content:
-          "GSTPIXEL connects digital products, AI automation, business services, and consultancy into one working system.",
+          "GSTPIXEL combines business consulting and services with digital development and automation — from starting a business and staying compliant to building its digital presence and growing online. Based in Jaigaon, West Bengal.",
       },
       {
         property: "og:title",
-        content: "GSTPIXEL — Digital Systems for Business",
+        content: "GSTPIXEL — Start Right. Stay Compliant. Grow Online.",
       },
       {
         property: "og:description",
         content:
-          "Digital products, automation, business services, and consultancy—assembled as one system.",
+          "Business services, consultancy, digital development, and automation—assembled as one system.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -64,8 +69,14 @@ function Home() {
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
               <p className="hero-copy">
-                Technology, digital development, business services, and
-                consultancy—connected into a coherent path from idea to growth.
+                Business consulting and services, digital development, and
+                automation—connected into one coherent path, whether you are
+                starting a business, keeping it compliant, or taking it online.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal variant="fadeInUp" delay={0.25}>
+              <p className="label text-primary hero-tagline">
+                Start Right. Stay Compliant. Grow Online.
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
@@ -265,15 +276,26 @@ function Home() {
                 stay connected to the wider system. Requirements are explained
                 carefully, without promises or assumptions.
               </p>
-              <ButtonLink
-                to="/services/$slug"
-                params={{ slug: "business-setup-compliance" }}
-                variant="secondary"
-                className="mt-6 luminous-edge"
-                style={{ borderRadius: "0.5rem" }}
-              >
-                Explore business services
-              </ButtonLink>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <ButtonLink
+                  to="/services/$slug"
+                  params={{ slug: "business-setup-compliance" }}
+                  variant="secondary"
+                  className="luminous-edge"
+                  style={{ borderRadius: "0.5rem" }}
+                >
+                  Explore business services
+                </ButtonLink>
+                <ButtonLink
+                  to="/solutions/$slug"
+                  params={{ slug: "gst-compliance-help" }}
+                  variant="secondary"
+                  className="luminous-edge"
+                  style={{ borderRadius: "0.5rem" }}
+                >
+                  Get GST or compliance help
+                </ButtonLink>
+              </div>
             </StaggeredReveal>
           </div>
           <div className="operation-ledger">
@@ -284,8 +306,10 @@ function Home() {
                 "Business registration",
                 "Compliance support",
               ].map((x, i) => (
-                <div
+                <Link
                   key={x}
+                  to="/services/$slug"
+                  params={{ slug: "business-setup-compliance" }}
                   className="assembly-panel assembly-connector"
                   style={{
                     borderRadius: "0.5rem",
@@ -298,7 +322,7 @@ function Home() {
                   <span>0{i + 1}</span>
                   <strong>{x}</strong>
                   <FileCheck2 size={18} />
-                </div>
+                </Link>
               ))}
             </StaggeredReveal>
           </div>
@@ -374,72 +398,71 @@ function Home() {
         style={{ "--env-glow-x": "50%", "--env-glow-y": "70%" }}
       >
         <div className="site-container">
-          <SectionHeader
-            label="06 / Useful tools"
-            title="Move from uncertainty to a useful next step."
-          />
+          <div className="flex flex-wrap items-end justify-between gap-5">
+            <SectionHeader
+              label="06 / Useful tools"
+              title="Move from uncertainty to a useful next step."
+            />
+            <ScrollReveal variant="scaleIn" delay={0.15}>
+              <ButtonLink
+                to="/tools"
+                variant="secondary"
+                className="luminous-edge"
+                style={{ borderRadius: "0.5rem" }}
+              >
+                All tools
+              </ButtonLink>
+            </ScrollReveal>
+          </div>
           <StaggeredReveal
             baseDelay={0.1}
             variant="fadeInUp"
             className="tool-rail"
           >
-            <Link
-              to="/tools/project-estimator"
-              className="assembly-panel assembly-connector"
-              style={{
-                borderRadius: "0.5rem",
-                padding: "1.5rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span>Project estimator</span>
-              <ArrowRight />
-            </Link>
-            <Link
-              to="/tools/service-finder"
-              className="assembly-panel assembly-connector"
-              style={{
-                borderRadius: "0.5rem",
-                padding: "1.5rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span>Service finder</span>
-              <ArrowRight />
-            </Link>
-            <Link
-              to="/tools/gst-calculator"
-              className="assembly-panel assembly-connector"
-              style={{
-                borderRadius: "0.5rem",
-                padding: "1.5rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span>GST calculator</span>
-              <ArrowRight />
-            </Link>
-            <Link
-              to="/tools/business-checklist"
-              className="assembly-panel assembly-connector"
-              style={{
-                borderRadius: "0.5rem",
-                padding: "1.5rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <span>Business checklist</span>
-              <ArrowRight />
-            </Link>
+            {toolCatalog.map((tool) => (
+              <Link
+                key={tool.slug}
+                to={`/tools/${tool.slug}`}
+                className="assembly-panel assembly-connector"
+                style={{
+                  borderRadius: "0.5rem",
+                  padding: "1.5rem",
+                  display: "grid",
+                  gap: "0.4rem",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                  }}
+                >
+                  <strong>{tool.title}</strong>
+                  <ArrowRight aria-hidden="true" />
+                </span>
+                <small style={{ color: "var(--muted-foreground)" }}>
+                  {tool.blurb}
+                </small>
+              </Link>
+            ))}
           </StaggeredReveal>
+          <ScrollReveal variant="fadeInUp" delay={0.1}>
+            <p
+              className="section-copy"
+              style={{ marginTop: "1.5rem", maxWidth: "70ch" }}
+            >
+              Each tool is transparent about its assumptions and can carry its
+              context into your project enquiry. Not sure where to begin? The{" "}
+              <Link to="/tools/service-finder">service finder</Link> points to
+              the capability that fits, and the{" "}
+              <Link to="/services/business-setup-compliance">
+                business checklist
+              </Link>{" "}
+              pairs with registration and compliance work.
+            </p>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -487,12 +510,97 @@ function Home() {
 
       <section
         className="content-band env-section"
+        data-env-phase="5"
+        style={{ "--env-glow-x": "45%", "--env-glow-y": "55%" }}
+      >
+        <div className="site-container editorial-split">
+          <div>
+            <SectionHeader
+              label="08 / Where we work"
+              title="Rooted in Jaigaon. Relevant across India."
+            />
+            <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
+              <p className="section-copy">
+                GSTPIXEL is based at {businessFacts.address}. Nearby businesses
+                get a team they can actually sit down with; businesses across
+                India get the same direct access by phone, WhatsApp, or email —
+                no call centres, no gatekeepers.
+              </p>
+              <ButtonLink
+                to="/contact"
+                variant="secondary"
+                className="mt-6 luminous-edge"
+                style={{ borderRadius: "0.5rem" }}
+              >
+                Contact details <ArrowRight size={16} />
+              </ButtonLink>
+            </StaggeredReveal>
+          </div>
+          <div className="operation-ledger">
+            <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
+              {[
+                {
+                  label: businessFacts.phone.label,
+                  href: businessFacts.phone.href,
+                },
+                {
+                  label: businessFacts.whatsapp.label,
+                  href: businessFacts.whatsapp.href,
+                },
+                {
+                  label: businessFacts.email.label,
+                  href: businessFacts.email.href,
+                },
+                { label: `GSTIN ${businessFacts.gstin}` },
+              ].map((item, i) =>
+                item.href ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    className="assembly-panel assembly-connector"
+                    style={{
+                      borderRadius: "0.5rem",
+                      padding: "1.25rem",
+                      display: "grid",
+                      gridTemplateColumns: "2rem 1fr auto",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>0{i + 1}</span>
+                    <strong>{item.label}</strong>
+                    <ArrowRight size={18} />
+                  </a>
+                ) : (
+                  <div
+                    key={item.label}
+                    className="assembly-panel assembly-connector"
+                    style={{
+                      borderRadius: "0.5rem",
+                      padding: "1.25rem",
+                      display: "grid",
+                      gridTemplateColumns: "2rem 1fr auto",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span>0{i + 1}</span>
+                    <strong>{item.label}</strong>
+                    <FileCheck2 size={18} />
+                  </div>
+                ),
+              )}
+            </StaggeredReveal>
+          </div>
+        </div>
+      </section>
+
+      <section
+        className="content-band env-section"
         data-env-phase="6"
         style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
       >
         <div className="site-container">
           <SectionHeader
-            label="08 / Process"
+            label="09 / Process"
             title="From first conversation to a working outcome."
           />
           <StaggeredReveal
@@ -524,7 +632,7 @@ function Home() {
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="09 / Resources"
+              label="10 / Resources"
               title="Useful guidance, when it is ready."
             />
           </div>
@@ -537,7 +645,10 @@ function Home() {
             <p>No approved resources are published yet.</p>
             <span>
               Future articles will cover business setup, GST and compliance,
-              websites and apps, AI automation, and digital growth.
+              websites and apps, AI automation, and digital growth. The planned{" "}
+              <Link to="/insights">insights library</Link> shows what is in
+              development, and the <Link to="/tools">tools</Link> are available
+              today.
             </span>
           </ScrollReveal>
         </div>

@@ -7,13 +7,60 @@ export type Service = {
   whoFor: string;
   needs: string[];
   process: string[];
+  /** Tool slugs that pair naturally with this service (service → tool → project). */
+  relatedTools: string[];
+  /** Solution slugs this service is a path towards. */
+  relatedSolutions: string[];
 };
 export type Solution = {
   slug: string;
   title: string;
   summary: string;
   services: string[];
+  /** Tool slugs that help someone act on this path (solution → tool → enquiry). */
+  relatedTools: string[];
 };
+
+export const toolCatalog = [
+  {
+    slug: "project-estimator",
+    title: "Project estimator",
+    blurb: "Frame scope and complexity before any numbers are discussed.",
+  },
+  {
+    slug: "service-finder",
+    title: "Service finder",
+    blurb: "Answer a few questions and see which capability fits.",
+  },
+  {
+    slug: "gst-calculator",
+    title: "GST calculator",
+    blurb: "Check inclusive or exclusive GST at a rate you provide.",
+  },
+  {
+    slug: "business-checklist",
+    title: "Business checklist",
+    blurb: "Organize preparation steps before any registration process.",
+  },
+] as const;
+
+const toolBySlug = Object.fromEntries(toolCatalog.map((t) => [t.slug, t]));
+export const getTool = (slug: string) => toolBySlug[slug];
+
+/** Verified business details. Nothing here is invented; do not add unverified claims. */
+export const businessFacts = {
+  name: "GSTPIXEL",
+  tagline: "Start Right. Stay Compliant. Grow Online.",
+  founder: "Ashis Gurung",
+  founderTitle: "Founder & Business Consultant",
+  address: "Ramgaon, Near Anthony School, Jaigaon – 736182, West Bengal, India",
+  gstin: "19ESPPG2569P1ZP",
+  phone: { label: "+91 90465 20548", href: "tel:+919046520548" },
+  phoneAlt: { label: "+91 81160 76725", href: "tel:+918116076725" },
+  phoneBhutan: { label: "+975 77260538", href: "tel:+97577260538" },
+  whatsapp: { label: "WhatsApp", href: "https://wa.me/919046520548" },
+  email: { label: "support@gstpixel.com", href: "mailto:support@gstpixel.com" },
+} as const;
 
 export const services: Service[] = [
   {
@@ -41,6 +88,8 @@ export const services: Service[] = [
       "Build, review, and refine responsively across devices",
       "Hand over with clear guidance for keeping it current",
     ],
+    relatedTools: ["project-estimator"],
+    relatedSolutions: ["build-a-website"],
   },
   {
     slug: "web-mobile-applications",
@@ -67,6 +116,8 @@ export const services: Service[] = [
       "Design and build in reviewable stages",
       "Plan how the application will be maintained and extended",
     ],
+    relatedTools: ["project-estimator"],
+    relatedSolutions: ["build-an-application"],
   },
   {
     slug: "ai-automation",
@@ -94,6 +145,8 @@ export const services: Service[] = [
       "Integrate appropriate AI or automation where it earns its place",
       "Review results with people still able to inspect and override",
     ],
+    relatedTools: ["project-estimator"],
+    relatedSolutions: ["automate-work"],
   },
   {
     slug: "business-setup-compliance",
@@ -122,6 +175,8 @@ export const services: Service[] = [
       "Prepare and organize information for official processes",
       "Flag anything that requires verification with the relevant authorities",
     ],
+    relatedTools: ["business-checklist", "gst-calculator"],
+    relatedSolutions: ["start-a-business", "gst-compliance-help"],
   },
   {
     slug: "business-technology-consulting",
@@ -149,6 +204,8 @@ export const services: Service[] = [
       "Recommend a sequence, not just a wish list",
       "Stay involved through execution where useful",
     ],
+    relatedTools: ["service-finder", "project-estimator"],
+    relatedSolutions: ["choose-a-direction", "start-a-business"],
   },
 ];
 
@@ -162,6 +219,7 @@ export const solutions: Solution[] = [
       "Business setup & compliance",
       "Business & technology consulting",
     ],
+    relatedTools: ["business-checklist"],
   },
   {
     slug: "build-a-website",
@@ -172,6 +230,7 @@ export const solutions: Solution[] = [
       "Websites & digital platforms",
       "Business & technology consulting",
     ],
+    relatedTools: ["project-estimator"],
   },
   {
     slug: "build-an-application",
@@ -179,6 +238,7 @@ export const solutions: Solution[] = [
     summary:
       "Define the users, workflows, and technical scope for a web or mobile product.",
     services: ["Web & mobile applications", "AI & automation"],
+    relatedTools: ["project-estimator"],
   },
   {
     slug: "automate-work",
@@ -186,6 +246,7 @@ export const solutions: Solution[] = [
     summary:
       "Identify repetitive work and connect the right processes before introducing automation.",
     services: ["AI & automation", "Business & technology consulting"],
+    relatedTools: ["project-estimator"],
   },
   {
     slug: "gst-compliance-help",
@@ -193,6 +254,7 @@ export const solutions: Solution[] = [
     summary:
       "Find the relevant support path without assuming one set of requirements fits every business.",
     services: ["Business setup & compliance"],
+    relatedTools: ["gst-calculator", "business-checklist"],
   },
   {
     slug: "choose-a-direction",
@@ -200,8 +262,12 @@ export const solutions: Solution[] = [
     summary:
       "Start with the outcome and receive a transparent, editable recommendation.",
     services: ["Business & technology consulting"],
+    relatedTools: ["service-finder"],
   },
 ];
+
+const solutionBySlug = Object.fromEntries(solutions.map((x) => [x.slug, x]));
+export const getSolution = (slug: string) => solutionBySlug[slug];
 
 export const conceptProjects = [
   {

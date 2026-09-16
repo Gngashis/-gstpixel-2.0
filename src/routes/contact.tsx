@@ -127,7 +127,7 @@ function Page() {
     <>
       <PageIntro
         label="Contact"
-        title="Start right. Stay compliant. Grow online."
+        title="Start Right. Stay Compliant. Grow Online."
         description="Reach GSTPIXEL directly, or use the guided enquiry to build a clear project summary first."
       />
 

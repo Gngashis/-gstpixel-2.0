@@ -20,6 +20,34 @@ import {
   SectionHeader,
   ScrollReveal,
 } from "@/components/page";
+import { services } from "@/lib/content";
+
+const toolServicePairings = [
+  {
+    tool: "Project estimator",
+    serviceSlugs: [
+      "websites-digital-platforms",
+      "web-mobile-applications",
+      "ai-automation",
+    ],
+    note: "Frames scope for any digital build before numbers are discussed.",
+  },
+  {
+    tool: "Service finder",
+    serviceSlugs: ["business-technology-consulting"],
+    note: "Points to the capability that fits when the path is unclear.",
+  },
+  {
+    tool: "GST calculator",
+    serviceSlugs: ["business-setup-compliance"],
+    note: "Pairs with GST-related support for everyday price and tax checks.",
+  },
+  {
+    tool: "Business checklist",
+    serviceSlugs: ["business-setup-compliance"],
+    note: "Organizes preparation before registration and compliance work.",
+  },
+] as const;
 
 const tools = [
   {
@@ -257,6 +285,73 @@ function Page() {
                   />
                 </div>
               </Link>
+            ))}
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section
+        className="content-band env-section"
+        data-env-phase="2"
+        style={{ "--env-glow-x": "40%", "--env-glow-y": "40%" }}
+      >
+        <div className="site-container">
+          <SectionHeader
+            label="From tool to service"
+            title="Every tool sits next to a capability."
+          />
+          <StaggeredReveal
+            baseDelay={0.08}
+            variant="fadeInUp"
+            className="outcome-list"
+          >
+            {toolServicePairings.map((pairing) => (
+              <div
+                key={pairing.tool}
+                className="assembly-panel assembly-connector"
+                style={{
+                  borderRadius: "0.5rem",
+                  padding: "1.5rem",
+                  display: "grid",
+                  gap: "0.75rem",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: "0.75rem",
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <strong>{pairing.tool}</strong>
+                  <span style={{ color: "var(--muted-foreground)" }}>
+                    {pairing.note}
+                  </span>
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
+                  {pairing.serviceSlugs.map((slug) => {
+                    const svc = services.find((s) => s.slug === slug);
+                    if (!svc) return null;
+                    return (
+                      <Link
+                        key={slug}
+                        to="/services/$slug"
+                        params={{ slug }}
+                        className="label text-primary"
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.35rem",
+                        }}
+                      >
+                        {svc.title} <ArrowRight size={13} aria-hidden="true" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             ))}
           </StaggeredReveal>
         </div>

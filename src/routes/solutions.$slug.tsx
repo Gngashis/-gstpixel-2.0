@@ -8,7 +8,7 @@ import {
   ScrollReveal,
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { solutions } from "@/lib/content";
+import { solutions, services, getTool } from "@/lib/content";
 
 export const Route = createFileRoute("/solutions/$slug")({
   loader: ({ params }) => {
@@ -84,7 +84,26 @@ function Page() {
               <p className="label text-primary">Connected capabilities</p>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.1}>
-              <h2>{x.services.join(" + ")}</h2>
+              <div className="outcome-list" style={{ marginTop: "0.5rem" }}>
+                {x.services.map((title) => {
+                  const svc = services.find((s) => s.title === title);
+                  if (!svc) return <h2 key={title}>{title}</h2>;
+                  return (
+                    <Link
+                      key={svc.slug}
+                      to="/services/$slug"
+                      params={{ slug: svc.slug }}
+                      className="related-service-card"
+                    >
+                      <div>
+                        <strong>{svc.title}</strong>
+                        <p>{svc.summary}</p>
+                      </div>
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  );
+                })}
+              </div>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
               <p>
@@ -93,10 +112,37 @@ function Page() {
                 enquiry.
               </p>
             </ScrollReveal>
+            {x.relatedTools.length > 0 && (
+              <ScrollReveal variant="fadeInUp" delay={0.25}>
+                <p className="label text-primary" style={{ marginTop: "2rem" }}>
+                  Useful tools on this path
+                </p>
+                <div className="outcome-list" style={{ marginTop: "0.5rem" }}>
+                  {x.relatedTools.map((slug) => {
+                    const tool = getTool(slug);
+                    if (!tool) return null;
+                    return (
+                      <Link
+                        key={tool.slug}
+                        to={`/tools/${tool.slug}`}
+                        className="related-service-card"
+                      >
+                        <div>
+                          <strong>{tool.title}</strong>
+                          <p>{tool.blurb}</p>
+                        </div>
+                        <ArrowRight aria-hidden="true" />
+                      </Link>
+                    );
+                  })}
+                </div>
+              </ScrollReveal>
+            )}
             <ScrollReveal variant="scaleIn" delay={0.3}>
               <ButtonLink
                 to="/start-your-project"
                 search={{ interest: x.slug }}
+                className="mt-6"
               >
                 Continue with this path <ArrowRight size={16} />
               </ButtonLink>

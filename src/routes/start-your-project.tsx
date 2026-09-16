@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, X } from "lucide-react";
 import {
@@ -8,6 +8,7 @@ import {
   SectionHeader,
 } from "@/components/page";
 import { Button } from "@/components/ui/button";
+import { businessFacts } from "@/lib/content";
 
 export const Route = createFileRoute("/start-your-project")({
   validateSearch: (
@@ -159,6 +160,34 @@ const empty: Form = {
   reply: "Email",
 };
 
+function restoreForm(value: unknown): Partial<Form> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const saved = value as Record<string, unknown>;
+  const restored: Partial<Form> = {};
+  const stringFields: (keyof Form)[] = [
+    "need",
+    "stage",
+    "details",
+    "budget",
+    "timing",
+    "name",
+    "email",
+    "phone",
+  ];
+
+  for (const field of stringFields) {
+    if (typeof saved[field] === "string") restored[field] = saved[field];
+  }
+  if (
+    saved["reply"] === "Email" ||
+    saved["reply"] === "Phone" ||
+    saved["reply"] === "WhatsApp"
+  ) {
+    restored.reply = saved["reply"];
+  }
+  return restored;
+}
+
 const budgetOptions = [
   { value: "", label: "Prefer not to say" },
   { value: "under-1l", label: "Under ₹1 lakh" },
@@ -184,6 +213,8 @@ const replyOptions = [
 
 function Page() {
   const search = Route.useSearch();
+  const interest = search["interest"];
+  const context = search["context"];
   const [step, setStep] = useState(0);
   const resolvedNeed = resolveNeedId(search["interest"] as string | undefined);
   const hasFreshContext = Boolean(search["interest"] || search["context"]);
@@ -205,8 +236,13 @@ function Page() {
     try {
       const saved = sessionStorage.getItem("gstpixel-enquiry");
       if (saved) {
-        const parsed = JSON.parse(saved);
-        setForm((current) => ({ ...current, ...parsed }));
+        const restored = restoreForm(JSON.parse(saved));
+        setForm((current) => ({
+          ...current,
+          ...restored,
+          ...(resolvedNeed ? { need: resolvedNeed } : {}),
+          ...(context ? { details: context } : {}),
+        }));
       }
     } catch {
       /* storage is optional */
@@ -300,6 +336,9 @@ function Page() {
     }
   };
 
+  const canContinue =
+    step === 0 ? Boolean(form.need) : step === 1 ? Boolean(form.stage) : true;
+
   const progress = ((step + 1) / stepLabels.length) * 100;
 
   return (
@@ -307,7 +346,7 @@ function Page() {
       <PageIntro
         label="Start your project"
         title="A clearer brief starts here."
-        description="Answer only what is useful. Your answers stay in this session while the verified delivery inbox is being configured."
+        description="Answer only what is useful — your answers stay in this browser session. Electronic submission is not enabled yet, so the direct phone, WhatsApp, and email routes below always work."
       />
 
       <section className="content-band">
@@ -713,6 +752,96 @@ function Page() {
               )}
             </div>
           </ScrollReveal>
+        </div>
+      </section>
+
+      <section className="content-band bg-secondary">
+        <div className="site-container detail-grid">
+          <div>
+            <SectionHeader
+              label="Direct routes"
+              title="Prefer to talk first? These always work."
+            />
+            <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
+              <p className="section-copy" style={{ marginTop: "1.5rem" }}>
+                The guided enquiry is optional. Until electronic submission is
+                enabled, phone, WhatsApp, and email are the surest ways to reach{" "}
+                {businessFacts.name} — speak directly with{" "}
+                {businessFacts.founder}, {businessFacts.founderTitle}. If you
+                have already answered the steps above, mention what you filled
+                in and the context can continue from there.
+              </p>
+              <div className="contact-methods" style={{ marginTop: "1.5rem" }}>
+                {[
+                  {
+                    label: "Phone",
+                    value: businessFacts.phone.label,
+                    href: businessFacts.phone.href,
+                  },
+                  {
+                    label: "WhatsApp",
+                    value: businessFacts.whatsapp.label,
+                    href: businessFacts.whatsapp.href,
+                  },
+                  {
+                    label: "Email",
+                    value: businessFacts.email.label,
+                    href: businessFacts.email.href,
+                  },
+                ].map((route) => (
+                  <a
+                    key={route.label}
+                    href={route.href}
+                    className="contact-method glass-light luminous-edge"
+                    style={{
+                      borderRadius: "0.5rem",
+                      padding: "1rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.2rem",
+                    }}
+                  >
+                    <span
+                      className="method-label"
+                      style={{
+                        font: "500 0.65rem var(--font-mono)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--muted-foreground)",
+                      }}
+                    >
+                      {route.label}
+                    </span>
+                    <span
+                      className="method-value"
+                      style={{ font: "600 1rem var(--font-body)" }}
+                    >
+                      {route.value}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </StaggeredReveal>
+          </div>
+          <div
+            className="result-panel glass-light luminous-edge"
+            style={{ borderRadius: "0.75rem", padding: "2rem" }}
+          >
+            <p className="label text-primary">What happens next</p>
+            <h2 style={{ font: "700 1.6rem var(--font-display)" }}>
+              A conversation, not a commitment.
+            </h2>
+            <p className="section-copy">
+              Your answers are a starting point, not a contract. Nothing is sent
+              anywhere until you choose to share it, and every field can be
+              edited or skipped.
+            </p>
+            <p className="section-copy">
+              Prefer to explore first? The <Link to="/tools">tools</Link> and{" "}
+              <Link to="/solutions">outcome routes</Link> can shape the same
+              context before you reach out.
+            </p>
+          </div>
         </div>
       </section>
 

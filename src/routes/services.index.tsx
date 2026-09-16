@@ -60,8 +60,10 @@ function Page() {
           </ScrollReveal>
           <ScrollReveal variant="fadeInUp" delay={0.2}>
             <p>
-              Explore by capability or start with the outcome you need. Every
-              path remains connected to the same GSTPIXEL Assembly.
+              Explore by capability, or{" "}
+              <Link to="/solutions">start with the outcome you need</Link> and
+              let the relevant services follow. Every path remains connected to
+              the same GSTPIXEL Assembly.
             </p>
           </ScrollReveal>
         </div>

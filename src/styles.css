@@ -290,7 +290,6 @@ footer a:hover {
   .start-band .site-container {
     grid-template-columns: 1fr auto;
   }
-
 }
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -352,6 +351,11 @@ footer a:hover {
   color: var(--ink-muted);
   font-size: 1.06rem;
   line-height: 1.75;
+}
+.hero-tagline {
+  margin-top: 1.4rem;
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
 }
 .section-copy {
   color: var(--muted-foreground);
@@ -3371,14 +3375,21 @@ footer a:hover {
 }
 
 .assembly-path {
-  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 75%, white), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 75%, white),
+    transparent
+  );
   box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 28%, transparent);
 }
 
 .interface-spec > div {
   background: var(--material-specular), var(--material-polymer);
   border-left: 2px solid color-mix(in oklab, var(--primary) 34%, transparent);
-  transition: transform 240ms var(--easing-standard), border-color 240ms var(--easing-standard);
+  transition:
+    transform 240ms var(--easing-standard),
+    border-color 240ms var(--easing-standard);
 }
 
 .interface-spec > div:hover {
@@ -3389,7 +3400,9 @@ footer a:hover {
 .workflow div {
   background: var(--material-clear);
   box-shadow: var(--glass-highlight-subtle), var(--depth-shadow-sm);
-  transition: transform 240ms var(--easing-standard), border-color 240ms var(--easing-standard);
+  transition:
+    transform 240ms var(--easing-standard),
+    border-color 240ms var(--easing-standard);
 }
 
 .workflow div:hover {
@@ -3398,7 +3411,9 @@ footer a:hover {
 }
 
 .operation-ledger > div {
-  transition: background 220ms var(--easing-standard), padding-left 220ms var(--easing-standard);
+  transition:
+    background 220ms var(--easing-standard),
+    padding-left 220ms var(--easing-standard);
 }
 
 .operation-ledger > div:hover {
@@ -3415,7 +3430,9 @@ footer a:hover {
 
 .process-line li {
   background: color-mix(in oklab, var(--material-polymer) 74%, transparent);
-  transition: background 220ms var(--easing-standard), transform 220ms var(--easing-standard);
+  transition:
+    background 220ms var(--easing-standard),
+    transform 220ms var(--easing-standard);
 }
 
 .process-line li:hover {
@@ -3434,7 +3451,11 @@ footer a:hover {
   position: absolute;
   inset: 15% -10% auto;
   height: 22rem;
-  background: radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 68%);
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    color-mix(in oklab, var(--primary) 12%, transparent),
+    transparent 68%
+  );
   pointer-events: none;
 }
 
@@ -3457,7 +3478,11 @@ footer a:hover {
 .start-band-trace i {
   width: clamp(1rem, 4vw, 4rem);
   height: 1px;
-  background: linear-gradient(90deg, color-mix(in oklab, var(--primary) 70%, transparent), transparent);
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--primary) 70%, transparent),
+    transparent
+  );
 }
 
 .start-band-trace span:last-child {

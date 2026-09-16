@@ -8,7 +8,7 @@ import {
   ScrollReveal,
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { services } from "@/lib/content";
+import { services, getTool, getSolution } from "@/lib/content";
 
 export const Route = createFileRoute("/services/$slug")({
   loader: ({ params }) => {
@@ -151,6 +151,61 @@ function Page() {
               </div>
             </div>
           </ScrollReveal>
+
+          {s.relatedTools.length > 0 && (
+            <StaggeredReveal baseDelay={0.1} variant="fadeInUp">
+              <p className="label text-primary" style={{ marginTop: "4rem" }}>
+                Useful tools for this service
+              </p>
+              <div className="outcome-list">
+                {s.relatedTools.map((slug) => {
+                  const tool = getTool(slug);
+                  if (!tool) return null;
+                  return (
+                    <Link
+                      key={tool.slug}
+                      to={`/tools/${tool.slug}`}
+                      className="related-service-card"
+                    >
+                      <div>
+                        <strong>{tool.title}</strong>
+                        <p>{tool.blurb}</p>
+                      </div>
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </StaggeredReveal>
+          )}
+
+          {s.relatedSolutions.length > 0 && (
+            <StaggeredReveal baseDelay={0.1} variant="fadeInUp">
+              <p className="label text-primary" style={{ marginTop: "4rem" }}>
+                Where this fits a bigger plan
+              </p>
+              <div className="outcome-list">
+                {s.relatedSolutions.map((slug) => {
+                  const solution = getSolution(slug);
+                  if (!solution) return null;
+                  return (
+                    <Link
+                      key={solution.slug}
+                      to="/solutions/$slug"
+                      params={{ slug: solution.slug }}
+                      className="related-service-card"
+                    >
+                      <div>
+                        <strong>{solution.title}</strong>
+                        <p>{solution.summary}</p>
+                      </div>
+                      <ArrowRight aria-hidden="true" />
+                    </Link>
+                  );
+                })}
+              </div>
+            </StaggeredReveal>
+          )}
 
           {related.length > 0 && (
             <StaggeredReveal baseDelay={0.1} variant="fadeInUp">
