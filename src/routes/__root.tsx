@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteShell } from "../components/site-shell";
+import { ScrollEnvironmentProvider } from "../lib/scroll-environment";
 
 function NotFoundComponent() {
   return (
@@ -136,10 +137,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <SiteShell>
-        <Outlet />
-      </SiteShell>
+      <ScrollEnvironmentProvider>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <SiteShell>
+          <Outlet />
+        </SiteShell>
+      </ScrollEnvironmentProvider>
     </QueryClientProvider>
   );
 }

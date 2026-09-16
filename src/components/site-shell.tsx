@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useElementEnvironment } from "@/lib/scroll-environment";
 
 const nav = [
   ["Services", "/services"],
@@ -24,6 +25,8 @@ export function Brand() {
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const headerRef = useRef<HTMLHeaderElement>(null);
+  const headerEnv = useElementEnvironment(headerRef);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -32,21 +35,42 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const isDarkPhase = headerEnv?.id !== undefined && headerEnv.id >= 3;
+
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground env-section">
       <a href="#main" className="skip-link">
         Skip to content
       </a>
       <header
-        className={`site-header${scrolled ? " site-header-scrolled" : ""}`}
+        ref={headerRef}
+        className={`site-header${scrolled ? " site-header-scrolled" : ""} ${isDarkPhase ? " site-header-dark" : ""}`}
+        style={{
+          background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 85%, transparent)`,
+          backdropFilter: "blur(24px)",
+          borderBottom: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 25%, transparent)` : "var(--ink-line)"}`,
+        }}
       >
         <div className="site-container flex h-16 items-center justify-between">
-          <Link to="/" aria-label="GSTPIXEL home">
+          <Link
+            to="/"
+            aria-label="GSTPIXEL home"
+            className="luminous-edge"
+            style={{ borderRadius: "0.5rem", padding: "0.25rem 0.5rem" }}
+          >
             <Brand />
           </Link>
           <nav
             aria-label="Primary"
             className="hidden items-center gap-7 lg:flex"
+            style={{
+              background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 60%, transparent)`,
+              backdropFilter: "blur(16px)",
+              border: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 20%, transparent)` : "var(--ink-line)"}`,
+              borderRadius: "9999px",
+              padding: "0.35rem 0.75rem",
+              boxShadow: "var(--depth-shadow-sm), var(--glass-inner-glow)",
+            }}
           >
             {nav.map(([label, to]) => (
               <Link
@@ -54,14 +78,40 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 to={to}
                 className="nav-link"
                 activeProps={{ className: "nav-link-active" }}
+                style={{
+                  position: "relative",
+                  padding: "0.4rem 0.6rem",
+                  borderRadius: "9999px",
+                  transition: "color 0.15s, background 0.2s, box-shadow 0.2s",
+                }}
+                onMouseEnter={(e) => {
+                  const target = e.currentTarget;
+                  target.style.background = `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 100%, transparent)`;
+                  target.style.boxShadow =
+                    "inset 0 0 0 1px color-mix(in oklab, var(--color-brand-primary) 30%, transparent)";
+                }}
+                onMouseLeave={(e) => {
+                  const target = e.currentTarget;
+                  target.style.background = "transparent";
+                  target.style.boxShadow = "none";
+                }}
               >
                 {label}
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild className="hidden sm:inline-flex">
-              <Link to="/start-your-project">Start your project</Link>
+            <Button
+              asChild
+              className="hidden sm:inline-flex luminous-edge"
+              style={{ borderRadius: "0.5rem" }}
+            >
+              <Link
+                to="/start-your-project"
+                style={{ padding: "0.6rem 1.25rem" }}
+              >
+                Start your project
+              </Link>
             </Button>
             <Button
               variant="quiet"
@@ -69,23 +119,56 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               aria-expanded={open}
               onClick={() => setOpen(!open)}
               className="px-3 lg:hidden"
+              style={{
+                background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 100%, transparent)`,
+                backdropFilter: "blur(16px)",
+                border: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 20%, transparent)` : "var(--ink-line)"}`,
+                borderRadius: "0.5rem",
+              }}
             >
               {open ? <X /> : <Menu />}
             </Button>
           </div>
         </div>
         {open && (
-          <nav aria-label="Mobile" className="mobile-nav" data-open>
+          <nav
+            aria-label="Mobile"
+            className="mobile-nav"
+            data-open
+            style={{
+              background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 95%, transparent)`,
+              backdropFilter: "blur(24px)",
+              borderTop: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 20%, transparent)` : "var(--ink-line)"}`,
+            }}
+          >
             {nav.map(([label, to]) => (
-              <Link key={to} to={to} onClick={() => setOpen(false)}>
+              <Link
+                key={to}
+                to={to}
+                onClick={() => setOpen(false)}
+                style={{
+                  borderBottom: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 15%, transparent)` : "var(--ink-line)"}`,
+                  background: "transparent",
+                }}
+              >
                 {label}
                 <span aria-hidden="true">↗</span>
               </Link>
             ))}
-            <Link to="/contact" onClick={() => setOpen(false)}>
+            <Link
+              to="/contact"
+              onClick={() => setOpen(false)}
+              style={{
+                borderBottom: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 15%, transparent)` : "var(--ink-line)"}`,
+              }}
+            >
               Contact<span aria-hidden="true">↗</span>
             </Link>
-            <Button asChild className="mt-3 w-full">
+            <Button
+              asChild
+              className="mt-3 w-full luminous-edge"
+              style={{ borderRadius: "0.5rem" }}
+            >
               <Link to="/start-your-project" onClick={() => setOpen(false)}>
                 Start your project
               </Link>

@@ -1,0 +1,488 @@
+@layer tokens {
+  :root {
+    /* ========================================
+       GSTPIXEL CONTROLLED CORE COLOUR SYSTEM
+       ========================================
+       A disciplined palette: few core colours, many sophisticated
+       tonal/gradient states, one recognizable GSTPIXEL identity.
+       
+       CORE PALETTE (4 colours):
+       - Foundation Dark: Deep graphite/night (text, deep surfaces)
+       - Foundation Light: Clean neutral/off-white (light surfaces)
+       - Primary Accent: Cyan-teal brand colour (CTAs, highlights, energy)
+       - Secondary Accent: Warm amber/gold (trust, warmth, human touch)
+       
+       All environmental states derive from combinations of these 4 cores.
+    */
+
+    /* --- FOUNDATION DARK (Deep graphite/night) --- */
+    --core-dark: oklch(0.085 0.012 255);
+    --core-dark-muted: oklch(0.12 0.015 255);
+    --core-dark-elevated: oklch(0.15 0.018 255);
+    --core-dark-text: oklch(0.97 0.006 250);
+    --core-dark-text-muted: oklch(0.72 0.018 250);
+
+    /* --- FOUNDATION LIGHT (Clean neutral/off-white) --- */
+    --core-light: oklch(0.985 0.002 255);
+    --core-light-muted: oklch(0.96 0.005 255);
+    --core-light-elevated: oklch(1 0 0);
+    --core-light-text: oklch(0.12 0.015 255);
+    --core-light-text-muted: oklch(0.45 0.015 255);
+
+    /* --- PRIMARY ACCENT (Cyan-teal: technology, clarity, forward energy) --- */
+    --core-primary: oklch(0.72 0.15 195);
+    --core-primary-strong: oklch(0.65 0.18 195);
+    --core-primary-muted: oklch(0.82 0.08 195);
+    --core-primary-pale: oklch(0.92 0.03 195);
+    --core-primary-foreground: oklch(0.12 0.018 250);
+
+    /* --- SECONDARY ACCENT (Warm amber/gold: trust, human touch, credibility) --- */
+    --core-trust: oklch(0.68 0.12 75);
+    --core-trust-strong: oklch(0.6 0.15 75);
+    --core-trust-muted: oklch(0.8 0.06 75);
+    --core-trust-pale: oklch(0.94 0.025 75);
+    --core-trust-foreground: oklch(0.12 0.018 250);
+
+    /* ========================================
+       SEMANTIC ALIASES (for backward compat)
+       ======================================== */
+    --color-brand-primary: var(--core-primary);
+    --color-brand-primary-foreground: var(--core-primary-foreground);
+    --color-brand-trust: var(--core-trust);
+    --color-brand-accent: var(--core-primary-pale);
+
+    /* ========================================
+       ENVIRONMENTAL STATES (derived from core palette)
+       Each phase interpolates between core colours.
+       ======================================== */
+
+    /* IDEA (0-16%): Deep graphite, restrained atmospheric introduction
+       Dominant: Foundation Dark + subtle Primary glow */
+    --env-idea-bg: var(--core-dark);
+    --env-idea-gradient:
+      radial-gradient(
+        ellipse 80% 60% at 20% 10%,
+        oklch(0.15 0.035 255 / 0.35),
+        transparent 60%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 85% 85%,
+        var(--core-primary) / 0.08,
+        transparent 55%
+      ),
+      linear-gradient(180deg, var(--core-dark), var(--core-dark-muted));
+    --env-idea-glow: var(--core-primary) / 0.12;
+    --env-idea-glass-tint: var(--core-dark-elevated) / 0.4;
+
+    /* DESIGN (16-33%): Richer luminous creative energy
+       Dominant: Foundation Dark + Primary + Trust warmth */
+    --env-design-bg: var(--core-dark-muted);
+    --env-design-gradient:
+      radial-gradient(
+        ellipse 75% 55% at 15% 20%,
+        var(--core-trust) / 0.25,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 70% 60% at 80% 15%,
+        var(--core-primary) / 0.15,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 50% 40% at 50% 70%,
+        oklch(0.85 0.08 85 / 0.1),
+        transparent 55%
+      ),
+      linear-gradient(180deg, var(--core-dark-muted), oklch(0.12 0.02 270));
+    --env-design-glow: var(--core-trust) / 0.18;
+    --env-design-glass-tint: oklch(0.2 0.03 265 / 0.45);
+
+    /* BUILD (33-50%): Structured technical depth, controlled cool energy
+       Dominant: Foundation Dark + Primary (stronger) */
+    --env-build-bg: oklch(0.1 0.018 250);
+    --env-build-gradient:
+      radial-gradient(
+        ellipse 85% 65% at 10% 5%,
+        var(--core-primary) / 0.18,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 90% 30%,
+        oklch(0.55 0.12 220 / 0.2),
+        transparent 50%
+      ),
+      conic-gradient(
+        from 180deg at 50% 50%,
+        transparent 0deg,
+        var(--core-primary) / 0.03 90deg,
+        transparent 180deg,
+        var(--core-trust) / 0.03 270deg,
+        transparent 360deg
+      ),
+      linear-gradient(180deg, oklch(0.1 0.018 250), oklch(0.13 0.022 255));
+    --env-build-glow: var(--core-primary) / 0.15;
+    --env-build-glass-tint: oklch(0.18 0.025 250 / 0.5);
+
+    /* AUTOMATE (50-66%): Deeper spectral blue/violet technological atmosphere
+       Dominant: Foundation Dark + Primary (shifted toward cyan) + Trust */
+    --env-automate-bg: oklch(0.095 0.02 260);
+    --env-automate-gradient:
+      radial-gradient(
+        ellipse 90% 70% at 5% 0%,
+        oklch(0.65 0.18 280 / 0.22),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 65% 55% at 95% 40%,
+        var(--core-primary) / 0.2,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 40% 35% at 40% 60%,
+        oklch(0.7 0.15 300 / 0.15),
+        transparent 50%
+      ),
+      linear-gradient(180deg, oklch(0.095 0.02 260), oklch(0.12 0.025 270));
+    --env-automate-glow: oklch(0.65 0.18 280 / 0.2);
+    --env-automate-glass-tint: oklch(0.2 0.035 275 / 0.55);
+
+    /* OPERATE (66-83%): Calmer architectural/business environment
+       Dominant: Foundation Dark + Trust (business warmth) */
+    --env-operate-bg: oklch(0.105 0.015 245);
+    --env-operate-gradient:
+      radial-gradient(
+        ellipse 80% 60% at 20% 15%,
+        var(--core-trust) / 0.2,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 70% 50% at 80% 70%,
+        oklch(0.55 0.08 160 / 0.18),
+        transparent 50%
+      ),
+      linear-gradient(180deg, oklch(0.105 0.015 245), oklch(0.13 0.018 250));
+    --env-operate-glow: var(--core-trust) / 0.16;
+    --env-operate-glass-tint: oklch(0.18 0.02 245 / 0.5);
+
+    /* GROW (83-95%): More expansive/optimistic visual energy
+       Dominant: Foundation Dark + Primary + Trust blend */
+    --env-grow-bg: oklch(0.1 0.015 200);
+    --env-grow-gradient:
+      radial-gradient(
+        ellipse 95% 75% at 50% -10%,
+        oklch(0.75 0.12 140 / 0.25),
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 50% at 10% 80%,
+        var(--core-trust) / 0.18,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 55% 45% at 90% 20%,
+        var(--core-primary) / 0.15,
+        transparent 50%
+      ),
+      linear-gradient(180deg, oklch(0.1 0.015 200), oklch(0.12 0.02 210));
+    --env-grow-glow: oklch(0.75 0.12 140 / 0.22);
+    --env-grow-glass-tint: oklch(0.22 0.03 180 / 0.5);
+
+    /* CTA (95-100%): Convergence back to GSTPIXEL core identity
+       Dominant: Foundation Dark + Primary + Trust balanced */
+    --env-cta-bg: oklch(0.105 0.018 260);
+    --env-cta-gradient:
+      radial-gradient(
+        ellipse 100% 80% at 50% 0%,
+        var(--core-primary) / 0.18,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 70% 60% at 50% 100%,
+        var(--core-trust) / 0.15,
+        transparent 50%
+      ),
+      linear-gradient(180deg, var(--core-dark), var(--core-dark));
+    --env-cta-glow: var(--core-primary) / 0.2;
+    --env-cta-glass-tint: oklch(0.18 0.025 260 / 0.55);
+
+    /* ========================================
+       GLASS / MATERIAL SYSTEM (using core palette)
+       ======================================== */
+
+    /* Glass opacity levels */
+    --glass-opacity-subtle: 0.08;
+    --glass-opacity-light: 0.12;
+    --glass-opacity-medium: 0.18;
+    --glass-opacity-strong: 0.28;
+    --glass-opacity-hero: 0.35;
+
+    /* Glass blur levels */
+    --glass-blur-xs: 8px;
+    --glass-blur-sm: 16px;
+    --glass-blur-md: 24px;
+    --glass-blur-lg: 32px;
+    --glass-blur-xl: 48px;
+
+    /* Glass border (using primary accent) */
+    --glass-border-subtle: 1px solid var(--core-primary) / 0.12;
+    --glass-border-light: 1px solid var(--core-primary) / 0.2;
+    --glass-border-medium: 1px solid var(--core-primary) / 0.3;
+    --glass-border-strong: 1px solid var(--core-primary) / 0.45;
+
+    /* Glass highlight (specular edge) */
+    --glass-highlight-subtle: inset 0 1px 0 var(--core-primary) / 0.08;
+    --glass-highlight-medium:
+      inset 0 1px 0 var(--core-primary) / 0.18,
+      inset 0 -1px 0 var(--core-primary) / 0.06;
+    --glass-highlight-strong:
+      inset 0 1px 0 var(--core-primary) / 0.25,
+      inset 0 -1px 0 var(--core-primary) / 0.1;
+
+    /* Depth shadows (using foundation dark) */
+    --depth-shadow-xs:
+      0 1px 3px var(--core-dark) / 0.12, 0 1px 2px var(--core-dark) / 0.08;
+    --depth-shadow-sm:
+      0 4px 8px var(--core-dark) / 0.15, 0 2px 4px var(--core-dark) / 0.1;
+    --depth-shadow-md:
+      0 12px 24px var(--core-dark) / 0.18, 0 4px 8px var(--core-dark) / 0.12;
+    --depth-shadow-lg:
+      0 24px 48px var(--core-dark) / 0.22, 0 8px 16px var(--core-dark) / 0.15;
+    --depth-shadow-xl:
+      0 40px 80px var(--core-dark) / 0.25, 0 16px 32px var(--core-dark) / 0.18;
+
+    /* Colored glow shadows (using primary/trust) */
+    --depth-glow-primary: 0 0 40px var(--core-primary) / 0.15;
+    --depth-glow-trust: 0 0 40px var(--core-trust) / 0.15;
+    --depth-glow-warm: 0 0 40px var(--core-trust) / 0.18;
+
+    /* Internal glow for glass panels */
+    --glass-inner-glow: inset 0 0 60px var(--core-primary) / 0.04;
+
+    /* Luminous edge treatment */
+    --edge-luminous: 0 0 0 1px var(--core-primary) / 0.35;
+    --edge-luminous-hover:
+      0 0 0 1px var(--core-primary), 0 0 20px var(--core-primary) / 0.3;
+
+    /* ========================================
+       MOTION TOKENS
+       ======================================== */
+    --motion-micro: 150ms;
+    --motion-structural: 280ms;
+    --motion-narrative: 550ms;
+    --motion-cinematic: 1100ms;
+
+    --easing-standard: cubic-bezier(0.16, 1, 0.3, 1);
+    --easing-expressive: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+    --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    /* ========================================
+       BUTTON TACTILE TOKENS
+       ======================================== */
+    --btn-lift-rest: translateY(-1px);
+    --btn-lift-hover: translateY(-3px);
+    --btn-lift-active: translateY(0.5px) scale(0.985);
+    --btn-lift-focus: translateY(-2px);
+    --btn-shadow-rest: var(--depth-shadow-sm);
+    --btn-shadow-hover: var(--depth-shadow-md), var(--depth-glow-primary);
+    --btn-shadow-active: var(--depth-shadow-xs);
+    --btn-shadow-focus:
+      0 0 0 3px var(--core-primary) / 0.25, var(--depth-shadow-sm);
+
+    /* ========================================
+       ENVIRONMENT TRANSITION (set by JS scroll observer)
+       ======================================== */
+    --env-progress: 0;
+    --env-phase: 0;
+
+    /* Interpolated environment values (computed by JS) */
+    --env-current-bg: var(--env-idea-bg);
+    --env-current-gradient: var(--env-idea-gradient);
+    --env-current-glow: var(--env-idea-glow);
+    --env-current-glass-tint: var(--env-idea-glass-tint);
+  }
+
+  /* ========================================
+     REDUCED MOTION OVERRIDES
+     ======================================== */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --motion-micro: 0.01ms;
+      --motion-structural: 0.01ms;
+      --motion-narrative: 0.01ms;
+      --motion-cinematic: 0.01ms;
+    }
+  }
+}
+
+/* ========================================
+   UTILITY CLASSES FOR GLASS MATERIAL
+   ======================================== */
+@layer utilities {
+  .glass-subtle {
+    background: var(--env-current-glass-tint) / var(--glass-opacity-subtle);
+    backdrop-filter: blur(var(--glass-blur-sm));
+    border: var(--glass-border-subtle);
+    box-shadow: var(--glass-highlight-subtle), var(--depth-shadow-xs);
+  }
+
+  .glass-light {
+    background: var(--env-current-glass-tint) / var(--glass-opacity-light);
+    backdrop-filter: blur(var(--glass-blur-md));
+    border: var(--glass-border-light);
+    box-shadow:
+      var(--glass-highlight-medium), var(--depth-shadow-sm),
+      var(--glass-inner-glow);
+  }
+
+  .glass-medium {
+    background: var(--env-current-glass-tint) / var(--glass-opacity-medium);
+    backdrop-filter: blur(var(--glass-blur-lg));
+    border: var(--glass-border-medium);
+    box-shadow:
+      var(--glass-highlight-strong), var(--depth-shadow-md),
+      var(--glass-inner-glow);
+  }
+
+  .glass-strong {
+    background: var(--env-current-glass-tint) / var(--glass-opacity-strong);
+    backdrop-filter: blur(var(--glass-blur-xl));
+    border: var(--glass-border-strong);
+    box-shadow:
+      var(--glass-highlight-strong), var(--depth-shadow-lg),
+      var(--glass-inner-glow);
+  }
+
+  .glass-hero {
+    background: var(--env-current-glass-tint) / var(--glass-opacity-hero);
+    backdrop-filter: blur(var(--glass-blur-xl));
+    border: var(--glass-border-strong);
+    box-shadow:
+      var(--glass-highlight-strong), var(--depth-shadow-xl),
+      var(--depth-glow-primary), var(--glass-inner-glow);
+  }
+
+  .luminous-edge {
+    position: relative;
+  }
+  .luminous-edge::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    border: var(--edge-luminous);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--motion-structural) var(--easing-standard);
+  }
+  .luminous-edge:hover::before,
+  .luminous-edge:focus-within::before {
+    opacity: 1;
+  }
+
+  /* Environmental section wrapper */
+  .env-section {
+    position: relative;
+    isolation: isolate;
+  }
+  .env-section::before {
+    content: "";
+    position: absolute;
+    inset: -50%;
+    background: var(--env-current-gradient);
+    z-index: -1;
+    pointer-events: none;
+    transition:
+      background var(--motion-cinematic) var(--easing-decelerate),
+      opacity var(--motion-cinematic) var(--easing-decelerate);
+  }
+  .env-section::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at var(--env-glow-x, 50%) var(--env-glow-y, 50%),
+      var(--env-current-glow) 0%,
+      transparent 70%
+    );
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.6;
+    transition:
+      background var(--motion-cinematic) var(--easing-decelerate),
+      opacity var(--motion-narrative) var(--easing-standard);
+  }
+}
+
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+@layer animations {
+  @keyframes ripple {
+    0% {
+      transform: scale(0);
+      opacity: 0.3;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 0;
+    }
+  }
+
+  @keyframes btn-press {
+    0% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(0.975);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes btn-lift {
+    0% {
+      transform: translateY(0);
+      box-shadow: var(--depth-shadow-sm);
+    }
+    100% {
+      transform: translateY(-3px);
+      box-shadow: var(--depth-shadow-md), var(--depth-glow-primary);
+    }
+  }
+
+  @keyframes pulse-glow {
+    0%,
+    100% {
+      box-shadow: 0 0 20px var(--core-primary) / 0.15;
+    }
+    50% {
+      box-shadow: 0 0 40px var(--core-primary) / 0.3;
+    }
+  }
+}
+
+@layer utilities {
+  .btn-tactile {
+    transition:
+      transform var(--motion-micro) var(--easing-spring),
+      box-shadow var(--motion-micro) var(--easing-standard),
+      background-color var(--motion-micro) var(--easing-standard);
+  }
+  .btn-tactile:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--depth-shadow-md), var(--depth-glow-primary);
+  }
+  .btn-tactile:active {
+    transform: translateY(0.5px) scale(0.985);
+    box-shadow: var(--depth-shadow-xs);
+    transition-duration: 50ms;
+  }
+  .btn-tactile:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 3px var(--core-primary) / 0.25,
+      var(--depth-shadow-sm);
+  }
+}

@@ -1,5 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, Calculator, Search, FileText, Target } from "lucide-react";
+import {
+  ArrowRight,
+  Calculator,
+  Search,
+  FileText,
+  Target,
+  Shield,
+  CheckCircle2,
+  Code,
+  Globe,
+  Server,
+  Database,
+  Zap,
+} from "lucide-react";
 import {
   PageIntro,
   StartBand,
@@ -45,6 +58,52 @@ const tools = [
   },
 ] as const;
 
+const techStack = [
+  { name: "React 19", category: "Frontend", icon: Code },
+  { name: "TanStack Start", category: "Full-stack Framework", icon: Globe },
+  { name: "TypeScript", category: "Language", icon: Code },
+  { name: "Tailwind CSS v4", category: "Styling", icon: Code },
+  { name: "Radix UI", category: "Components", icon: Database },
+  { name: "TanStack Query", category: "State Management", icon: Server },
+  { name: "TanStack Router", category: "Routing", icon: Globe },
+  { name: "Nitro / Cloudflare Workers", category: "Deployment", icon: Server },
+  { name: "Vite", category: "Build Tool", icon: Zap },
+  { name: "Zod", category: "Validation", icon: Shield },
+] as const;
+
+const toolTrustSignals = [
+  {
+    icon: CheckCircle2,
+    title: "Zero fabricated outputs",
+    desc: "No invented prices, guarantees, or regulatory claims in any tool.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Transparent assumptions",
+    desc: "Every calculator shows its logic. You provide the rates and parameters.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Privacy by design",
+    desc: "No data leaves your browser. Tools run entirely client-side.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Editable at every step",
+    desc: "Change any input instantly. Nothing locks you into a path.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Context carries forward",
+    desc: "Start an enquiry with only the relevant tool data pre-filled.",
+  },
+  {
+    icon: CheckCircle2,
+    title: "Built on open standards",
+    desc: "Client-side JavaScript, Web APIs, and open-source libraries only.",
+  },
+] as const;
+
 export const Route = createFileRoute("/tools/")({
   head: () => ({
     meta: [
@@ -70,7 +129,11 @@ export const Route = createFileRoute("/tools/")({
 function Page() {
   return (
     <>
-      <header className="page-intro">
+      <header
+        className="page-intro env-section"
+        data-env-phase="0"
+        style={{ "--env-glow-x": "20%", "--env-glow-y": "10%" }}
+      >
         <div className="site-container">
           <ScrollReveal variant="fadeInUp" delay={0}>
             <p className="label text-primary">Useful tools</p>
@@ -87,7 +150,11 @@ function Page() {
         </div>
       </header>
 
-      <section className="content-band">
+      <section
+        className="content-band env-section"
+        data-env-phase="1"
+        style={{ "--env-glow-x": "30%", "--env-glow-y": "30%" }}
+      >
         <div className="site-container">
           <StaggeredReveal
             baseDelay={0.1}
@@ -98,26 +165,96 @@ function Page() {
               <Link
                 key={tool.slug}
                 to={`/tools/${tool.slug}`}
-                className="tool-card"
+                className="tool-card glass-medium luminous-edge"
+                style={{
+                  borderRadius: "0.75rem",
+                  padding: "2rem",
+                  display: "grid",
+                  gap: "1rem",
+                }}
               >
-                <div className="tool-card-icon" aria-hidden="true">
+                <div
+                  className="tool-card-icon glass-medium"
+                  aria-hidden="true"
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: "3.5rem",
+                    height: "3.5rem",
+                    borderRadius: "0.5rem",
+                    background:
+                      "color-mix(in oklab, var(--color-brand-primary) 15%, transparent)",
+                    color: "var(--color-brand-primary)",
+                  }}
+                >
                   <tool.icon size={28} />
                 </div>
-                <div className="tool-card-header">
+                <div
+                  className="tool-card-header"
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <span className="label text-primary">Tool 0{i + 1}</span>
-                  <span className="tool-category">{tool.category}</span>
+                  <span
+                    className="tool-category glass-light"
+                    style={{
+                      borderRadius: "9999px",
+                      padding: "0.2rem 0.6rem",
+                      font: "500 0.6rem var(--font-mono)",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {tool.category}
+                  </span>
                 </div>
-                <h3>{tool.title}</h3>
-                <p>{tool.description}</p>
-                <div className="tool-features">
+                <h3 style={{ font: "700 1.4rem var(--font-display)" }}>
+                  {tool.title}
+                </h3>
+                <p
+                  style={{ color: "var(--muted-foreground)", lineHeight: 1.6 }}
+                >
+                  {tool.description}
+                </p>
+                <div
+                  className="tool-features"
+                  style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}
+                >
                   {tool.features.map((f) => (
-                    <span key={f} className="feature-tag">
+                    <span
+                      key={f}
+                      className="feature-tag glass-light"
+                      style={{
+                        borderRadius: "0.25rem",
+                        padding: "0.25rem 0.5rem",
+                        font: "500 0.65rem var(--font-mono)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.05em",
+                      }}
+                    >
                       {f}
                     </span>
                   ))}
                 </div>
-                <div className="tool-card-footer">
-                  <ArrowRight size={18} aria-hidden="true" />
+                <div
+                  className="tool-card-footer"
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    marginTop: "0.5rem",
+                  }}
+                >
+                  <ArrowRight
+                    size={18}
+                    aria-hidden="true"
+                    style={{
+                      color: "var(--color-brand-primary)",
+                      opacity: 0.6,
+                      transition: "opacity 0.2s, transform 0.2s",
+                    }}
+                  />
                 </div>
               </Link>
             ))}
@@ -125,7 +262,11 @@ function Page() {
         </div>
       </section>
 
-      <section className="content-band bg-secondary">
+      <section
+        className="content-band env-section bg-secondary"
+        data-env-phase="3"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="Tool principles"
@@ -136,22 +277,175 @@ function Page() {
             variant="fadeInUp"
             className="tool-principles"
           >
-            <div className="principle-card">
-              <strong>You provide the assumptions</strong>
-              <p>Rates, scope, timing — you choose. We calculate.</p>
-            </div>
-            <div className="principle-card">
-              <strong>Everything stays editable</strong>
-              <p>Change any input. The result updates instantly.</p>
-            </div>
-            <div className="principle-card">
-              <strong>Context carries forward</strong>
-              <p>Start an enquiry with only the relevant tool data.</p>
-            </div>
-            <div className="principle-card">
-              <strong>No fabricated outputs</strong>
-              <p>No invented prices, guarantees, or regulatory claims.</p>
-            </div>
+            {[
+              {
+                strong: "You provide the assumptions",
+                p: "Rates, scope, timing — you choose. We calculate.",
+              },
+              {
+                strong: "Everything stays editable",
+                p: "Change any input. The result updates instantly.",
+              },
+              {
+                strong: "Context carries forward",
+                p: "Start an enquiry with only the relevant tool data.",
+              },
+              {
+                strong: "No fabricated outputs",
+                p: "No invented prices, guarantees, or regulatory claims.",
+              },
+            ].map((item, i) => (
+              <div
+                key={item.strong}
+                className="principle-card glass-light luminous-edge"
+                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+              >
+                <strong>{item.strong}</strong>
+                <p
+                  style={{
+                    marginTop: "0.5rem",
+                    color: "var(--muted-foreground)",
+                  }}
+                >
+                  {item.p}
+                </p>
+              </div>
+            ))}
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section
+        className="content-band env-section bg-ink text-ink-foreground"
+        data-env-phase="5"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
+        <div className="site-container">
+          <SectionHeader
+            label="Technology credibility"
+            title="Tools built on open, auditable standards."
+          />
+          <ScrollReveal
+            variant="fadeInUp"
+            delay={0}
+            className="tech-disclaimer"
+          >
+            <p style={{ color: "var(--ink-muted)", maxWidth: "60ch" }}>
+              GSTPIXEL tools run entirely in your browser using standard Web
+              APIs. No server-side processing, no data collection, no vendor
+              lock-in.
+            </p>
+          </ScrollReveal>
+          <StaggeredReveal
+            baseDelay={0.08}
+            variant="fadeInUp"
+            className="tech-stack-grid"
+          >
+            {techStack.map((tech, i) => (
+              <div
+                key={tech.name}
+                className="tech-card glass-medium luminous-edge"
+                style={{
+                  borderRadius: "0.5rem",
+                  padding: "1.25rem",
+                  textAlign: "center",
+                }}
+              >
+                <div
+                  className="tech-icon"
+                  aria-hidden="true"
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: "3rem",
+                    height: "3rem",
+                    margin: "0 auto 0.75rem",
+                    borderRadius: "0.5rem",
+                    background:
+                      "color-mix(in oklab, var(--color-brand-primary) 15%, transparent)",
+                    color: "var(--color-brand-primary)",
+                  }}
+                >
+                  <tech.icon size={20} />
+                </div>
+                <strong style={{ display: "block", fontSize: "0.95rem" }}>
+                  {tech.name}
+                </strong>
+                <span
+                  className="tech-category"
+                  style={{
+                    display: "block",
+                    marginTop: "0.25rem",
+                    font: "500 0.65rem var(--font-mono)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    color: "var(--ink-muted)",
+                  }}
+                >
+                  {tech.category}
+                </span>
+              </div>
+            ))}
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section
+        className="content-band env-section"
+        data-env-phase="6"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
+        <div className="site-container">
+          <SectionHeader
+            label="Why trust these tools"
+            title="Built on openness, not opacity."
+          />
+          <StaggeredReveal
+            baseDelay={0.08}
+            variant="fadeInUp"
+            className="trust-signals"
+          >
+            {toolTrustSignals.map((signal, i) => (
+              <div
+                key={signal.title}
+                className="trust-card glass-light luminous-edge"
+                style={{
+                  borderRadius: "0.5rem",
+                  padding: "1.5rem",
+                  display: "flex",
+                  gap: "1rem",
+                }}
+              >
+                <div
+                  className="trust-icon"
+                  aria-hidden="true"
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    borderRadius: "0.5rem",
+                    background:
+                      "color-mix(in oklab, var(--color-brand-trust) 15%, transparent)",
+                    color: "var(--color-brand-trust)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <signal.icon size={20} />
+                </div>
+                <div>
+                  <strong>{signal.title}</strong>
+                  <p
+                    style={{
+                      marginTop: "0.25rem",
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    {signal.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
           </StaggeredReveal>
         </div>
       </section>

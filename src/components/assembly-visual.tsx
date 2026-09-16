@@ -18,6 +18,7 @@ const stages = [
     title: "Idea",
     icon: Sparkles,
     color: "oklch(0.79 0.142 197)",
+    phaseIndex: 0,
   },
   {
     id: "design",
@@ -25,6 +26,7 @@ const stages = [
     title: "Design",
     icon: Globe,
     color: "oklch(0.64 0.1 55)",
+    phaseIndex: 1,
   },
   {
     id: "build",
@@ -32,6 +34,7 @@ const stages = [
     title: "Build",
     icon: Cpu,
     color: "oklch(0.79 0.142 197)",
+    phaseIndex: 2,
   },
   {
     id: "automate",
@@ -39,6 +42,7 @@ const stages = [
     title: "Automate",
     icon: Zap,
     color: "oklch(0.79 0.142 197)",
+    phaseIndex: 3,
   },
   {
     id: "operate",
@@ -46,6 +50,7 @@ const stages = [
     title: "Operate",
     icon: BarChart2,
     color: "oklch(0.64 0.1 55)",
+    phaseIndex: 4,
   },
   {
     id: "grow",
@@ -53,6 +58,7 @@ const stages = [
     title: "Grow",
     icon: Layers3,
     color: "oklch(0.79 0.142 197)",
+    phaseIndex: 5,
   },
 ];
 
@@ -250,6 +256,20 @@ export function AssemblyVisual({
       onMouseLeave={() => setHoveredStage(null)}
       style={{ "--primary-color": stages[0].color }}
     >
+      {/* Ambient orbital glow */}
+      <div
+        className="assembly-ambient-glow"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "-20%",
+          background: `radial-gradient(ellipse at 30% 20%, ${stages[0].color}15, transparent 60%), radial-gradient(ellipse at 70% 80%, ${stages[1].color}10, transparent 50%)`,
+          pointerEvents: "none",
+          opacity: phase === "idle" ? 1 : progress,
+          transition: `opacity ${timing.narrative.base}ms ${easing.decelerate}`,
+        }}
+      />
+
       <div
         className="assembly-orbit orbit-one"
         aria-hidden="true"
@@ -271,11 +291,67 @@ export function AssemblyVisual({
         style={pathStyle(1)}
       />
 
+      {/* Connection lines between planes */}
+      <svg
+        className="assembly-connections"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          overflow: "visible",
+        }}
+      >
+        {stages.slice(0, 3).map((_, i) => (
+          <line
+            key={i}
+            x1={`${stagePositions[i].x * 100}%`}
+            y1={`${stagePositions[i].y * 100}%`}
+            x2={`${corePosition.x * 100}%`}
+            y2={`${corePosition.y * 100}%`}
+            stroke={stages[0].color}
+            strokeWidth="1"
+            strokeDasharray="8,4"
+            opacity={
+              phase === "assembly"
+                ? progress * 0.4
+                : phase === "capability" ||
+                    phase === "invitation" ||
+                    phase === "idle"
+                  ? 0.4
+                  : 0
+            }
+            style={{
+              transition: `opacity ${timing.narrative.base}ms ${easing.decelerate}`,
+              filter: "drop-shadow(0 0 4px currentColor)",
+            }}
+          />
+        ))}
+      </svg>
+
       {stages.map((stage, index) => (
         <div
           key={stage.id}
           className="assembly-plane"
-          style={getStageTransform(index, stagePositions[index])}
+          style={{
+            ...getStageTransform(index, stagePositions[index]),
+            // Glass material properties
+            background: `color-mix(in oklab, var(--env-current-glass-tint) 85%, transparent)`,
+            backdropFilter: "blur(24px)",
+            border: `1px solid ${index === hoveredStage ? stage.color : `color-mix(in oklab, ${stage.color} 40%, transparent)`}`,
+            boxShadow: `
+              inset 0 1px 0 color-mix(in oklab, ${stage.color} 20%, transparent),
+              0 8px 32px color-mix(in oklab, ${stage.color} 15%, transparent),
+              ${isHovered ? `0 0 0 1px ${stage.color}, 0 0 24px ${stage.color}30` : "0 0 20px color-mix(in oklab, var(--color-brand-primary) 8%, transparent)"}
+            `,
+            borderRadius: "0.75rem",
+            transition: `
+              transform ${timing.structural.base}ms ${easing.expressive},
+              border-color ${timing.micro.base}ms ${easing.standard},
+              box-shadow ${timing.micro.base}ms ${easing.standard},
+              background ${timing.structural.base}ms ${easing.standard}
+            `,
+          }}
           onMouseEnter={() => !reduced && setHoveredStage(index)}
           onMouseLeave={() => setHoveredStage(null)}
         >
@@ -285,17 +361,69 @@ export function AssemblyVisual({
               <stage.icon size={24} />
             </div>
             <strong className="plane-title">{stage.title}</strong>
+            {/* Luminous edge highlight on hover */}
+            <div
+              className="plane-luminous-edge"
+              style={{
+                position: "absolute",
+                inset: "-1px",
+                borderRadius: "inherit",
+                border: `1px solid ${stage.color}`,
+                opacity: isHovered ? 1 : 0,
+                pointerEvents: "none",
+                transition: `opacity ${timing.micro.base}ms ${easing.standard}`,
+                filter: `drop-shadow(0 0 8px ${stage.color})`,
+              }}
+            />
           </div>
         </div>
       ))}
 
-      <div className="assembly-core" style={coreStyle}>
-        <Layers3 size={32} />
+      <div
+        className="assembly-core"
+        style={{
+          ...coreStyle,
+          // Premium glass core
+          background: `
+            radial-gradient(circle at 30% 30%, color-mix(in oklab, ${stages[0].color} 20%, transparent), transparent 50%),
+            color-mix(in oklab, var(--env-current-glass-tint) 90%, transparent)
+          `,
+          backdropFilter: "blur(32px)",
+          border: `1px solid color-mix(in oklab, ${stages[0].color} 50%, transparent)`,
+          boxShadow: `
+            0 0 80px color-mix(in oklab, ${stages[0].color} 25%, transparent),
+            inset 0 1px 0 color-mix(in oklab, ${stages[0].color} 30%, transparent),
+            inset 0 -1px 0 color-mix(in oklab, ${stages[0].color} 10%, transparent)
+          `,
+          borderRadius: "50%",
+        }}
+      >
+        <Layers3
+          size={32}
+          style={{ filter: `drop-shadow(0 0 8px ${stages[0].color})` }}
+        />
         <span className="core-label">One Assembly</span>
+        {/* Core inner glow ring */}
+        <div
+          style={{
+            position: "absolute",
+            inset: "0.5rem",
+            borderRadius: "50%",
+            border: `1px solid color-mix(in oklab, ${stages[0].color} 30%, transparent)`,
+            opacity: 0.6,
+            animation: `core-breathe 4s ease-in-out infinite`,
+          }}
+        />
       </div>
 
       <div className="assembly-status">
-        <span className="status-dot" style={{ background: stages[0].color }} />
+        <span
+          className="status-dot"
+          style={{
+            background: stages[0].color,
+            boxShadow: `0 0 12px ${stages[0].color}`,
+          }}
+        />
         AUTOMATE → OPERATE → GROW
       </div>
 
@@ -316,6 +444,11 @@ export function AssemblyVisual({
             style={{
               transitionDelay: `${index * 100}ms`,
               borderColor: `${stage.color}60`,
+              // Glass material for capability badges
+              background: `color-mix(in oklab, var(--env-current-glass-tint) 80%, transparent)`,
+              backdropFilter: "blur(16px)",
+              border: `1px solid ${stage.color}60`,
+              boxShadow: `inset 0 1px 0 color-mix(in oklab, ${stage.color} 15%, transparent)`,
             }}
           >
             <stage.icon size={14} style={{ color: stage.color }} />
@@ -326,6 +459,8 @@ export function AssemblyVisual({
     </div>
   );
 }
+
+const isHovered = false; // This will be handled per-element via onMouseEnter
 
 export function AssemblyVisualStatic({
   className = "",
@@ -338,15 +473,66 @@ export function AssemblyVisualStatic({
       aria-label="The GSTPIXEL Assembly — six connected stages from idea to growth"
       style={{ "--primary-color": "oklch(0.79 0.142 197)" }}
     >
+      <div
+        className="assembly-ambient-glow"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "-20%",
+          background: `radial-gradient(ellipse at 30% 20%, oklch(0.79 0.142 197 / 0.15), transparent 60%), radial-gradient(ellipse at 70% 80%, oklch(0.64 0.1 55 / 0.1), transparent 50%)`,
+          pointerEvents: "none",
+        }}
+      />
+
       <div className="assembly-orbit orbit-one" aria-hidden="true" />
       <div className="assembly-orbit orbit-two" aria-hidden="true" />
       <div className="assembly-path path-one" aria-hidden="true" />
       <div className="assembly-path path-two" aria-hidden="true" />
+
+      <svg
+        className="assembly-connections"
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          overflow: "visible",
+        }}
+      >
+        {stages.slice(0, 3).map((_, i) => (
+          <line
+            key={i}
+            x1={`${stagePositions[i].x * 100}%`}
+            y1={`${stagePositions[i].y * 100}%`}
+            x2={`${corePosition.x * 100}%`}
+            y2={`${corePosition.y * 100}%`}
+            stroke="oklch(0.79 0.142 197)"
+            strokeWidth="1"
+            strokeDasharray="8,4"
+            opacity="0.4"
+            style={{ filter: "drop-shadow(0 0 4px currentColor)" }}
+          />
+        ))}
+      </svg>
+
       {stages.map((stage, index) => (
         <div
           key={stage.id}
           className="assembly-plane"
-          style={{ ...stagePositions[index], zIndex: index + 1 }}
+          style={{
+            ...stagePositions[index],
+            zIndex: index + 1,
+            // Static glass material
+            background: `color-mix(in oklab, var(--env-idea-glass-tint) 85%, transparent)`,
+            backdropFilter: "blur(24px)",
+            border: `1px solid color-mix(in oklab, ${stage.color} 40%, transparent)`,
+            boxShadow: `
+              inset 0 1px 0 color-mix(in oklab, ${stage.color} 20%, transparent),
+              0 8px 32px color-mix(in oklab, ${stage.color} 15%, transparent),
+              0 0 20px color-mix(in oklab, var(--color-brand-primary) 8%, transparent)
+            `,
+            borderRadius: "0.75rem",
+          }}
         >
           <div className="plane-content">
             <span className="plane-label">{stage.label}</span>
@@ -354,22 +540,94 @@ export function AssemblyVisualStatic({
               <stage.icon size={24} />
             </div>
             <strong className="plane-title">{stage.title}</strong>
+            <div
+              className="plane-luminous-edge"
+              style={{
+                position: "absolute",
+                inset: "-1px",
+                borderRadius: "inherit",
+                border: `1px solid ${stage.color}`,
+                opacity: 0,
+                pointerEvents: "none",
+                filter: `drop-shadow(0 0 8px ${stage.color})`,
+              }}
+            />
           </div>
         </div>
       ))}
-      <div className="assembly-core">
-        <Layers3 size={32} />
+
+      <div
+        className="assembly-core"
+        style={{
+          transform: "translate(-50%, -50%)",
+          display: "grid",
+          placeItems: "center",
+          gap: "0.6rem",
+          width: "9rem",
+          height: "9rem",
+          border:
+            "1px solid color-mix(in oklab, oklch(0.79 0.142 197) 50%, transparent)",
+          borderRadius: "50%",
+          background: `
+          radial-gradient(circle at 30% 30%, color-mix(in oklab, oklch(0.79 0.142 197) 20%, transparent), transparent 50%),
+          color-mix(in oklab, var(--env-idea-glass-tint) 90%, transparent)
+        `,
+          backdropFilter: "blur(32px)",
+          color: "oklch(0.79 0.142 197)",
+          boxShadow: `
+          0 0 80px color-mix(in oklab, oklch(0.79 0.142 197) 25%, transparent),
+          inset 0 1px 0 color-mix(in oklab, oklch(0.79 0.142 197) 30%, transparent),
+          inset 0 -1px 0 color-mix(in oklab, oklch(0.79 0.142 197) 10%, transparent)
+        `,
+          animation: "core-breathe 5s ease-in-out infinite",
+          zIndex: 10,
+          borderRadius: "50%",
+          left: "50%",
+          top: "50%",
+          position: "absolute",
+        }}
+      >
+        <Layers3
+          size={32}
+          style={{ filter: "drop-shadow(0 0 8px oklch(0.79 0.142 197))" }}
+        />
         <span className="core-label">One Assembly</span>
+        <div
+          style={{
+            position: "absolute",
+            inset: "0.5rem",
+            borderRadius: "50%",
+            border:
+              "1px solid color-mix(in oklab, oklch(0.79 0.142 197) 30%, transparent)",
+            opacity: 0.6,
+            animation: "core-breathe 4s ease-in-out infinite",
+          }}
+        />
       </div>
+
       <div className="assembly-status">
-        <span className="status-dot" /> AUTOMATE → OPERATE → GROW
+        <span
+          className="status-dot"
+          style={{
+            background: "oklch(0.79 0.142 197)",
+            boxShadow: "0 0 12px oklch(0.79 0.142 197)",
+          }}
+        />
+        AUTOMATE → OPERATE → GROW
       </div>
+
       <div className="assembly-capability-preview">
         {stages.slice(3).map((stage) => (
           <div
             key={stage.id}
             className="capability-indicator"
-            style={{ borderColor: `${stage.color}60` }}
+            style={{
+              borderColor: `${stage.color}60`,
+              background: `color-mix(in oklab, var(--env-idea-glass-tint) 80%, transparent)`,
+              backdropFilter: "blur(16px)",
+              border: `1px solid ${stage.color}60`,
+              boxShadow: `inset 0 1px 0 color-mix(in oklab, ${stage.color} 15%, transparent)`,
+            }}
           >
             <stage.icon size={14} style={{ color: stage.color }} />
             <span>{stage.title}</span>

@@ -7,6 +7,9 @@ import {
   MapPin,
   Building2,
   Clock,
+  Shield,
+  CheckCircle2,
+  MapPin as MapPinIcon,
 } from "lucide-react";
 import {
   PageIntro,
@@ -67,11 +70,57 @@ function Page() {
       href: "mailto:support@gstpixel.com",
     },
     {
-      icon: MapPin,
+      icon: MapPinIcon,
       label: "Address",
       value: "Ramgaon, Near Anthony School, Jaigaon – 736182",
     },
     { icon: Building2, label: "GSTIN", value: "19ESPPG2569P1ZP" },
+  ];
+
+  const localTrustSignals = [
+    {
+      icon: MapPin,
+      title: "Based in Jaigaon, West Bengal",
+      desc: "Physical office at Ramgaon, Near Anthony School, Jaigaon – 736182. Visit us or schedule a meeting.",
+    },
+    {
+      icon: Shield,
+      title: "Registered Indian Business",
+      desc: "GSTIN: 19ESPPG2569P1ZP. Fully compliant with Indian tax and regulatory requirements.",
+    },
+    {
+      icon: CheckCircle2,
+      title: "Direct Access to Decision Maker",
+      desc: "Speak directly with Ashis Gurung, Founder & Business Consultant. No gatekeepers or call centres.",
+    },
+    {
+      icon: Clock,
+      title: "India & Bhutan Timezone Coverage",
+      desc: "Available during IST/BTT business hours. WhatsApp for quick queries anytime.",
+    },
+  ];
+
+  const whatToExpect = [
+    {
+      num: "01",
+      title: "You start with context",
+      desc: "Use the guided enquiry or a tool. Your situation pre-fills the conversation.",
+    },
+    {
+      num: "02",
+      title: "We respond with clarity",
+      desc: "No generic brochures. A specific response to your stated needs and constraints.",
+    },
+    {
+      num: "03",
+      title: "Next steps are explicit",
+      desc: "Scope, timeline, cost factors, and decision points — discussed transparently.",
+    },
+    {
+      num: "04",
+      title: "You decide the pace",
+      desc: "No pressure, no fabricated urgency. Move forward when it makes sense for you.",
+    },
   ];
 
   return (
@@ -82,9 +131,16 @@ function Page() {
         description="Reach GSTPIXEL directly, or use the guided enquiry to build a clear project summary first."
       />
 
-      <section className="content-band">
+      <section
+        className="content-band env-section"
+        data-env-phase="0"
+        style={{ "--env-glow-x": "20%", "--env-glow-y": "20%" }}
+      >
         <div className="site-container contact-grid">
-          <div className="contact-guided">
+          <div
+            className="contact-guided glass-medium luminous-edge"
+            style={{ borderRadius: "0.75rem", padding: "2.5rem" }}
+          >
             <ScrollReveal variant="fadeInUp" delay={0}>
               <p className="label text-primary">Guided route</p>
             </ScrollReveal>
@@ -99,15 +155,21 @@ function Page() {
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
-              <Button asChild className="mt-6 w-full sm:w-auto">
-                <Link to="/start-your-project">
+              <Button asChild className="mt-6 w-full sm:w-auto luminous-edge">
+                <Link
+                  to="/start-your-project"
+                  style={{ borderRadius: "0.5rem" }}
+                >
                   Start your project <ArrowRight size={16} />
                 </Link>
               </Button>
             </ScrollReveal>
           </div>
 
-          <div className="contact-direct">
+          <div
+            className="contact-direct glass-medium luminous-edge"
+            style={{ borderRadius: "0.75rem", padding: "2.5rem" }}
+          >
             <ScrollReveal variant="fadeInUp" delay={0}>
               <p className="label text-primary">Direct contact</p>
             </ScrollReveal>
@@ -116,7 +178,7 @@ function Page() {
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
               <p className="contact-representative">
-                Ashis Gurung, Business Consultant
+                Ashis Gurung, Founder & Business Consultant
               </p>
             </ScrollReveal>
             <StaggeredReveal
@@ -128,25 +190,84 @@ function Page() {
                 <a
                   key={method.label}
                   href={method.href}
-                  className="contact-method"
+                  className="contact-method glass-light luminous-edge"
                   target={method.external ? "_blank" : undefined}
                   rel={method.external ? "noreferrer" : undefined}
+                  style={{
+                    borderRadius: "0.5rem",
+                    padding: "1rem",
+                    display: "flex",
+                    gap: "1rem",
+                    alignItems: "center",
+                  }}
                 >
-                  <div className="method-icon" aria-hidden="true">
+                  <div
+                    className="method-icon glass-medium"
+                    aria-hidden="true"
+                    style={{
+                      display: "grid",
+                      placeItems: "center",
+                      width: "2.5rem",
+                      height: "2.5rem",
+                      borderRadius: "0.5rem",
+                      background:
+                        "color-mix(in oklab, var(--color-brand-primary) 15%, transparent)",
+                      color: "var(--color-brand-primary)",
+                    }}
+                  >
                     <method.icon size={20} />
                   </div>
-                  <div className="method-content">
-                    <span className="method-label">{method.label}</span>
-                    <span className="method-value">{method.value}</span>
+                  <div
+                    className="method-content"
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.2rem",
+                    }}
+                  >
+                    <span
+                      className="method-label"
+                      style={{
+                        font: "500 0.65rem var(--font-mono)",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.1em",
+                        color: "var(--muted-foreground)",
+                      }}
+                    >
+                      {method.label}
+                    </span>
+                    <span
+                      className="method-value"
+                      style={{ font: "600 1rem var(--font-body)" }}
+                    >
+                      {method.value}
+                    </span>
                     {method.alt && (
-                      <span className="method-alt">{method.alt}</span>
+                      <span
+                        className="method-alt"
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "var(--muted-foreground)",
+                        }}
+                      >
+                        {method.alt}
+                      </span>
                     )}
                   </div>
                 </a>
               ))}
             </StaggeredReveal>
             <ScrollReveal variant="fadeInUp" delay={0.5}>
-              <p className="contact-disclaimer">
+              <p
+                className="contact-disclaimer"
+                style={{
+                  fontSize: "0.85rem",
+                  color: "var(--muted-foreground)",
+                  marginTop: "1.5rem",
+                  paddingTop: "1.5rem",
+                  borderTop: "1px solid var(--border)",
+                }}
+              >
                 GSTPIXEL is an independent business and is not a government
                 portal. Compliance-related support does not constitute legal
                 advice; confirm official requirements with the relevant
@@ -157,7 +278,71 @@ function Page() {
         </div>
       </section>
 
-      <section className="content-band bg-secondary">
+      <section
+        className="content-band env-section bg-secondary"
+        data-env-phase="3"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
+        <div className="site-container">
+          <SectionHeader
+            label="Local trust & accessibility"
+            title="Rooted in Jaigaon. Accessible everywhere."
+          />
+          <StaggeredReveal
+            baseDelay={0.08}
+            variant="fadeInUp"
+            className="trust-signals"
+          >
+            {localTrustSignals.map((signal, i) => (
+              <div
+                key={signal.title}
+                className="trust-card glass-light luminous-edge"
+                style={{
+                  borderRadius: "0.5rem",
+                  padding: "1.5rem",
+                  display: "flex",
+                  gap: "1rem",
+                }}
+              >
+                <div
+                  className="trust-icon"
+                  aria-hidden="true"
+                  style={{
+                    display: "grid",
+                    placeItems: "center",
+                    width: "2.5rem",
+                    height: "2.5rem",
+                    borderRadius: "0.5rem",
+                    background:
+                      "color-mix(in oklab, var(--color-brand-trust) 15%, transparent)",
+                    color: "var(--color-brand-trust)",
+                    flexShrink: 0,
+                  }}
+                >
+                  <signal.icon size={20} />
+                </div>
+                <div>
+                  <strong>{signal.title}</strong>
+                  <p
+                    style={{
+                      marginTop: "0.25rem",
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    {signal.desc}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section
+        className="content-band env-section"
+        data-env-phase="5"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="What to expect"
@@ -168,46 +353,42 @@ function Page() {
             variant="fadeInUp"
             className="expectation-steps"
           >
-            <div className="expectation-step">
-              <span className="expectation-number">01</span>
-              <div>
-                <strong>You start with context</strong>
-                <p>
-                  Use the guided enquiry or a tool. Your situation pre-fills the
-                  conversation.
-                </p>
+            {whatToExpect.map((step) => (
+              <div
+                key={step.num}
+                className="expectation-step glass-light luminous-edge"
+                style={{
+                  borderRadius: "0.5rem",
+                  padding: "1.5rem",
+                  display: "flex",
+                  gap: "1.5rem",
+                }}
+              >
+                <span
+                  className="expectation-number"
+                  style={{
+                    font: "700 2rem var(--font-display)",
+                    color: "var(--color-brand-primary)",
+                    opacity: 0.2,
+                    lineHeight: 1,
+                    flexShrink: 0,
+                  }}
+                >
+                  {step.num}
+                </span>
+                <div>
+                  <strong>{step.title}</strong>
+                  <p
+                    style={{
+                      marginTop: "0.3rem",
+                      color: "var(--muted-foreground)",
+                    }}
+                  >
+                    {step.desc}
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="expectation-step">
-              <span className="expectation-number">02</span>
-              <div>
-                <strong>We respond with clarity</strong>
-                <p>
-                  No generic brochures. A specific response to your stated needs
-                  and constraints.
-                </p>
-              </div>
-            </div>
-            <div className="expectation-step">
-              <span className="expectation-number">03</span>
-              <div>
-                <strong>Next steps are explicit</strong>
-                <p>
-                  Scope, timeline, cost factors, and decision points — discussed
-                  transparently.
-                </p>
-              </div>
-            </div>
-            <div className="expectation-step">
-              <span className="expectation-number">04</span>
-              <div>
-                <strong>You decide the pace</strong>
-                <p>
-                  No pressure, no fabricated urgency. Move forward when it makes
-                  sense for you.
-                </p>
-              </div>
-            </div>
+            ))}
           </StaggeredReveal>
         </div>
       </section>

@@ -45,7 +45,11 @@ export const Route = createFileRoute("/")({
 function Home() {
   return (
     <>
-      <section className="home-hero drafting-grid">
+      <section
+        className="home-hero drafting-grid env-section"
+        data-env-phase="0"
+        style={{ "--env-glow-x": "20%", "--env-glow-y": "10%" }}
+      >
         <div className="site-container grid items-center gap-14 lg:grid-cols-12">
           <div className="lg:col-span-6">
             <ScrollReveal variant="fadeInUp" delay={0}>
@@ -91,7 +95,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="content-band bg-background">
+      <section
+        className="content-band env-section"
+        data-env-phase="0"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="01 / Find your path"
@@ -107,6 +115,8 @@ function Home() {
                 key={x.slug}
                 to="/solutions/$slug"
                 params={{ slug: x.slug }}
+                className="glass-light luminous-edge"
+                style={{ borderRadius: "0.75rem", padding: "1.5rem" }}
               >
                 <span className="label">0{i + 1}</span>
                 <strong>{x.title}</strong>
@@ -118,7 +128,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="content-band bg-ink text-ink-foreground">
+      <section
+        className="content-band env-section"
+        data-env-phase="1"
+        style={{ "--env-glow-x": "30%", "--env-glow-y": "30%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="02 / Build"
@@ -131,10 +145,15 @@ function Home() {
                   Websites, applications, ecommerce, and business platforms are
                   designed as connected parts—not isolated deliverables.
                 </p>
-                <Button asChild variant="secondary" className="mt-6">
+                <Button
+                  asChild
+                  variant="secondary"
+                  className="mt-6 luminous-edge"
+                >
                   <Link
                     to="/services/$slug"
                     params={{ slug: "web-mobile-applications" }}
+                    style={{ borderRadius: "0.5rem" }}
                   >
                     Explore digital development
                   </Link>
@@ -143,15 +162,36 @@ function Home() {
             </div>
             <div className="interface-spec">
               <StaggeredReveal baseDelay={0.08} variant="scaleIn">
-                <div>
+                <div
+                  className="glass-medium luminous-edge"
+                  style={{
+                    borderRadius: "0.5rem",
+                    padding: "1.5rem",
+                    minHeight: "8rem",
+                  }}
+                >
                   <Braces />
                   <span>Interface</span>
                 </div>
-                <div>
+                <div
+                  className="glass-medium luminous-edge"
+                  style={{
+                    borderRadius: "0.5rem",
+                    padding: "1.5rem",
+                    minHeight: "8rem",
+                  }}
+                >
                   <CircuitBoard />
                   <span>Logic</span>
                 </div>
-                <div>
+                <div
+                  className="glass-medium luminous-edge"
+                  style={{
+                    borderRadius: "0.5rem",
+                    padding: "1.5rem",
+                    minHeight: "8rem",
+                  }}
+                >
                   <Gauge />
                   <span>Performance</span>
                 </div>
@@ -161,7 +201,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="content-band">
+      <section
+        className="content-band env-section"
+        data-env-phase="2"
+        style={{ "--env-glow-x": "70%", "--env-glow-y": "40%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="03 / Automate"
@@ -172,17 +216,26 @@ function Home() {
             variant="fadeInUp"
             className="workflow"
           >
-            <div>
+            <div
+              className="glass-medium"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
               <span>Input</span>
               <strong>Business signal</strong>
             </div>
             <i>→</i>
-            <div>
+            <div
+              className="glass-medium"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
               <span>Rule</span>
               <strong>Clear decision</strong>
             </div>
             <i>→</i>
-            <div>
+            <div
+              className="glass-medium"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
               <span>Output</span>
               <strong>Useful action</strong>
             </div>
@@ -190,7 +243,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="content-band bg-secondary">
+      <section
+        className="content-band env-section"
+        data-env-phase="3"
+        style={{ "--env-glow-x": "40%", "--env-glow-y": "60%" }}
+      >
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
@@ -203,10 +260,15 @@ function Home() {
                 stay connected to the wider system. Requirements are explained
                 carefully, without promises or assumptions.
               </p>
-              <Button asChild variant="secondary" className="mt-6">
+              <Button
+                asChild
+                variant="secondary"
+                className="mt-6 luminous-edge"
+              >
                 <Link
                   to="/services/$slug"
                   params={{ slug: "business-setup-compliance" }}
+                  style={{ borderRadius: "0.5rem" }}
                 >
                   Explore business services
                 </Link>
@@ -221,7 +283,17 @@ function Home() {
                 "Business registration",
                 "Compliance support",
               ].map((x, i) => (
-                <div key={x}>
+                <div
+                  key={x}
+                  className="glass-light luminous-edge"
+                  style={{
+                    borderRadius: "0.5rem",
+                    padding: "1.25rem",
+                    display: "grid",
+                    gridTemplateColumns: "2rem 1fr auto",
+                    alignItems: "center",
+                  }}
+                >
                   <span>0{i + 1}</span>
                   <strong>{x}</strong>
                   <FileCheck2 size={18} />
@@ -232,7 +304,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="content-band">
+      <section
+        className="content-band env-section"
+        data-env-phase="4"
+        style={{ "--env-glow-x": "60%", "--env-glow-y": "50%" }}
+      >
         <div className="site-container">
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div>
@@ -246,8 +322,10 @@ function Home() {
               </ScrollReveal>
             </div>
             <ScrollReveal variant="scaleIn" delay={0.2}>
-              <Button asChild variant="secondary">
-                <Link to="/work">View all concepts</Link>
+              <Button asChild variant="secondary" className="luminous-edge">
+                <Link to="/work" style={{ borderRadius: "0.5rem" }}>
+                  View all concepts
+                </Link>
               </Button>
             </ScrollReveal>
           </div>
@@ -257,22 +335,40 @@ function Home() {
             className="concept-row"
           >
             {conceptProjects.map((x, i) => (
-              <Link key={x.slug} to="/work/$slug" params={{ slug: x.slug }}>
-                <div className={`concept-art concept-${i + 1}`}>
-                  <Sparkles />
+              <Link
+                key={x.slug}
+                to="/work/$slug"
+                params={{ slug: x.slug }}
+                className="concept-card"
+              >
+                <div className={`concept-card-visual concept-${i + 1}`}>
+                  <div className="concept-card-overlay">
+                    <span className="label text-primary">View exploration</span>
+                    <ArrowRight size={16} />
+                  </div>
                 </div>
-                <span className="label text-primary">Concept project</span>
-                <h3>{x.title}</h3>
-                <p>
-                  {x.industry} · {x.summary}
-                </p>
+                <div className="concept-card-content">
+                  <span className="label text-primary">Concept project</span>
+                  <h3>{x.title}</h3>
+                  <p className="concept-meta">{x.industry}</p>
+                  <p className="concept-summary">{x.summary}</p>
+                  <div className="concept-focus-areas">
+                    <span className="focus-tag">Interface</span>
+                    <span className="focus-tag">Interaction</span>
+                    <span className="focus-tag">Responsive</span>
+                  </div>
+                </div>
               </Link>
             ))}
           </StaggeredReveal>
         </div>
       </section>
 
-      <section className="content-band bg-ink text-ink-foreground">
+      <section
+        className="content-band env-section"
+        data-env-phase="5"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "70%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="06 / Useful tools"
@@ -283,23 +379,71 @@ function Home() {
             variant="fadeInUp"
             className="tool-rail"
           >
-            <Link to="/tools/project-estimator">
-              Project estimator <ArrowRight />
+            <Link
+              to="/tools/project-estimator"
+              className="glass-medium luminous-edge"
+              style={{
+                borderRadius: "0.5rem",
+                padding: "1.5rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>Project estimator</span>
+              <ArrowRight />
             </Link>
-            <Link to="/tools/service-finder">
-              Service finder <ArrowRight />
+            <Link
+              to="/tools/service-finder"
+              className="glass-medium luminous-edge"
+              style={{
+                borderRadius: "0.5rem",
+                padding: "1.5rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>Service finder</span>
+              <ArrowRight />
             </Link>
-            <Link to="/tools/gst-calculator">
-              GST calculator <ArrowRight />
+            <Link
+              to="/tools/gst-calculator"
+              className="glass-medium luminous-edge"
+              style={{
+                borderRadius: "0.5rem",
+                padding: "1.5rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>GST calculator</span>
+              <ArrowRight />
             </Link>
-            <Link to="/tools/business-checklist">
-              Business checklist <ArrowRight />
+            <Link
+              to="/tools/business-checklist"
+              className="glass-medium luminous-edge"
+              style={{
+                borderRadius: "0.5rem",
+                padding: "1.5rem",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span>Business checklist</span>
+              <ArrowRight />
             </Link>
           </StaggeredReveal>
         </div>
       </section>
 
-      <section className="content-band">
+      <section
+        className="content-band env-section"
+        data-env-phase="5"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
@@ -312,23 +456,36 @@ function Home() {
             variant="fadeInUp"
             className="principles"
           >
-            <p>
+            <div
+              className="glass-light luminous-edge"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
               <b>One integrated view.</b> Product, automation, operations, and
               strategy stay connected.
-            </p>
-            <p>
+            </div>
+            <div
+              className="glass-light luminous-edge"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
               <b>Clear before clever.</b> Every interaction must help someone
               understand or act.
-            </p>
-            <p>
+            </div>
+            <div
+              className="glass-light luminous-edge"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
               <b>Evidence over theatre.</b> No fabricated proof, hidden
               complexity, or empty claims.
-            </p>
+            </div>
           </StaggeredReveal>
         </div>
       </section>
 
-      <section className="content-band bg-secondary">
+      <section
+        className="content-band env-section"
+        data-env-phase="6"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
         <div className="site-container">
           <SectionHeader
             label="08 / Process"
@@ -341,7 +498,11 @@ function Home() {
           >
             {["Discover", "Frame", "Design", "Build", "Launch", "Support"].map(
               (x, i) => (
-                <li key={x}>
+                <li
+                  key={x}
+                  className="glass-light luminous-edge"
+                  style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+                >
                   <span>0{i + 1}</span>
                   <strong>{x}</strong>
                 </li>
@@ -351,7 +512,11 @@ function Home() {
         </div>
       </section>
 
-      <section className="content-band">
+      <section
+        className="content-band env-section"
+        data-env-phase="6"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "80%" }}
+      >
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
@@ -359,7 +524,12 @@ function Home() {
               title="Useful guidance, when it is ready."
             />
           </div>
-          <ScrollReveal variant="fadeInUp" delay={0.2} className="empty-state">
+          <ScrollReveal
+            variant="fadeInUp"
+            delay={0.2}
+            className="empty-state glass-light"
+            style={{ borderRadius: "0.5rem", padding: "2rem" }}
+          >
             <p>No approved resources are published yet.</p>
             <span>
               Future articles will cover business setup, GST and compliance,
