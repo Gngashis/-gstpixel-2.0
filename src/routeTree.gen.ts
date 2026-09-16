@@ -26,9 +26,14 @@ import { Route as SolutionsIndexRouteImport } from './routes/solutions.index'
 import { Route as SolutionsSlugRouteImport } from './routes/solutions.$slug'
 import { Route as ToolsIndexRouteImport } from './routes/tools.index'
 import { Route as ToolsBusinessChecklistRouteImport } from './routes/tools.business-checklist'
+import { Route as ToolsBusinessRoadmapRouteImport } from './routes/tools.business-roadmap'
+import { Route as ToolsDigitalReadinessRouteImport } from './routes/tools.digital-readiness'
 import { Route as ToolsGstCalculatorRouteImport } from './routes/tools.gst-calculator'
 import { Route as ToolsProjectEstimatorRouteImport } from './routes/tools.project-estimator'
+import { Route as ToolsProjectPlanningRouteImport } from './routes/tools.project-planning'
 import { Route as ToolsServiceFinderRouteImport } from './routes/tools.service-finder'
+import { Route as ToolsWebsiteImprovementRouteImport } from './routes/tools.website-improvement'
+import { Route as ToolsWebsiteRequirementsRouteImport } from './routes/tools.website-requirements'
 import { Route as WorkIndexRouteImport } from './routes/work.index'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 
@@ -117,6 +122,16 @@ const ToolsBusinessChecklistRoute = ToolsBusinessChecklistRouteImport.update({
   path: '/business-checklist',
   getParentRoute: () => ToolsRouteRoute,
 } as any)
+const ToolsBusinessRoadmapRoute = ToolsBusinessRoadmapRouteImport.update({
+  id: '/business-roadmap',
+  path: '/business-roadmap',
+  getParentRoute: () => ToolsRouteRoute,
+} as any)
+const ToolsDigitalReadinessRoute = ToolsDigitalReadinessRouteImport.update({
+  id: '/digital-readiness',
+  path: '/digital-readiness',
+  getParentRoute: () => ToolsRouteRoute,
+} as any)
 const ToolsGstCalculatorRoute = ToolsGstCalculatorRouteImport.update({
   id: '/gst-calculator',
   path: '/gst-calculator',
@@ -127,11 +142,27 @@ const ToolsProjectEstimatorRoute = ToolsProjectEstimatorRouteImport.update({
   path: '/project-estimator',
   getParentRoute: () => ToolsRouteRoute,
 } as any)
+const ToolsProjectPlanningRoute = ToolsProjectPlanningRouteImport.update({
+  id: '/project-planning',
+  path: '/project-planning',
+  getParentRoute: () => ToolsRouteRoute,
+} as any)
 const ToolsServiceFinderRoute = ToolsServiceFinderRouteImport.update({
   id: '/service-finder',
   path: '/service-finder',
   getParentRoute: () => ToolsRouteRoute,
 } as any)
+const ToolsWebsiteImprovementRoute = ToolsWebsiteImprovementRouteImport.update({
+  id: '/website-improvement',
+  path: '/website-improvement',
+  getParentRoute: () => ToolsRouteRoute,
+} as any)
+const ToolsWebsiteRequirementsRoute =
+  ToolsWebsiteRequirementsRouteImport.update({
+    id: '/website-requirements',
+    path: '/website-requirements',
+    getParentRoute: () => ToolsRouteRoute,
+  } as any)
 const WorkIndexRoute = WorkIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -158,9 +189,14 @@ export interface FileRoutesByFullPath {
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
+  '/tools/business-roadmap': typeof ToolsBusinessRoadmapRoute
+  '/tools/digital-readiness': typeof ToolsDigitalReadinessRoute
   '/tools/gst-calculator': typeof ToolsGstCalculatorRoute
   '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
+  '/tools/project-planning': typeof ToolsProjectPlanningRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
+  '/tools/website-improvement': typeof ToolsWebsiteImprovementRoute
+  '/tools/website-requirements': typeof ToolsWebsiteRequirementsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/services/': typeof ServicesIndexRoute
   '/solutions/': typeof SolutionsIndexRoute
@@ -178,9 +214,14 @@ export interface FileRoutesByTo {
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
+  '/tools/business-roadmap': typeof ToolsBusinessRoadmapRoute
+  '/tools/digital-readiness': typeof ToolsDigitalReadinessRoute
   '/tools/gst-calculator': typeof ToolsGstCalculatorRoute
   '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
+  '/tools/project-planning': typeof ToolsProjectPlanningRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
+  '/tools/website-improvement': typeof ToolsWebsiteImprovementRoute
+  '/tools/website-requirements': typeof ToolsWebsiteRequirementsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/services': typeof ServicesIndexRoute
   '/solutions': typeof SolutionsIndexRoute
@@ -203,9 +244,14 @@ export interface FileRoutesById {
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
+  '/tools/business-roadmap': typeof ToolsBusinessRoadmapRoute
+  '/tools/digital-readiness': typeof ToolsDigitalReadinessRoute
   '/tools/gst-calculator': typeof ToolsGstCalculatorRoute
   '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
+  '/tools/project-planning': typeof ToolsProjectPlanningRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
+  '/tools/website-improvement': typeof ToolsWebsiteImprovementRoute
+  '/tools/website-requirements': typeof ToolsWebsiteRequirementsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/services/': typeof ServicesIndexRoute
   '/solutions/': typeof SolutionsIndexRoute
@@ -229,9 +275,14 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
+    | '/tools/business-roadmap'
+    | '/tools/digital-readiness'
     | '/tools/gst-calculator'
     | '/tools/project-estimator'
+    | '/tools/project-planning'
     | '/tools/service-finder'
+    | '/tools/website-improvement'
+    | '/tools/website-requirements'
     | '/work/$slug'
     | '/services/'
     | '/solutions/'
@@ -249,9 +300,14 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
+    | '/tools/business-roadmap'
+    | '/tools/digital-readiness'
     | '/tools/gst-calculator'
     | '/tools/project-estimator'
+    | '/tools/project-planning'
     | '/tools/service-finder'
+    | '/tools/website-improvement'
+    | '/tools/website-requirements'
     | '/work/$slug'
     | '/services'
     | '/solutions'
@@ -273,9 +329,14 @@ export interface FileRouteTypes {
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
+    | '/tools/business-roadmap'
+    | '/tools/digital-readiness'
     | '/tools/gst-calculator'
     | '/tools/project-estimator'
+    | '/tools/project-planning'
     | '/tools/service-finder'
+    | '/tools/website-improvement'
+    | '/tools/website-requirements'
     | '/work/$slug'
     | '/services/'
     | '/solutions/'
@@ -418,6 +479,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsBusinessChecklistRouteImport
       parentRoute: typeof ToolsRouteRoute
     }
+    '/tools/business-roadmap': {
+      id: '/tools/business-roadmap'
+      path: '/business-roadmap'
+      fullPath: '/tools/business-roadmap'
+      preLoaderRoute: typeof ToolsBusinessRoadmapRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/digital-readiness': {
+      id: '/tools/digital-readiness'
+      path: '/digital-readiness'
+      fullPath: '/tools/digital-readiness'
+      preLoaderRoute: typeof ToolsDigitalReadinessRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
     '/tools/gst-calculator': {
       id: '/tools/gst-calculator'
       path: '/gst-calculator'
@@ -432,11 +507,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsProjectEstimatorRouteImport
       parentRoute: typeof ToolsRouteRoute
     }
+    '/tools/project-planning': {
+      id: '/tools/project-planning'
+      path: '/project-planning'
+      fullPath: '/tools/project-planning'
+      preLoaderRoute: typeof ToolsProjectPlanningRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
     '/tools/service-finder': {
       id: '/tools/service-finder'
       path: '/service-finder'
       fullPath: '/tools/service-finder'
       preLoaderRoute: typeof ToolsServiceFinderRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/website-improvement': {
+      id: '/tools/website-improvement'
+      path: '/website-improvement'
+      fullPath: '/tools/website-improvement'
+      preLoaderRoute: typeof ToolsWebsiteImprovementRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/website-requirements': {
+      id: '/tools/website-requirements'
+      path: '/website-requirements'
+      fullPath: '/tools/website-requirements'
+      preLoaderRoute: typeof ToolsWebsiteRequirementsRouteImport
       parentRoute: typeof ToolsRouteRoute
     }
     '/work/': {
@@ -486,17 +582,27 @@ const SolutionsRouteRouteWithChildren = SolutionsRouteRoute._addFileChildren(
 
 interface ToolsRouteRouteChildren {
   ToolsBusinessChecklistRoute: typeof ToolsBusinessChecklistRoute
+  ToolsBusinessRoadmapRoute: typeof ToolsBusinessRoadmapRoute
+  ToolsDigitalReadinessRoute: typeof ToolsDigitalReadinessRoute
   ToolsGstCalculatorRoute: typeof ToolsGstCalculatorRoute
   ToolsProjectEstimatorRoute: typeof ToolsProjectEstimatorRoute
+  ToolsProjectPlanningRoute: typeof ToolsProjectPlanningRoute
   ToolsServiceFinderRoute: typeof ToolsServiceFinderRoute
+  ToolsWebsiteImprovementRoute: typeof ToolsWebsiteImprovementRoute
+  ToolsWebsiteRequirementsRoute: typeof ToolsWebsiteRequirementsRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteRouteChildren: ToolsRouteRouteChildren = {
   ToolsBusinessChecklistRoute: ToolsBusinessChecklistRoute,
+  ToolsBusinessRoadmapRoute: ToolsBusinessRoadmapRoute,
+  ToolsDigitalReadinessRoute: ToolsDigitalReadinessRoute,
   ToolsGstCalculatorRoute: ToolsGstCalculatorRoute,
   ToolsProjectEstimatorRoute: ToolsProjectEstimatorRoute,
+  ToolsProjectPlanningRoute: ToolsProjectPlanningRoute,
   ToolsServiceFinderRoute: ToolsServiceFinderRoute,
+  ToolsWebsiteImprovementRoute: ToolsWebsiteImprovementRoute,
+  ToolsWebsiteRequirementsRoute: ToolsWebsiteRequirementsRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
 

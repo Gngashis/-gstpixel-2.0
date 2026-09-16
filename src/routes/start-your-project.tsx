@@ -249,7 +249,7 @@ function Page() {
     } finally {
       setDraftLoaded(true);
     }
-  }, [hasFreshContext]);
+  }, [context, hasFreshContext, resolvedNeed]);
 
   useEffect(() => {
     try {
