@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   PageIntro,
   ScrollReveal,
@@ -102,6 +102,7 @@ export const Route = createFileRoute("/tools/business-checklist")({
 function Page() {
   const [done, setDone] = useState<string[]>([]);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const confirmRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     try {
@@ -120,6 +121,19 @@ function Page() {
       /* optional storage */
     }
   }, []);
+
+  useEffect(() => {
+    if (!showResetConfirm) return;
+    confirmRef.current?.focus();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setShowResetConfirm(false);
+        document.getElementById("reset-checklist")?.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [showResetConfirm]);
 
   useEffect(() => {
     try {
@@ -143,9 +157,15 @@ function Page() {
 
   const handleReset = () => setShowResetConfirm(true);
 
+  const closeConfirm = () => {
+    setShowResetConfirm(false);
+    document.getElementById("reset-checklist")?.focus();
+  };
+
   const confirmReset = () => {
     setDone([]);
     setShowResetConfirm(false);
+    document.getElementById("reset-checklist")?.focus();
   };
 
   return (
@@ -237,7 +257,11 @@ function Page() {
             {progress > 0 && (
               <ScrollReveal variant="scaleIn" delay={0.6}>
                 <div className="checklist-actions">
-                  <Button variant="quiet" onClick={handleReset}>
+                  <Button
+                    id="reset-checklist"
+                    variant="quiet"
+                    onClick={handleReset}
+                  >
                     Reset checklist
                   </Button>
                 </div>
@@ -246,6 +270,8 @@ function Page() {
 
             {showResetConfirm && (
               <div
+                ref={confirmRef}
+                tabIndex={-1}
                 className="reset-confirm"
                 role="alertdialog"
                 aria-labelledby="reset-title"
@@ -257,6 +283,7 @@ function Page() {
                   borderRadius: "0.5rem",
                   background:
                     "color-mix(in oklab, var(--destructive) 10%, transparent)",
+                  outline: "none",
                 }}
               >
                 <p id="reset-title" style={{ fontWeight: 600 }}>
@@ -283,11 +310,7 @@ function Page() {
                   >
                     Confirm reset
                   </Button>
-                  <Button
-                    variant="quiet"
-                    size="sm"
-                    onClick={() => setShowResetConfirm(false)}
-                  >
+                  <Button variant="quiet" size="sm" onClick={closeConfirm}>
                     Cancel
                   </Button>
                 </div>

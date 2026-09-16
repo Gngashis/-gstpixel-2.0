@@ -224,7 +224,7 @@ function Page() {
     details: search["context"] ?? "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
-  const [draftLoaded, setDraftLoaded] = useState(false);
+  const [hadDraft, setHadDraft] = useState(false);
 
   const set = (key: keyof Form, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -232,22 +232,25 @@ function Page() {
   };
 
   useEffect(() => {
-    if (hasFreshContext) return;
+    let draftExists = false;
     try {
       const saved = sessionStorage.getItem("gstpixel-enquiry");
       if (saved) {
-        const restored = restoreForm(JSON.parse(saved));
-        setForm((current) => ({
-          ...current,
-          ...restored,
-          ...(resolvedNeed ? { need: resolvedNeed } : {}),
-          ...(context ? { details: context } : {}),
-        }));
+        draftExists = true;
+        if (!hasFreshContext) {
+          const restored = restoreForm(JSON.parse(saved));
+          setForm((current) => ({
+            ...current,
+            ...restored,
+            ...(resolvedNeed ? { need: resolvedNeed } : {}),
+            ...(context ? { details: context } : {}),
+          }));
+        }
       }
     } catch {
       /* storage is optional */
     } finally {
-      setDraftLoaded(true);
+      setHadDraft(draftExists);
     }
   }, [context, hasFreshContext, resolvedNeed]);
 
@@ -260,7 +263,7 @@ function Page() {
   }, [form]);
 
   const handleResetDraft = () => {
-    setForm(empty);
+    setForm({ ...empty, need: resolvedNeed, details: context ?? "" });
     try {
       sessionStorage.removeItem("gstpixel-enquiry");
     } catch {
@@ -268,12 +271,10 @@ function Page() {
     }
     setStep(0);
     setErrors({});
+    setHadDraft(false);
   };
 
-  const showDraftNotice =
-    hasFreshContext &&
-    draftLoaded &&
-    (form.need || form.details || form.name || form.email);
+  const showDraftNotice = hasFreshContext && hadDraft;
 
   const deriveErrors = (
     s: number,
@@ -292,8 +293,14 @@ function Page() {
         !/^\S+@\S+\.\S+$/.test(currentForm.email)
       )
         newErrors.email = "Valid email is required";
-      if (currentForm.reply !== "Email" && !currentForm.phone.trim())
-        newErrors.phone = "Phone number is required for this reply method";
+      if (currentForm.reply !== "Email") {
+        const digits = currentForm.phone.replace(/\D/g, "");
+        if (!currentForm.phone.trim()) {
+          newErrors.phone = "Phone number is required for this reply method";
+        } else if (digits.length < 7 || digits.length > 15) {
+          newErrors.phone = "Enter a valid phone number";
+        }
+      }
     }
 
     return newErrors;
@@ -308,10 +315,10 @@ function Page() {
   const focusFirstError = (errorKeys: string[]) => {
     if (errorKeys.length === 0) return;
     const firstErrorKey = errorKeys[0] as keyof Form;
-    const element = document.getElementById(firstErrorKey);
-    if (element) {
-      element.focus({ preventScroll: true });
-    }
+    const element =
+      document.getElementById(firstErrorKey) ??
+      document.querySelector<HTMLElement>(`input[name="${firstErrorKey}"]`);
+    element?.focus({ preventScroll: true });
   };
 
   const next = () => {
