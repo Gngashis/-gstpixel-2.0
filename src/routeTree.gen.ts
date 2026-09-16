@@ -8,488 +8,488 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root";
-import { Route as IndexRouteImport } from "./routes/index";
-import { Route as SplatRouteImport } from "./routes/$";
-import { Route as AboutRouteImport } from "./routes/about";
-import { Route as ContactRouteImport } from "./routes/contact";
-import { Route as InsightsRouteImport } from "./routes/insights";
-import { Route as PrivacyRouteImport } from "./routes/privacy";
-import { Route as ServicesRouteRouteImport } from "./routes/services.route";
-import { Route as SolutionsRouteRouteImport } from "./routes/solutions.route";
-import { Route as StartYourProjectRouteImport } from "./routes/start-your-project";
-import { Route as ToolsRouteRouteImport } from "./routes/tools.route";
-import { Route as WorkRouteRouteImport } from "./routes/work.route";
-import { Route as ServicesIndexRouteImport } from "./routes/services.index";
-import { Route as ServicesSlugRouteImport } from "./routes/services.$slug";
-import { Route as SolutionsIndexRouteImport } from "./routes/solutions.index";
-import { Route as SolutionsSlugRouteImport } from "./routes/solutions.$slug";
-import { Route as ToolsIndexRouteImport } from "./routes/tools.index";
-import { Route as ToolsBusinessChecklistRouteImport } from "./routes/tools.business-checklist";
-import { Route as ToolsGstCalculatorRouteImport } from "./routes/tools.gst-calculator";
-import { Route as ToolsProjectEstimatorRouteImport } from "./routes/tools.project-estimator";
-import { Route as ToolsServiceFinderRouteImport } from "./routes/tools.service-finder";
-import { Route as WorkIndexRouteImport } from "./routes/work.index";
-import { Route as WorkSlugRouteImport } from "./routes/work.$slug";
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as IndexRouteImport } from './routes/index'
+import { Route as SplatRouteImport } from './routes/$'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ServicesRouteRouteImport } from './routes/services.route'
+import { Route as SolutionsRouteRouteImport } from './routes/solutions.route'
+import { Route as StartYourProjectRouteImport } from './routes/start-your-project'
+import { Route as ToolsRouteRouteImport } from './routes/tools.route'
+import { Route as WorkRouteRouteImport } from './routes/work.route'
+import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as SolutionsIndexRouteImport } from './routes/solutions.index'
+import { Route as SolutionsSlugRouteImport } from './routes/solutions.$slug'
+import { Route as ToolsIndexRouteImport } from './routes/tools.index'
+import { Route as ToolsBusinessChecklistRouteImport } from './routes/tools.business-checklist'
+import { Route as ToolsGstCalculatorRouteImport } from './routes/tools.gst-calculator'
+import { Route as ToolsProjectEstimatorRouteImport } from './routes/tools.project-estimator'
+import { Route as ToolsServiceFinderRouteImport } from './routes/tools.service-finder'
+import { Route as WorkIndexRouteImport } from './routes/work.index'
+import { Route as WorkSlugRouteImport } from './routes/work.$slug'
 
 const IndexRoute = IndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SplatRoute = SplatRouteImport.update({
-  id: "/$",
-  path: "/$",
+  id: '/$',
+  path: '/$',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const AboutRoute = AboutRouteImport.update({
-  id: "/about",
-  path: "/about",
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ContactRoute = ContactRouteImport.update({
-  id: "/contact",
-  path: "/contact",
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const InsightsRoute = InsightsRouteImport.update({
-  id: "/insights",
-  path: "/insights",
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
-  id: "/privacy",
-  path: "/privacy",
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ServicesRouteRoute = ServicesRouteRouteImport.update({
-  id: "/services",
-  path: "/services",
+  id: '/services',
+  path: '/services',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const SolutionsRouteRoute = SolutionsRouteRouteImport.update({
-  id: "/solutions",
-  path: "/solutions",
+  id: '/solutions',
+  path: '/solutions',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const StartYourProjectRoute = StartYourProjectRouteImport.update({
-  id: "/start-your-project",
-  path: "/start-your-project",
+  id: '/start-your-project',
+  path: '/start-your-project',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ToolsRouteRoute = ToolsRouteRouteImport.update({
-  id: "/tools",
-  path: "/tools",
+  id: '/tools',
+  path: '/tools',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const WorkRouteRoute = WorkRouteRouteImport.update({
-  id: "/work",
-  path: "/work",
+  id: '/work',
+  path: '/work',
   getParentRoute: () => rootRouteImport,
-} as any);
+} as any)
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => ServicesRouteRoute,
-} as any);
+} as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
-  id: "/$slug",
-  path: "/$slug",
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => ServicesRouteRoute,
-} as any);
+} as any)
 const SolutionsIndexRoute = SolutionsIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => SolutionsRouteRoute,
-} as any);
+} as any)
 const SolutionsSlugRoute = SolutionsSlugRouteImport.update({
-  id: "/$slug",
-  path: "/$slug",
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => SolutionsRouteRoute,
-} as any);
+} as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => ToolsRouteRoute,
-} as any);
+} as any)
 const ToolsBusinessChecklistRoute = ToolsBusinessChecklistRouteImport.update({
-  id: "/business-checklist",
-  path: "/business-checklist",
+  id: '/business-checklist',
+  path: '/business-checklist',
   getParentRoute: () => ToolsRouteRoute,
-} as any);
+} as any)
 const ToolsGstCalculatorRoute = ToolsGstCalculatorRouteImport.update({
-  id: "/gst-calculator",
-  path: "/gst-calculator",
+  id: '/gst-calculator',
+  path: '/gst-calculator',
   getParentRoute: () => ToolsRouteRoute,
-} as any);
+} as any)
 const ToolsProjectEstimatorRoute = ToolsProjectEstimatorRouteImport.update({
-  id: "/project-estimator",
-  path: "/project-estimator",
+  id: '/project-estimator',
+  path: '/project-estimator',
   getParentRoute: () => ToolsRouteRoute,
-} as any);
+} as any)
 const ToolsServiceFinderRoute = ToolsServiceFinderRouteImport.update({
-  id: "/service-finder",
-  path: "/service-finder",
+  id: '/service-finder',
+  path: '/service-finder',
   getParentRoute: () => ToolsRouteRoute,
-} as any);
+} as any)
 const WorkIndexRoute = WorkIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => WorkRouteRoute,
-} as any);
+} as any)
 const WorkSlugRoute = WorkSlugRouteImport.update({
-  id: "/$slug",
-  path: "/$slug",
+  id: '/$slug',
+  path: '/$slug',
   getParentRoute: () => WorkRouteRoute,
-} as any);
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/services": typeof ServicesRouteRouteWithChildren;
-  "/solutions": typeof SolutionsRouteRouteWithChildren;
-  "/tools": typeof ToolsRouteRouteWithChildren;
-  "/work": typeof WorkRouteRouteWithChildren;
-  "/$": typeof SplatRoute;
-  "/about": typeof AboutRoute;
-  "/contact": typeof ContactRoute;
-  "/insights": typeof InsightsRoute;
-  "/privacy": typeof PrivacyRoute;
-  "/start-your-project": typeof StartYourProjectRoute;
-  "/services/$slug": typeof ServicesSlugRoute;
-  "/solutions/$slug": typeof SolutionsSlugRoute;
-  "/tools/business-checklist": typeof ToolsBusinessChecklistRoute;
-  "/tools/gst-calculator": typeof ToolsGstCalculatorRoute;
-  "/tools/project-estimator": typeof ToolsProjectEstimatorRoute;
-  "/tools/service-finder": typeof ToolsServiceFinderRoute;
-  "/work/$slug": typeof WorkSlugRoute;
-  "/services/": typeof ServicesIndexRoute;
-  "/solutions/": typeof SolutionsIndexRoute;
-  "/tools/": typeof ToolsIndexRoute;
-  "/work/": typeof WorkIndexRoute;
+  '/': typeof IndexRoute
+  '/services': typeof ServicesRouteRouteWithChildren
+  '/solutions': typeof SolutionsRouteRouteWithChildren
+  '/tools': typeof ToolsRouteRouteWithChildren
+  '/work': typeof WorkRouteRouteWithChildren
+  '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/insights': typeof InsightsRoute
+  '/privacy': typeof PrivacyRoute
+  '/start-your-project': typeof StartYourProjectRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/solutions/$slug': typeof SolutionsSlugRoute
+  '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
+  '/tools/gst-calculator': typeof ToolsGstCalculatorRoute
+  '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
+  '/tools/service-finder': typeof ToolsServiceFinderRoute
+  '/work/$slug': typeof WorkSlugRoute
+  '/services/': typeof ServicesIndexRoute
+  '/solutions/': typeof SolutionsIndexRoute
+  '/tools/': typeof ToolsIndexRoute
+  '/work/': typeof WorkIndexRoute
 }
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/$": typeof SplatRoute;
-  "/about": typeof AboutRoute;
-  "/contact": typeof ContactRoute;
-  "/insights": typeof InsightsRoute;
-  "/privacy": typeof PrivacyRoute;
-  "/start-your-project": typeof StartYourProjectRoute;
-  "/services/$slug": typeof ServicesSlugRoute;
-  "/solutions/$slug": typeof SolutionsSlugRoute;
-  "/tools/business-checklist": typeof ToolsBusinessChecklistRoute;
-  "/tools/gst-calculator": typeof ToolsGstCalculatorRoute;
-  "/tools/project-estimator": typeof ToolsProjectEstimatorRoute;
-  "/tools/service-finder": typeof ToolsServiceFinderRoute;
-  "/work/$slug": typeof WorkSlugRoute;
-  "/services": typeof ServicesIndexRoute;
-  "/solutions": typeof SolutionsIndexRoute;
-  "/tools": typeof ToolsIndexRoute;
-  "/work": typeof WorkIndexRoute;
+  '/': typeof IndexRoute
+  '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/insights': typeof InsightsRoute
+  '/privacy': typeof PrivacyRoute
+  '/start-your-project': typeof StartYourProjectRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/solutions/$slug': typeof SolutionsSlugRoute
+  '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
+  '/tools/gst-calculator': typeof ToolsGstCalculatorRoute
+  '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
+  '/tools/service-finder': typeof ToolsServiceFinderRoute
+  '/work/$slug': typeof WorkSlugRoute
+  '/services': typeof ServicesIndexRoute
+  '/solutions': typeof SolutionsIndexRoute
+  '/tools': typeof ToolsIndexRoute
+  '/work': typeof WorkIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport;
-  "/": typeof IndexRoute;
-  "/services": typeof ServicesRouteRouteWithChildren;
-  "/solutions": typeof SolutionsRouteRouteWithChildren;
-  "/tools": typeof ToolsRouteRouteWithChildren;
-  "/work": typeof WorkRouteRouteWithChildren;
-  "/$": typeof SplatRoute;
-  "/about": typeof AboutRoute;
-  "/contact": typeof ContactRoute;
-  "/insights": typeof InsightsRoute;
-  "/privacy": typeof PrivacyRoute;
-  "/start-your-project": typeof StartYourProjectRoute;
-  "/services/$slug": typeof ServicesSlugRoute;
-  "/solutions/$slug": typeof SolutionsSlugRoute;
-  "/tools/business-checklist": typeof ToolsBusinessChecklistRoute;
-  "/tools/gst-calculator": typeof ToolsGstCalculatorRoute;
-  "/tools/project-estimator": typeof ToolsProjectEstimatorRoute;
-  "/tools/service-finder": typeof ToolsServiceFinderRoute;
-  "/work/$slug": typeof WorkSlugRoute;
-  "/services/": typeof ServicesIndexRoute;
-  "/solutions/": typeof SolutionsIndexRoute;
-  "/tools/": typeof ToolsIndexRoute;
-  "/work/": typeof WorkIndexRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/services': typeof ServicesRouteRouteWithChildren
+  '/solutions': typeof SolutionsRouteRouteWithChildren
+  '/tools': typeof ToolsRouteRouteWithChildren
+  '/work': typeof WorkRouteRouteWithChildren
+  '/$': typeof SplatRoute
+  '/about': typeof AboutRoute
+  '/contact': typeof ContactRoute
+  '/insights': typeof InsightsRoute
+  '/privacy': typeof PrivacyRoute
+  '/start-your-project': typeof StartYourProjectRoute
+  '/services/$slug': typeof ServicesSlugRoute
+  '/solutions/$slug': typeof SolutionsSlugRoute
+  '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
+  '/tools/gst-calculator': typeof ToolsGstCalculatorRoute
+  '/tools/project-estimator': typeof ToolsProjectEstimatorRoute
+  '/tools/service-finder': typeof ToolsServiceFinderRoute
+  '/work/$slug': typeof WorkSlugRoute
+  '/services/': typeof ServicesIndexRoute
+  '/solutions/': typeof SolutionsIndexRoute
+  '/tools/': typeof ToolsIndexRoute
+  '/work/': typeof WorkIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
+  fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/services"
-    | "/solutions"
-    | "/tools"
-    | "/work"
-    | "/$"
-    | "/about"
-    | "/contact"
-    | "/insights"
-    | "/privacy"
-    | "/start-your-project"
-    | "/services/$slug"
-    | "/solutions/$slug"
-    | "/tools/business-checklist"
-    | "/tools/gst-calculator"
-    | "/tools/project-estimator"
-    | "/tools/service-finder"
-    | "/work/$slug"
-    | "/services/"
-    | "/solutions/"
-    | "/tools/"
-    | "/work/";
-  fileRoutesByTo: FileRoutesByTo;
+    | '/'
+    | '/services'
+    | '/solutions'
+    | '/tools'
+    | '/work'
+    | '/$'
+    | '/about'
+    | '/contact'
+    | '/insights'
+    | '/privacy'
+    | '/start-your-project'
+    | '/services/$slug'
+    | '/solutions/$slug'
+    | '/tools/business-checklist'
+    | '/tools/gst-calculator'
+    | '/tools/project-estimator'
+    | '/tools/service-finder'
+    | '/work/$slug'
+    | '/services/'
+    | '/solutions/'
+    | '/tools/'
+    | '/work/'
+  fileRoutesByTo: FileRoutesByTo
   to:
-    | "/"
-    | "/$"
-    | "/about"
-    | "/contact"
-    | "/insights"
-    | "/privacy"
-    | "/start-your-project"
-    | "/services/$slug"
-    | "/solutions/$slug"
-    | "/tools/business-checklist"
-    | "/tools/gst-calculator"
-    | "/tools/project-estimator"
-    | "/tools/service-finder"
-    | "/work/$slug"
-    | "/services"
-    | "/solutions"
-    | "/tools"
-    | "/work";
+    | '/'
+    | '/$'
+    | '/about'
+    | '/contact'
+    | '/insights'
+    | '/privacy'
+    | '/start-your-project'
+    | '/services/$slug'
+    | '/solutions/$slug'
+    | '/tools/business-checklist'
+    | '/tools/gst-calculator'
+    | '/tools/project-estimator'
+    | '/tools/service-finder'
+    | '/work/$slug'
+    | '/services'
+    | '/solutions'
+    | '/tools'
+    | '/work'
   id:
-    | "__root__"
-    | "/"
-    | "/services"
-    | "/solutions"
-    | "/tools"
-    | "/work"
-    | "/$"
-    | "/about"
-    | "/contact"
-    | "/insights"
-    | "/privacy"
-    | "/start-your-project"
-    | "/services/$slug"
-    | "/solutions/$slug"
-    | "/tools/business-checklist"
-    | "/tools/gst-calculator"
-    | "/tools/project-estimator"
-    | "/tools/service-finder"
-    | "/work/$slug"
-    | "/services/"
-    | "/solutions/"
-    | "/tools/"
-    | "/work/";
-  fileRoutesById: FileRoutesById;
+    | '__root__'
+    | '/'
+    | '/services'
+    | '/solutions'
+    | '/tools'
+    | '/work'
+    | '/$'
+    | '/about'
+    | '/contact'
+    | '/insights'
+    | '/privacy'
+    | '/start-your-project'
+    | '/services/$slug'
+    | '/solutions/$slug'
+    | '/tools/business-checklist'
+    | '/tools/gst-calculator'
+    | '/tools/project-estimator'
+    | '/tools/service-finder'
+    | '/work/$slug'
+    | '/services/'
+    | '/solutions/'
+    | '/tools/'
+    | '/work/'
+  fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  ServicesRouteRoute: typeof ServicesRouteRouteWithChildren;
-  SolutionsRouteRoute: typeof SolutionsRouteRouteWithChildren;
-  ToolsRouteRoute: typeof ToolsRouteRouteWithChildren;
-  WorkRouteRoute: typeof WorkRouteRouteWithChildren;
-  SplatRoute: typeof SplatRoute;
-  AboutRoute: typeof AboutRoute;
-  ContactRoute: typeof ContactRoute;
-  InsightsRoute: typeof InsightsRoute;
-  PrivacyRoute: typeof PrivacyRoute;
-  StartYourProjectRoute: typeof StartYourProjectRoute;
+  IndexRoute: typeof IndexRoute
+  ServicesRouteRoute: typeof ServicesRouteRouteWithChildren
+  SolutionsRouteRoute: typeof SolutionsRouteRouteWithChildren
+  ToolsRouteRoute: typeof ToolsRouteRouteWithChildren
+  WorkRouteRoute: typeof WorkRouteRouteWithChildren
+  SplatRoute: typeof SplatRoute
+  AboutRoute: typeof AboutRoute
+  ContactRoute: typeof ContactRoute
+  InsightsRoute: typeof InsightsRoute
+  PrivacyRoute: typeof PrivacyRoute
+  StartYourProjectRoute: typeof StartYourProjectRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/$": {
-      id: "/$";
-      path: "/$";
-      fullPath: "/$";
-      preLoaderRoute: typeof SplatRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/about": {
-      id: "/about";
-      path: "/about";
-      fullPath: "/about";
-      preLoaderRoute: typeof AboutRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/contact": {
-      id: "/contact";
-      path: "/contact";
-      fullPath: "/contact";
-      preLoaderRoute: typeof ContactRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/insights": {
-      id: "/insights";
-      path: "/insights";
-      fullPath: "/insights";
-      preLoaderRoute: typeof InsightsRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/privacy": {
-      id: "/privacy";
-      path: "/privacy";
-      fullPath: "/privacy";
-      preLoaderRoute: typeof PrivacyRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/services": {
-      id: "/services";
-      path: "/services";
-      fullPath: "/services";
-      preLoaderRoute: typeof ServicesRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/solutions": {
-      id: "/solutions";
-      path: "/solutions";
-      fullPath: "/solutions";
-      preLoaderRoute: typeof SolutionsRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/start-your-project": {
-      id: "/start-your-project";
-      path: "/start-your-project";
-      fullPath: "/start-your-project";
-      preLoaderRoute: typeof StartYourProjectRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/tools": {
-      id: "/tools";
-      path: "/tools";
-      fullPath: "/tools";
-      preLoaderRoute: typeof ToolsRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/work": {
-      id: "/work";
-      path: "/work";
-      fullPath: "/work";
-      preLoaderRoute: typeof WorkRouteRouteImport;
-      parentRoute: typeof rootRouteImport;
-    };
-    "/services/": {
-      id: "/services/";
-      path: "/";
-      fullPath: "/services/";
-      preLoaderRoute: typeof ServicesIndexRouteImport;
-      parentRoute: typeof ServicesRouteRoute;
-    };
-    "/services/$slug": {
-      id: "/services/$slug";
-      path: "/$slug";
-      fullPath: "/services/$slug";
-      preLoaderRoute: typeof ServicesSlugRouteImport;
-      parentRoute: typeof ServicesRouteRoute;
-    };
-    "/solutions/": {
-      id: "/solutions/";
-      path: "/";
-      fullPath: "/solutions/";
-      preLoaderRoute: typeof SolutionsIndexRouteImport;
-      parentRoute: typeof SolutionsRouteRoute;
-    };
-    "/solutions/$slug": {
-      id: "/solutions/$slug";
-      path: "/$slug";
-      fullPath: "/solutions/$slug";
-      preLoaderRoute: typeof SolutionsSlugRouteImport;
-      parentRoute: typeof SolutionsRouteRoute;
-    };
-    "/tools/": {
-      id: "/tools/";
-      path: "/";
-      fullPath: "/tools/";
-      preLoaderRoute: typeof ToolsIndexRouteImport;
-      parentRoute: typeof ToolsRouteRoute;
-    };
-    "/tools/business-checklist": {
-      id: "/tools/business-checklist";
-      path: "/business-checklist";
-      fullPath: "/tools/business-checklist";
-      preLoaderRoute: typeof ToolsBusinessChecklistRouteImport;
-      parentRoute: typeof ToolsRouteRoute;
-    };
-    "/tools/gst-calculator": {
-      id: "/tools/gst-calculator";
-      path: "/gst-calculator";
-      fullPath: "/tools/gst-calculator";
-      preLoaderRoute: typeof ToolsGstCalculatorRouteImport;
-      parentRoute: typeof ToolsRouteRoute;
-    };
-    "/tools/project-estimator": {
-      id: "/tools/project-estimator";
-      path: "/project-estimator";
-      fullPath: "/tools/project-estimator";
-      preLoaderRoute: typeof ToolsProjectEstimatorRouteImport;
-      parentRoute: typeof ToolsRouteRoute;
-    };
-    "/tools/service-finder": {
-      id: "/tools/service-finder";
-      path: "/service-finder";
-      fullPath: "/tools/service-finder";
-      preLoaderRoute: typeof ToolsServiceFinderRouteImport;
-      parentRoute: typeof ToolsRouteRoute;
-    };
-    "/work/": {
-      id: "/work/";
-      path: "/";
-      fullPath: "/work/";
-      preLoaderRoute: typeof WorkIndexRouteImport;
-      parentRoute: typeof WorkRouteRoute;
-    };
-    "/work/$slug": {
-      id: "/work/$slug";
-      path: "/$slug";
-      fullPath: "/work/$slug";
-      preLoaderRoute: typeof WorkSlugRouteImport;
-      parentRoute: typeof WorkRouteRoute;
-    };
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$': {
+      id: '/$'
+      path: '/$'
+      fullPath: '/$'
+      preLoaderRoute: typeof SplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services': {
+      id: '/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof ServicesRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/solutions': {
+      id: '/solutions'
+      path: '/solutions'
+      fullPath: '/solutions'
+      preLoaderRoute: typeof SolutionsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/start-your-project': {
+      id: '/start-your-project'
+      path: '/start-your-project'
+      fullPath: '/start-your-project'
+      preLoaderRoute: typeof StartYourProjectRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools': {
+      id: '/tools'
+      path: '/tools'
+      fullPath: '/tools'
+      preLoaderRoute: typeof ToolsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/work': {
+      id: '/work'
+      path: '/work'
+      fullPath: '/work'
+      preLoaderRoute: typeof WorkRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/': {
+      id: '/services/'
+      path: '/'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof ServicesRouteRoute
+    }
+    '/services/$slug': {
+      id: '/services/$slug'
+      path: '/$slug'
+      fullPath: '/services/$slug'
+      preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof ServicesRouteRoute
+    }
+    '/solutions/': {
+      id: '/solutions/'
+      path: '/'
+      fullPath: '/solutions/'
+      preLoaderRoute: typeof SolutionsIndexRouteImport
+      parentRoute: typeof SolutionsRouteRoute
+    }
+    '/solutions/$slug': {
+      id: '/solutions/$slug'
+      path: '/$slug'
+      fullPath: '/solutions/$slug'
+      preLoaderRoute: typeof SolutionsSlugRouteImport
+      parentRoute: typeof SolutionsRouteRoute
+    }
+    '/tools/': {
+      id: '/tools/'
+      path: '/'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/business-checklist': {
+      id: '/tools/business-checklist'
+      path: '/business-checklist'
+      fullPath: '/tools/business-checklist'
+      preLoaderRoute: typeof ToolsBusinessChecklistRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/gst-calculator': {
+      id: '/tools/gst-calculator'
+      path: '/gst-calculator'
+      fullPath: '/tools/gst-calculator'
+      preLoaderRoute: typeof ToolsGstCalculatorRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/project-estimator': {
+      id: '/tools/project-estimator'
+      path: '/project-estimator'
+      fullPath: '/tools/project-estimator'
+      preLoaderRoute: typeof ToolsProjectEstimatorRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/tools/service-finder': {
+      id: '/tools/service-finder'
+      path: '/service-finder'
+      fullPath: '/tools/service-finder'
+      preLoaderRoute: typeof ToolsServiceFinderRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
+    '/work/': {
+      id: '/work/'
+      path: '/'
+      fullPath: '/work/'
+      preLoaderRoute: typeof WorkIndexRouteImport
+      parentRoute: typeof WorkRouteRoute
+    }
+    '/work/$slug': {
+      id: '/work/$slug'
+      path: '/$slug'
+      fullPath: '/work/$slug'
+      preLoaderRoute: typeof WorkSlugRouteImport
+      parentRoute: typeof WorkRouteRoute
+    }
   }
 }
 
 interface ServicesRouteRouteChildren {
-  ServicesSlugRoute: typeof ServicesSlugRoute;
-  ServicesIndexRoute: typeof ServicesIndexRoute;
+  ServicesSlugRoute: typeof ServicesSlugRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
 }
 
 const ServicesRouteRouteChildren: ServicesRouteRouteChildren = {
   ServicesSlugRoute: ServicesSlugRoute,
   ServicesIndexRoute: ServicesIndexRoute,
-};
+}
 
 const ServicesRouteRouteWithChildren = ServicesRouteRoute._addFileChildren(
   ServicesRouteRouteChildren,
-);
+)
 
 interface SolutionsRouteRouteChildren {
-  SolutionsSlugRoute: typeof SolutionsSlugRoute;
-  SolutionsIndexRoute: typeof SolutionsIndexRoute;
+  SolutionsSlugRoute: typeof SolutionsSlugRoute
+  SolutionsIndexRoute: typeof SolutionsIndexRoute
 }
 
 const SolutionsRouteRouteChildren: SolutionsRouteRouteChildren = {
   SolutionsSlugRoute: SolutionsSlugRoute,
   SolutionsIndexRoute: SolutionsIndexRoute,
-};
+}
 
 const SolutionsRouteRouteWithChildren = SolutionsRouteRoute._addFileChildren(
   SolutionsRouteRouteChildren,
-);
+)
 
 interface ToolsRouteRouteChildren {
-  ToolsBusinessChecklistRoute: typeof ToolsBusinessChecklistRoute;
-  ToolsGstCalculatorRoute: typeof ToolsGstCalculatorRoute;
-  ToolsProjectEstimatorRoute: typeof ToolsProjectEstimatorRoute;
-  ToolsServiceFinderRoute: typeof ToolsServiceFinderRoute;
-  ToolsIndexRoute: typeof ToolsIndexRoute;
+  ToolsBusinessChecklistRoute: typeof ToolsBusinessChecklistRoute
+  ToolsGstCalculatorRoute: typeof ToolsGstCalculatorRoute
+  ToolsProjectEstimatorRoute: typeof ToolsProjectEstimatorRoute
+  ToolsServiceFinderRoute: typeof ToolsServiceFinderRoute
+  ToolsIndexRoute: typeof ToolsIndexRoute
 }
 
 const ToolsRouteRouteChildren: ToolsRouteRouteChildren = {
@@ -498,25 +498,25 @@ const ToolsRouteRouteChildren: ToolsRouteRouteChildren = {
   ToolsProjectEstimatorRoute: ToolsProjectEstimatorRoute,
   ToolsServiceFinderRoute: ToolsServiceFinderRoute,
   ToolsIndexRoute: ToolsIndexRoute,
-};
+}
 
 const ToolsRouteRouteWithChildren = ToolsRouteRoute._addFileChildren(
   ToolsRouteRouteChildren,
-);
+)
 
 interface WorkRouteRouteChildren {
-  WorkSlugRoute: typeof WorkSlugRoute;
-  WorkIndexRoute: typeof WorkIndexRoute;
+  WorkSlugRoute: typeof WorkSlugRoute
+  WorkIndexRoute: typeof WorkIndexRoute
 }
 
 const WorkRouteRouteChildren: WorkRouteRouteChildren = {
   WorkSlugRoute: WorkSlugRoute,
   WorkIndexRoute: WorkIndexRoute,
-};
+}
 
 const WorkRouteRouteWithChildren = WorkRouteRoute._addFileChildren(
   WorkRouteRouteChildren,
-);
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -530,17 +530,17 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   PrivacyRoute: PrivacyRoute,
   StartYourProjectRoute: StartYourProjectRoute,
-};
+}
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
+  ._addFileTypes<FileRouteTypes>()
 
-import type { getRouter } from "./router.tsx";
-import type { startInstance } from "./start.ts";
-declare module "@tanstack/react-start" {
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
   interface Register {
-    ssr: true;
-    router: Awaited<ReturnType<typeof getRouter>>;
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>;
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }

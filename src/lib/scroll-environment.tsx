@@ -114,17 +114,6 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
-function lerpColorString(a: string, b: string, t: number): string {
-  if (t <= 0) return a;
-  if (t >= 1) return b;
-  // For complex CSS values (gradients), we can't truly interpolate.
-  // We'll cross-fade by returning the one with higher weight at boundaries,
-  // and for intermediate values we blend by opacity via CSS.
-  // The actual smooth interpolation is handled by CSS custom properties
-  // that transition smoothly. Here we just pick the dominant phase.
-  return t < 0.5 ? a : b;
-}
-
 function parseOklch(
   color: string,
 ): { l: number; c: number; h: number; alpha: number } | null {
@@ -167,11 +156,11 @@ function getInterpolatedPhase(progress: number): {
   glowY: string;
   phaseName: string;
   phaseProgress: number;
+  specular: string;
+  illumination: string;
 } {
-  // Clamp progress
   const p = Math.max(0, Math.min(1, progress));
 
-  // Find current phase
   let currentPhase = phases[0];
   let nextPhase = phases[1];
   let phaseProgress = 0;
@@ -191,9 +180,6 @@ function getInterpolatedPhase(progress: number): {
     }
   }
 
-  // For background color and glow (oklch values), we can interpolate
-  // For gradients, we'll use the current phase's gradient but CSS will handle
-  // the transition via the custom properties we set
   const interpolatedBg = interpolateOklch(
     currentPhase.bg,
     nextPhase.bg,
@@ -210,7 +196,6 @@ function getInterpolatedPhase(progress: number): {
     phaseProgress,
   );
 
-  // For glow position, interpolate percentages
   const currentGlowX = parseFloat(currentPhase.glowX);
   const nextGlowX = parseFloat(nextPhase.glowX);
   const currentGlowY = parseFloat(currentPhase.glowY);
@@ -218,16 +203,22 @@ function getInterpolatedPhase(progress: number): {
   const interpolatedGlowX = `${lerp(currentGlowX, nextGlowX, phaseProgress)}%`;
   const interpolatedGlowY = `${lerp(currentGlowY, nextGlowY, phaseProgress)}%`;
 
-  // Keep multiple low-contrast fields present between phases so scrolling
-  // feels like movement through one environment rather than a color swap.
   const interpolatedGradient = `
     radial-gradient(ellipse 90% 72% at ${interpolatedGlowX} ${interpolatedGlowY}, ${interpolatedGlow}, transparent 68%),
     radial-gradient(ellipse 54% 42% at ${lerp(currentGlowX, 100 - nextGlowX, phaseProgress)}% ${lerp(nextGlowY, currentGlowY, phaseProgress)}%, color-mix(in oklab, ${interpolatedGlow} 34%, transparent), transparent 72%),
     linear-gradient(118deg, color-mix(in oklab, ${interpolatedBg} 94%, oklch(0.72 0.15 195 / 0.06)), ${interpolatedBg} 54%, color-mix(in oklab, ${interpolatedBg} 92%, oklch(0.68 0.12 75 / 0.06)))
   `;
 
-  const specular = (0.12 + phaseProgress * 0.2 + (currentPhase.id % 2) * 0.05).toFixed(2);
-  const illumination = (0.5 + phaseProgress * 0.25 + (currentPhase.id % 2) * 0.05).toFixed(2);
+  const specular = (
+    0.12 +
+    phaseProgress * 0.2 +
+    (currentPhase.id % 2) * 0.05
+  ).toFixed(2);
+  const illumination = (
+    0.5 +
+    phaseProgress * 0.25 +
+    (currentPhase.id % 2) * 0.05
+  ).toFixed(2);
 
   return {
     bg: interpolatedBg,
@@ -245,20 +236,26 @@ function getInterpolatedPhase(progress: number): {
 
 export function useScrollEnvironment(): {
   progress: number;
-  interpolated: ReturnType<typeof getInterpolatedPhase>;
 } {
   const reduced = useReducedMotion();
   const [progress, setProgress] = useState(0);
-  const [interpolated, setInterpolated] = useState(() =>
-    getInterpolatedPhase(0),
-  );
   const rafRef = useRef<number>();
   const lastProgressRef = useRef(0);
 
   useEffect(() => {
     if (reduced) {
       setProgress(1);
-      setInterpolated(getInterpolatedPhase(1));
+      const root = document.documentElement;
+      const interp = getInterpolatedPhase(1);
+      root.style.setProperty("--env-progress", "1");
+      root.style.setProperty("--env-current-bg", interp.bg);
+      root.style.setProperty("--env-current-gradient", interp.gradient);
+      root.style.setProperty("--env-current-glow", interp.glow);
+      root.style.setProperty("--env-current-glass-tint", interp.glassTint);
+      root.style.setProperty("--env-glow-x", interp.glowX);
+      root.style.setProperty("--env-glow-y", interp.glowY);
+      root.style.setProperty("--env-specular", interp.specular);
+      root.style.setProperty("--env-illumination", interp.illumination);
       return;
     }
 
@@ -269,15 +266,12 @@ export function useScrollEnvironment(): {
         scrollHeight > 0 ? window.scrollY / scrollHeight : 0;
       const clampedProgress = Math.max(0, Math.min(1, currentProgress));
 
-      // Only update if progress changed meaningfully (throttle)
       if (Math.abs(clampedProgress - lastProgressRef.current) > 0.001) {
         lastProgressRef.current = clampedProgress;
         setProgress(clampedProgress);
-        setInterpolated(getInterpolatedPhase(clampedProgress));
 
-        // Update CSS custom properties for smooth interpolation
-        const root = document.documentElement;
         const interp = getInterpolatedPhase(clampedProgress);
+        const root = document.documentElement;
         root.style.setProperty("--env-progress", clampedProgress.toString());
         root.style.setProperty("--env-current-bg", interp.bg);
         root.style.setProperty("--env-current-gradient", interp.gradient);
@@ -303,7 +297,7 @@ export function useScrollEnvironment(): {
     };
   }, [reduced]);
 
-  return { progress, interpolated };
+  return { progress };
 }
 
 export function ScrollEnvironmentProvider({
@@ -311,27 +305,9 @@ export function ScrollEnvironmentProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { progress, interpolated } = useScrollEnvironment();
+  useScrollEnvironment();
 
-  return (
-    <>
-      <style
-        dangerouslySetInnerHTML={{
-          __html: `
-            :root {
-              --env-current-bg: ${interpolated.bg};
-              --env-current-gradient: ${interpolated.gradient};
-              --env-current-glow: ${interpolated.glow};
-              --env-current-glass-tint: ${interpolated.glassTint};
-              --env-glow-x: ${interpolated.glowX};
-              --env-glow-y: ${interpolated.glowY};
-            }
-          `,
-        }}
-      />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }
 
 export function useElementEnvironment(

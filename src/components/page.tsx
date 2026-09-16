@@ -14,6 +14,14 @@ import {
   scaleIn,
 } from "@/lib/motion";
 
+function useHydrated(): boolean {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+  return hydrated;
+}
+
 export function ScrollReveal({
   children,
   className = "",
@@ -27,17 +35,30 @@ export function ScrollReveal({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
+  const hydrated = useHydrated();
   const visible = useIntersection(ref);
 
   const variants = {
     fadeInUp: {
-      opacity: visible ? 1 : 0,
-      transform: visible ? "translateY(0)" : "translateY(24px)",
+      opacity: 1,
+      transform: "translateY(0)",
     },
-    fadeIn: { opacity: visible ? 1 : 0 },
+    fadeIn: { opacity: 1 },
     scaleIn: {
-      opacity: visible ? 1 : 0,
-      transform: visible ? "scale(1)" : "scale(0.96)",
+      opacity: 1,
+      transform: "scale(1)",
+    },
+  };
+
+  const initialVariants = {
+    fadeInUp: {
+      opacity: 0,
+      transform: "translateY(24px)",
+    },
+    fadeIn: { opacity: 0 },
+    scaleIn: {
+      opacity: 0,
+      transform: "scale(0.96)",
     },
   };
 
@@ -47,9 +68,13 @@ export function ScrollReveal({
     delay,
   };
 
+  const isVisible = hydrated ? visible : true;
+
   const style: React.CSSProperties = {
-    ...variants[variant],
-    transition: `${transition.duration}s ${transition.easing} ${transition.delay}s`,
+    ...(isVisible ? variants[variant] : initialVariants[variant]),
+    transition: isVisible
+      ? `${transition.duration}s ${transition.easing} ${transition.delay}s`
+      : "none",
     willChange: "opacity, transform",
   };
 

@@ -202,7 +202,22 @@ function Page() {
                     to="/start-your-project"
                     className="w-full"
                     search={{
-                      interest: result.title,
+                      interest:
+                        result.id === "digital-presence"
+                          ? "website"
+                          : result.id === "product-app"
+                            ? "application"
+                            : result.id === "operations"
+                              ? "ai"
+                              : result.id === "business-start"
+                                ? "registration"
+                                : result.id === "compliance"
+                                  ? "compliance"
+                                  : result.id === "strategy"
+                                    ? "consultancy"
+                                    : result.id === "growth"
+                                      ? "growth"
+                                      : "unsure",
                       context: `Service finder: ${result.paths}`,
                     }}
                   >

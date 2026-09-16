@@ -314,14 +314,13 @@ function Page() {
                     fontSize: "0.9rem",
                   }}
                 >
-                  <a
-                    href="tel:+919046520548"
+                  <span
                     className="flex items-center gap-0.5"
                     style={{ color: "var(--foreground)" }}
                   >
                     <MapPin size={16} aria-hidden="true" /> Jaigaon, West
                     Bengal, India
-                  </a>
+                  </span>
                   <a
                     href="mailto:support@gstpixel.com"
                     className="flex items-center gap-0.5"

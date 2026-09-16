@@ -52,6 +52,52 @@ const needs = [
   { id: "unsure", label: "Not sure yet", icon: "HelpCircle" },
 ] as const;
 
+const needIds = needs.map((n) => n.id);
+
+function resolveNeedId(incoming: string | undefined): string {
+  if (!incoming) return "";
+  if (needIds.includes(incoming as (typeof needIds)[number])) return incoming;
+  const lower = incoming.toLowerCase();
+  if (
+    lower.includes("website") ||
+    lower.includes("ecommerce") ||
+    lower.includes("digital platform")
+  )
+    return "website";
+  if (
+    lower.includes("web app") ||
+    lower.includes("mobile app") ||
+    lower.includes("application")
+  )
+    return "application";
+  if (lower.includes("ai") || lower.includes("automation")) return "ai";
+  if (
+    lower.includes("gst") ||
+    lower.includes("fssai") ||
+    lower.includes("compliance")
+  )
+    return "compliance";
+  if (
+    lower.includes("registration") ||
+    lower.includes("business setup") ||
+    lower.includes("setup")
+  )
+    return "registration";
+  if (
+    lower.includes("consult") ||
+    lower.includes("transformation") ||
+    lower.includes("strategy")
+  )
+    return "consultancy";
+  if (
+    lower.includes("growth") ||
+    lower.includes("reach") ||
+    lower.includes("conversion")
+  )
+    return "growth";
+  return "unsure";
+}
+
 const stages = [
   {
     id: "exploring",
@@ -139,12 +185,15 @@ const replyOptions = [
 function Page() {
   const search = Route.useSearch();
   const [step, setStep] = useState(0);
+  const resolvedNeed = resolveNeedId(search["interest"] as string | undefined);
+  const hasFreshContext = Boolean(search["interest"] || search["context"]);
   const [form, setForm] = useState<Form>({
     ...empty,
-    need: search["interest"] ?? "",
+    need: resolvedNeed,
     details: search["context"] ?? "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
+  const [draftLoaded, setDraftLoaded] = useState(false);
 
   const set = (key: keyof Form, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -152,13 +201,19 @@ function Page() {
   };
 
   useEffect(() => {
+    if (hasFreshContext) return;
     try {
       const saved = sessionStorage.getItem("gstpixel-enquiry");
-      if (saved) setForm((current) => ({ ...current, ...JSON.parse(saved) }));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setForm((current) => ({ ...current, ...parsed }));
+      }
     } catch {
       /* storage is optional */
+    } finally {
+      setDraftLoaded(true);
     }
-  }, []);
+  }, [hasFreshContext]);
 
   useEffect(() => {
     try {
@@ -168,31 +223,81 @@ function Page() {
     }
   }, [form]);
 
-  const validateStep = (s: number): boolean => {
+  const handleResetDraft = () => {
+    setForm(empty);
+    try {
+      sessionStorage.removeItem("gstpixel-enquiry");
+    } catch {
+      /* storage is optional */
+    }
+    setStep(0);
+    setErrors({});
+  };
+
+  const showDraftNotice =
+    hasFreshContext &&
+    draftLoaded &&
+    (form.need || form.details || form.name || form.email);
+
+  const deriveErrors = (
+    s: number,
+    currentForm: Form,
+  ): Partial<Record<keyof Form, string>> => {
     const newErrors: Partial<Record<keyof Form, string>> = {};
 
-    if (s === 0 && !form.need)
+    if (s === 0 && !currentForm.need)
       newErrors.need = "Please select what you need help with";
-    if (s === 1 && !form.stage)
+    if (s === 1 && !currentForm.stage)
       newErrors.stage = "Please select your current stage";
     if (s === 4) {
-      if (!form.name.trim()) newErrors.name = "Name is required";
-      if (!form.email.trim() || !/^\S+@\S+\.\S+$/.test(form.email))
+      if (!currentForm.name.trim()) newErrors.name = "Name is required";
+      if (
+        !currentForm.email.trim() ||
+        !/^\S+@\S+\.\S+$/.test(currentForm.email)
+      )
         newErrors.email = "Valid email is required";
-      if (form.reply !== "Email" && !form.phone.trim())
+      if (currentForm.reply !== "Email" && !currentForm.phone.trim())
         newErrors.phone = "Phone number is required for this reply method";
     }
 
+    return newErrors;
+  };
+
+  const validateStep = (s: number): boolean => {
+    const newErrors = deriveErrors(s, form);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  const focusFirstError = (errorKeys: string[]) => {
+    if (errorKeys.length === 0) return;
+    const firstErrorKey = errorKeys[0] as keyof Form;
+    const element = document.getElementById(firstErrorKey);
+    if (element) {
+      element.focus({ preventScroll: true });
+    }
+  };
+
   const next = () => {
-    if (validateStep(step)) setStep((current) => Math.min(5, current + 1));
+    const newErrors = deriveErrors(step, form);
+    if (Object.keys(newErrors).length === 0) {
+      setErrors({});
+      setStep((current) => Math.min(5, current + 1));
+    } else {
+      setErrors(newErrors);
+      focusFirstError(Object.keys(newErrors));
+    }
   };
 
   const handleSubmit = () => {
-    if (validateStep(4)) setStep(5);
+    const newErrors = deriveErrors(4, form);
+    if (Object.keys(newErrors).length === 0) {
+      setErrors({});
+      setStep(5);
+    } else {
+      setErrors(newErrors);
+      focusFirstError(Object.keys(newErrors));
+    }
   };
 
   const progress = ((step + 1) / stepLabels.length) * 100;
@@ -222,6 +327,41 @@ function Page() {
               </small>
             </div>
           </ScrollReveal>
+
+          <div
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+            id="step-announcer"
+          >
+            Step {step + 1} of {stepLabels.length}: {stepLabels[step]}
+          </div>
+
+          {showDraftNotice && (
+            <div
+              className="draft-notice"
+              role="status"
+              style={{ marginBottom: "1.5rem" }}
+            >
+              <p
+                style={{
+                  fontSize: "0.85rem",
+                  color: "var(--muted-foreground)",
+                }}
+              >
+                You arrived with fresh context from a tool. A previous draft
+                also exists.
+              </p>
+              <Button
+                variant="quiet"
+                size="sm"
+                onClick={handleResetDraft}
+                style={{ marginTop: "0.5rem" }}
+              >
+                Start fresh with tool context
+              </Button>
+            </div>
+          )}
 
           <div className="enquiry-step" key={step}>
             {step === 0 && (
@@ -562,7 +702,7 @@ function Page() {
               {step < 5 ? (
                 <Button
                   onClick={step === 4 ? handleSubmit : next}
-                  disabled={!validateStep(step)}
+                  disabled={Object.keys(deriveErrors(step, form)).length > 0}
                 >
                   {step === 4 ? "Review" : "Continue"} <ArrowRight size={16} />
                 </Button>

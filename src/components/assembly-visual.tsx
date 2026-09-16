@@ -2,14 +2,7 @@
 
 import { Layers3, Sparkles, Zap, Cpu, Globe, BarChart2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import {
-  useReducedMotion,
-  useAnimationFrame,
-  timing,
-  easing,
-  lerp,
-  clamp,
-} from "@/lib/motion";
+import { useReducedMotion, timing, easing, lerp, clamp } from "@/lib/motion";
 
 const stages = [
   {
@@ -94,7 +87,8 @@ export function AssemblyVisual({
   >("arrival");
   const [progress, setProgress] = useState(0);
   const [hoveredStage, setHoveredStage] = useState<number | null>(null);
-  const [pointer, setPointer] = useState({ x: 0.5, y: 0.5 });
+  const pointerRef = useRef({ x: 0.5, y: 0.5 });
+  const rafRef = useRef<number>();
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
@@ -116,18 +110,24 @@ export function AssemblyVisual({
 
     let currentIndex = 0;
     let startTime = performance.now();
+    let lastProgressUpdate = 0;
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
       const current = sequence[currentIndex];
 
       if (current.phase !== "idle") {
-        setProgress(Math.min(1, elapsed / current.duration));
+        const newProgress = Math.min(1, elapsed / current.duration);
+        if (now - lastProgressUpdate >= 33) {
+          lastProgressUpdate = now;
+          setProgress(newProgress);
+        }
       }
 
       if (elapsed >= current.duration && currentIndex < sequence.length - 1) {
         currentIndex++;
         startTime = now;
+        lastProgressUpdate = 0;
         setPhase(current.phase);
         setProgress(0);
       } else if (currentIndex === sequence.length - 1) {
@@ -143,21 +143,31 @@ export function AssemblyVisual({
     return () => cancelAnimationFrame(frame);
   }, [reduced]);
 
-  useAnimationFrame((time) => {
-    if (reduced || phase === "idle") return;
-
-    const pulse = Math.sin(time / 1000) * 0.5 + 0.5;
-    const drift = Math.sin(time / 3000) * 0.02;
-  });
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+  useEffect(() => {
     if (reduced) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    setPointer({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
-    });
-  };
+
+    const updatePointer = () => {
+      rafRef.current = requestAnimationFrame(updatePointer);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      pointerRef.current = {
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      };
+    };
+
+    const container = containerRef.current;
+    container.addEventListener("mousemove", handleMouseMove);
+    rafRef.current = requestAnimationFrame(updatePointer);
+
+    return () => {
+      container.removeEventListener("mousemove", handleMouseMove);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [reduced]);
 
   const getStageTransform = (
     index: number,
@@ -194,8 +204,8 @@ export function AssemblyVisual({
       scale = isHovered ? 1.05 : 1;
     }
 
-    const px = (pointer.x - 0.5) * 20;
-    const py = (pointer.y - 0.5) * 20;
+    const px = (pointerRef.current.x - 0.5) * 20;
+    const py = (pointerRef.current.y - 0.5) * 20;
     const parallaxX = (index % 2 === 0 ? 1 : -1) * px * 0.15;
     const parallaxY = (index % 2 === 0 ? 1 : -1) * py * 0.15;
 
@@ -209,53 +219,109 @@ export function AssemblyVisual({
     };
   };
 
-  const coreStyle: React.CSSProperties = {
-    transform: `translate(-50%, -50%) scale(${phase === "assembly" ? progress : phase === "capability" || phase === "invitation" || phase === "idle" ? 1 : 0})`,
-    opacity: phase === "arrival" || phase === "recognition" ? 0 : 1,
-    transition: `transform ${timing.narrative.base}ms ${easing.spring}, opacity ${timing.structural.base}ms ${easing.standard}`,
-    boxShadow: `0 0 ${lerp(30, 80, Math.sin(performance.now() / 2000) * 0.5 + 0.5)}px ${stages[0].color}40`,
+  const coreScale =
+    phase === "assembly"
+      ? progress
+      : phase === "capability" || phase === "invitation" || phase === "idle"
+        ? 1
+        : 0;
+  const coreOpacity = phase === "arrival" || phase === "recognition" ? 0 : 1;
+
+  const orbitOpacity = (index: number) => {
+    const p = clamp(progress, 0, 1);
+    if (phase === "arrival") return p * 0.3;
+    if (phase === "recognition") return 0.3 + p * 0.3;
+    return 0.6;
   };
 
-  const orbitStyle = (index: number): React.CSSProperties => {
+  const orbitScale = (index: number) =>
+    phase === "assembly" ? clamp(progress, 0, 1) : 1;
+  const orbitBorderAlpha = (p: number) =>
+    Math.floor(16 + 20 * p)
+      .toString(16)
+      .padStart(2, "0");
+
+  const pathOpacity = () => {
     const p = clamp(progress, 0, 1);
-    const rotation = (performance.now() / (index === 0 ? 20000 : 30000)) * 360;
-    return {
-      transform: `rotate(${rotation}deg) skewX(-12deg) scale(${phase === "assembly" ? p : 1})`,
-      opacity:
-        phase === "arrival"
-          ? p * 0.3
-          : phase === "recognition"
-            ? 0.3 + p * 0.3
-            : 0.6,
-      borderColor: `${stages[0].color}${Math.floor(16 + 20 * p)
-        .toString(16)
-        .padStart(2, "0")}`,
-    };
+    if (phase === "assembly") return p;
+    if (phase === "capability" || phase === "invitation" || phase === "idle")
+      return 0.4;
+    return 0;
   };
 
-  const pathStyle = (index: number): React.CSSProperties => {
-    const p = clamp(progress, 0, 1);
-    return {
-      opacity:
-        phase === "assembly"
-          ? p
-          : phase === "capability" || phase === "invitation" || phase === "idle"
-            ? 0.4
-            : 0,
-      transform: `scaleX(${phase === "assembly" ? p : 1})`,
-      transformOrigin: "left center",
-    };
-  };
+  const pathScale = () => (phase === "assembly" ? clamp(progress, 0, 1) : 1);
+
+  const ambientOpacity = phase === "idle" ? 1 : progress;
+
+  const capabilityOpacity =
+    phase === "capability" || phase === "invitation" || phase === "idle"
+      ? 1
+      : 0;
+
+  const primaryColor = stages[0].color;
 
   return (
     <div
       ref={containerRef}
       className={`assembly-visual ${className}`}
       aria-label={ariaLabel}
-      onMouseMove={handleMouseMove}
       onMouseLeave={() => setHoveredStage(null)}
-      style={{ "--primary-color": stages[0].color }}
+      style={
+        {
+          "--primary-color": primaryColor,
+          "--pointer-x": pointerRef.current.x,
+          "--pointer-y": pointerRef.current.y,
+        } as React.CSSProperties
+      }
     >
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          .assembly-visual .assembly-core {
+            animation: core-breathe 5s ease-in-out infinite;
+          }
+          .assembly-visual .assembly-core::before {
+            content: "";
+            position: absolute;
+            inset: 0.5rem;
+            border-radius: 50%;
+            border: 1px solid color-mix(in oklab, ${primaryColor} 30%, transparent);
+            opacity: 0.6;
+            animation: core-breathe 4s ease-in-out infinite;
+          }
+          .assembly-visual .orbit-one {
+            animation: orbit-drift-1 20s linear infinite;
+          }
+          .assembly-visual .orbit-two {
+            animation: orbit-drift-2 30s linear infinite;
+          }
+          @keyframes core-breathe {
+            0%, 100% {
+              opacity: 0.6;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 1;
+              transform: scale(1.03);
+            }
+          }
+          @keyframes core-glow-pulse {
+            0%, 100% {
+              box-shadow: 0 0 50px color-mix(in oklab, ${primaryColor} 12%, transparent);
+            }
+            50% {
+              box-shadow: 0 0 90px color-mix(in oklab, ${primaryColor} 20%, transparent);
+            }
+          }
+          @keyframes orbit-drift-1 {
+            to { transform: rotate(360deg) skewX(-12deg); }
+          }
+          @keyframes orbit-drift-2 {
+            to { transform: rotate(360deg) skewX(-12deg); }
+          }
+        `,
+        }}
+      />
       {/* Ambient orbital glow */}
       <div
         className="assembly-ambient-glow"
@@ -263,9 +329,9 @@ export function AssemblyVisual({
         style={{
           position: "absolute",
           inset: "-20%",
-          background: `radial-gradient(ellipse at 30% 20%, ${stages[0].color}15, transparent 60%), radial-gradient(ellipse at 70% 80%, ${stages[1].color}10, transparent 50%)`,
+          background: `radial-gradient(ellipse at 30% 20%, ${primaryColor}15, transparent 60%), radial-gradient(ellipse at 70% 80%, ${stages[1].color}10, transparent 50%)`,
           pointerEvents: "none",
-          opacity: phase === "idle" ? 1 : progress,
+          opacity: ambientOpacity,
           transition: `opacity ${timing.narrative.base}ms ${easing.decelerate}`,
         }}
       />
@@ -273,22 +339,38 @@ export function AssemblyVisual({
       <div
         className="assembly-orbit orbit-one"
         aria-hidden="true"
-        style={orbitStyle(0)}
+        style={{
+          opacity: orbitOpacity(0),
+          transform: `rotate(0deg) skewX(-12deg) scale(${orbitScale(0)})`,
+          borderColor: `${primaryColor}${orbitBorderAlpha(clamp(progress, 0, 1))}`,
+        }}
       />
       <div
         className="assembly-orbit orbit-two"
         aria-hidden="true"
-        style={orbitStyle(1)}
+        style={{
+          opacity: orbitOpacity(1),
+          transform: `rotate(0deg) skewX(-12deg) scale(${orbitScale(1)})`,
+          borderColor: `${primaryColor}${orbitBorderAlpha(clamp(progress, 0, 1))}`,
+        }}
       />
       <div
         className="assembly-path path-one"
         aria-hidden="true"
-        style={pathStyle(0)}
+        style={{
+          opacity: pathOpacity(),
+          transform: `scaleX(${pathScale()})`,
+          transformOrigin: "left center",
+        }}
       />
       <div
         className="assembly-path path-two"
         aria-hidden="true"
-        style={pathStyle(1)}
+        style={{
+          opacity: pathOpacity(),
+          transform: `scaleX(${pathScale()})`,
+          transformOrigin: "left center",
+        }}
       />
 
       {/* Connection lines between planes */}
@@ -309,7 +391,7 @@ export function AssemblyVisual({
             y1={`${stagePositions[i].y * 100}%`}
             x2={`${corePosition.x * 100}%`}
             y2={`${corePosition.y * 100}%`}
-            stroke={stages[0].color}
+            stroke={primaryColor}
             strokeWidth="1"
             strokeDasharray="8,4"
             opacity={
@@ -336,7 +418,6 @@ export function AssemblyVisual({
           style={{
             ...getStageTransform(index, stagePositions[index]),
             zIndex: hoveredStage === index ? 8 : 2 + index,
-            // Glass material properties
             background: `color-mix(in oklab, var(--env-current-glass-tint) 85%, transparent)`,
             backdropFilter: "blur(24px)",
             border: `1px solid ${index === hoveredStage ? stage.color : `color-mix(in oklab, ${stage.color} 40%, transparent)`}`,
@@ -362,7 +443,6 @@ export function AssemblyVisual({
               <stage.icon size={24} />
             </div>
             <strong className="plane-title">{stage.title}</strong>
-            {/* Luminous edge highlight on hover */}
             <div
               className="plane-luminous-edge"
               style={{
@@ -383,46 +463,37 @@ export function AssemblyVisual({
       <div
         className="assembly-core"
         style={{
-          ...coreStyle,
-          // Premium glass core
+          transform: `translate(-50%, -50%) scale(${coreScale})`,
+          opacity: coreOpacity,
+          transition: `transform ${timing.narrative.base}ms ${easing.spring}, opacity ${timing.structural.base}ms ${easing.standard}`,
           background: `
-            radial-gradient(circle at 30% 30%, color-mix(in oklab, ${stages[0].color} 20%, transparent), transparent 50%),
+            radial-gradient(circle at 30% 30%, color-mix(in oklab, ${primaryColor} 20%, transparent), transparent 50%),
             color-mix(in oklab, var(--env-current-glass-tint) 90%, transparent)
           `,
           backdropFilter: "blur(32px)",
-          border: `1px solid color-mix(in oklab, ${stages[0].color} 50%, transparent)`,
+          border: `1px solid color-mix(in oklab, ${primaryColor} 50%, transparent)`,
           boxShadow: `
-            0 0 80px color-mix(in oklab, ${stages[0].color} 25%, transparent),
-            inset 0 1px 0 color-mix(in oklab, ${stages[0].color} 30%, transparent),
-            inset 0 -1px 0 color-mix(in oklab, ${stages[0].color} 10%, transparent)
+            0 0 80px color-mix(in oklab, ${primaryColor} 25%, transparent),
+            inset 0 1px 0 color-mix(in oklab, ${primaryColor} 30%, transparent),
+            inset 0 -1px 0 color-mix(in oklab, ${primaryColor} 10%, transparent)
           `,
           borderRadius: "50%",
         }}
       >
         <Layers3
           size={32}
-          style={{ filter: `drop-shadow(0 0 8px ${stages[0].color})` }}
+          style={{ filter: `drop-shadow(0 0 8px ${primaryColor})` }}
         />
         <span className="core-label">One Assembly</span>
-        {/* Core inner glow ring */}
-        <div
-          style={{
-            position: "absolute",
-            inset: "0.5rem",
-            borderRadius: "50%",
-            border: `1px solid color-mix(in oklab, ${stages[0].color} 30%, transparent)`,
-            opacity: 0.6,
-            animation: `core-breathe 4s ease-in-out infinite`,
-          }}
-        />
       </div>
 
       <div className="assembly-status">
         <span
           className="status-dot"
           style={{
-            background: stages[0].color,
-            boxShadow: `0 0 12px ${stages[0].color}`,
+            background: primaryColor,
+            boxShadow: `0 0 12px ${primaryColor}`,
+            animation: "status-pulse 2s ease-in-out infinite",
           }}
         />
         AUTOMATE → OPERATE → GROW
@@ -431,10 +502,7 @@ export function AssemblyVisual({
       <div
         className="assembly-capability-preview"
         style={{
-          opacity:
-            phase === "capability" || phase === "invitation" || phase === "idle"
-              ? 1
-              : 0,
+          opacity: capabilityOpacity,
           transition: `opacity ${timing.narrative.base}ms ${easing.decelerate}`,
         }}
       >
@@ -445,7 +513,6 @@ export function AssemblyVisual({
             style={{
               transitionDelay: `${index * 100}ms`,
               borderColor: `${stage.color}60`,
-              // Glass material for capability badges
               background: `color-mix(in oklab, var(--env-current-glass-tint) 80%, transparent)`,
               backdropFilter: "blur(16px)",
               border: `1px solid ${stage.color}60`,
@@ -521,7 +588,6 @@ export function AssemblyVisualStatic({
           style={{
             ...stagePositions[index],
             zIndex: index + 1,
-            // Static glass material
             background: `color-mix(in oklab, var(--env-idea-glass-tint) 85%, transparent)`,
             backdropFilter: "blur(24px)",
             border: `1px solid color-mix(in oklab, ${stage.color} 40%, transparent)`,
@@ -578,7 +644,6 @@ export function AssemblyVisualStatic({
           inset 0 1px 0 color-mix(in oklab, oklch(0.79 0.142 197) 30%, transparent),
           inset 0 -1px 0 color-mix(in oklab, oklch(0.79 0.142 197) 10%, transparent)
         `,
-          animation: "core-breathe 5s ease-in-out infinite",
           zIndex: 10,
           borderRadius: "50%",
           left: "50%",
@@ -610,6 +675,7 @@ export function AssemblyVisualStatic({
           style={{
             background: "oklch(0.79 0.142 197)",
             boxShadow: "0 0 12px oklch(0.79 0.142 197)",
+            animation: "status-pulse 2s ease-in-out infinite",
           }}
         />
         AUTOMATE → OPERATE → GROW

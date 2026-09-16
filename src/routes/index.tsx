@@ -108,7 +108,17 @@ function Home() {
             variant="fadeInUp"
             className="outcome-list"
           >
-            <span className="assembly-node" style={{ position: "absolute", top: "-1rem", left: "-1rem", zIndex: "1" }}>01</span>
+            <span
+              className="assembly-node"
+              style={{
+                position: "absolute",
+                top: "-1rem",
+                left: "-1rem",
+                zIndex: "1",
+              }}
+            >
+              01
+            </span>
             {solutions.map((x, i) => (
               <Link
                 key={x.slug}
@@ -158,7 +168,7 @@ function Home() {
             <div className="interface-spec">
               <StaggeredReveal baseDelay={0.08} variant="scaleIn">
                 <div
-                  className="glass-medium luminous-edge"
+                  className="glass-below-fold luminous-edge"
                   style={{
                     borderRadius: "0.5rem",
                     padding: "1.5rem",
@@ -169,7 +179,7 @@ function Home() {
                   <span>Interface</span>
                 </div>
                 <div
-                  className="glass-medium luminous-edge"
+                  className="glass-below-fold luminous-edge"
                   style={{
                     borderRadius: "0.5rem",
                     padding: "1.5rem",
@@ -180,7 +190,7 @@ function Home() {
                   <span>Logic</span>
                 </div>
                 <div
-                  className="glass-medium luminous-edge"
+                  className="glass-below-fold luminous-edge"
                   style={{
                     borderRadius: "0.5rem",
                     padding: "1.5rem",
@@ -212,7 +222,7 @@ function Home() {
             className="workflow"
           >
             <div
-              className="glass-medium"
+              className="glass-below-fold"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <span>Input</span>
@@ -220,7 +230,7 @@ function Home() {
             </div>
             <i>→</i>
             <div
-              className="glass-medium"
+              className="glass-below-fold"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <span>Rule</span>
@@ -228,7 +238,7 @@ function Home() {
             </div>
             <i>→</i>
             <div
-              className="glass-medium"
+              className="glass-below-fold"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <span>Output</span>

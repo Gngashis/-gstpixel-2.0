@@ -273,7 +273,7 @@ function Page() {
                   to="/start-your-project"
                   className="w-full"
                   search={{
-                    interest: "Business setup or compliance",
+                    interest: "registration",
                     context: `Business checklist: ${progress}/${total} preparation items completed`,
                   }}
                 >

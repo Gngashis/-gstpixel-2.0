@@ -350,6 +350,15 @@ export function ButtonLink({
   const isLoading = internalState === "loading";
   const isSuccess = internalState === "success";
   const isError = internalState === "error";
+  const isDisabled = disabled || isLoading;
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isDisabled) {
+      e.preventDefault();
+      return;
+    }
+    onClick?.(e);
+  };
 
   const getContent = () => {
     if (isLoading) {
@@ -387,11 +396,12 @@ export function ButtonLink({
       className={cn(
         buttonVariants({ variant, size, state: internalState }),
         className,
+        isDisabled && "pointer-events-none opacity-45",
       )}
-      disabled={disabled || isLoading}
+      aria-disabled={isDisabled}
       aria-busy={isLoading}
       aria-live={isLoading ? "polite" : undefined}
-      onClick={onClick}
+      onClick={handleLinkClick}
       {...props}
     >
       {ripple && (

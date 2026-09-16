@@ -67,12 +67,12 @@
       ),
       radial-gradient(
         ellipse 60% 50% at 85% 85%,
-        var(--core-primary) / 0.08,
+        color-mix(in oklab, var(--core-primary) 8%, transparent),
         transparent 55%
       ),
       linear-gradient(180deg, var(--core-dark), var(--core-dark-muted));
-    --env-idea-glow: var(--core-primary) / 0.12;
-    --env-idea-glass-tint: var(--core-dark-elevated) / 0.4;
+    --env-idea-glow: color-mix(in oklab, var(--core-primary) 12%, transparent);
+    --env-idea-glass-tint: color-mix(in oklab, var(--core-dark-elevated) 40%, transparent);
 
     /* DESIGN (16-33%): Richer luminous creative energy
        Dominant: Foundation Dark + Primary + Trust warmth */
@@ -80,12 +80,12 @@
     --env-design-gradient:
       radial-gradient(
         ellipse 75% 55% at 15% 20%,
-        var(--core-trust) / 0.25,
+        color-mix(in oklab, var(--core-trust) 25%, transparent),
         transparent 55%
       ),
       radial-gradient(
         ellipse 70% 60% at 80% 15%,
-        var(--core-primary) / 0.15,
+        color-mix(in oklab, var(--core-primary) 15%, transparent),
         transparent 50%
       ),
       radial-gradient(
@@ -94,7 +94,7 @@
         transparent 55%
       ),
       linear-gradient(180deg, var(--core-dark-muted), oklch(0.12 0.02 270));
-    --env-design-glow: var(--core-trust) / 0.18;
+    --env-design-glow: color-mix(in oklab, var(--core-trust) 18%, transparent);
     --env-design-glass-tint: oklch(0.2 0.03 265 / 0.45);
 
     /* BUILD (33-50%): Structured technical depth, controlled cool energy
@@ -103,7 +103,7 @@
     --env-build-gradient:
       radial-gradient(
         ellipse 85% 65% at 10% 5%,
-        var(--core-primary) / 0.18,
+        color-mix(in oklab, var(--core-primary) 18%, transparent),
         transparent 55%
       ),
       radial-gradient(
@@ -114,13 +114,13 @@
       conic-gradient(
         from 180deg at 50% 50%,
         transparent 0deg,
-        var(--core-primary) / 0.03 90deg,
+        color-mix(in oklab, var(--core-primary) 3%, transparent) 90deg,
         transparent 180deg,
-        var(--core-trust) / 0.03 270deg,
+        color-mix(in oklab, var(--core-trust) 3%, transparent) 270deg,
         transparent 360deg
       ),
       linear-gradient(180deg, oklch(0.1 0.018 250), oklch(0.13 0.022 255));
-    --env-build-glow: var(--core-primary) / 0.15;
+    --env-build-glow: color-mix(in oklab, var(--core-primary) 15%, transparent);
     --env-build-glass-tint: oklch(0.18 0.025 250 / 0.5);
 
     /* AUTOMATE (50-66%): Deeper spectral blue/violet technological atmosphere
@@ -134,7 +134,7 @@
       ),
       radial-gradient(
         ellipse 65% 55% at 95% 40%,
-        var(--core-primary) / 0.2,
+        color-mix(in oklab, var(--core-primary) 20%, transparent),
         transparent 50%
       ),
       radial-gradient(
@@ -152,7 +152,7 @@
     --env-operate-gradient:
       radial-gradient(
         ellipse 80% 60% at 20% 15%,
-        var(--core-trust) / 0.2,
+        color-mix(in oklab, var(--core-trust) 20%, transparent),
         transparent 55%
       ),
       radial-gradient(
@@ -161,7 +161,7 @@
         transparent 50%
       ),
       linear-gradient(180deg, oklch(0.105 0.015 245), oklch(0.13 0.018 250));
-    --env-operate-glow: var(--core-trust) / 0.16;
+    --env-operate-glow: color-mix(in oklab, var(--core-trust) 16%, transparent);
     --env-operate-glass-tint: oklch(0.18 0.02 245 / 0.5);
 
     /* GROW (83-95%): More expansive/optimistic visual energy
@@ -175,12 +175,12 @@
       ),
       radial-gradient(
         ellipse 60% 50% at 10% 80%,
-        var(--core-trust) / 0.18,
+        color-mix(in oklab, var(--core-trust) 18%, transparent),
         transparent 50%
       ),
       radial-gradient(
         ellipse 55% 45% at 90% 20%,
-        var(--core-primary) / 0.15,
+        color-mix(in oklab, var(--core-primary) 15%, transparent),
         transparent 50%
       ),
       linear-gradient(180deg, oklch(0.1 0.015 200), oklch(0.12 0.02 210));
@@ -193,16 +193,16 @@
     --env-cta-gradient:
       radial-gradient(
         ellipse 100% 80% at 50% 0%,
-        var(--core-primary) / 0.18,
+        color-mix(in oklab, var(--core-primary) 18%, transparent),
         transparent 55%
       ),
       radial-gradient(
         ellipse 70% 60% at 50% 100%,
-        var(--core-trust) / 0.15,
+        color-mix(in oklab, var(--core-trust) 15%, transparent),
         transparent 50%
       ),
       linear-gradient(180deg, var(--core-dark), var(--core-dark));
-    --env-cta-glow: var(--core-primary) / 0.2;
+    --env-cta-glow: color-mix(in oklab, var(--core-primary) 20%, transparent);
     --env-cta-glass-tint: oklch(0.18 0.025 260 / 0.55);
 
     /* ========================================
@@ -223,40 +223,47 @@
     --glass-blur-lg: 32px;
     --glass-blur-xl: 48px;
 
+    /* Mobile blur caps */
+    --glass-blur-mobile-xs: 4px;
+    --glass-blur-mobile-sm: 8px;
+    --glass-blur-mobile-md: 12px;
+    --glass-blur-mobile-lg: 16px;
+    --glass-blur-mobile-xl: 24px;
+
     /* Glass border (using primary accent) */
-    --glass-border-subtle: 1px solid var(--core-primary) / 0.12;
-    --glass-border-light: 1px solid var(--core-primary) / 0.2;
-    --glass-border-medium: 1px solid var(--core-primary) / 0.3;
-    --glass-border-strong: 1px solid var(--core-primary) / 0.45;
+    --glass-border-subtle: 1px solid color-mix(in oklab, var(--core-primary) 12%, transparent);
+    --glass-border-light: 1px solid color-mix(in oklab, var(--core-primary) 20%, transparent);
+    --glass-border-medium: 1px solid color-mix(in oklab, var(--core-primary) 30%, transparent);
+    --glass-border-strong: 1px solid color-mix(in oklab, var(--core-primary) 45%, transparent);
 
     /* Glass highlight (specular edge) */
-    --glass-highlight-subtle: inset 0 1px 0 var(--core-primary) / 0.08;
+    --glass-highlight-subtle: inset 0 1px 0 color-mix(in oklab, var(--core-primary) 8%, transparent);
     --glass-highlight-medium:
-      inset 0 1px 0 var(--core-primary) / 0.18,
-      inset 0 -1px 0 var(--core-primary) / 0.06;
+      inset 0 1px 0 color-mix(in oklab, var(--core-primary) 18%, transparent),
+      inset 0 -1px 0 color-mix(in oklab, var(--core-primary) 6%, transparent);
     --glass-highlight-strong:
-      inset 0 1px 0 var(--core-primary) / 0.25,
-      inset 0 -1px 0 var(--core-primary) / 0.1;
+      inset 0 1px 0 color-mix(in oklab, var(--core-primary) 25%, transparent),
+      inset 0 -1px 0 color-mix(in oklab, var(--core-primary) 10%, transparent);
 
     /* Depth shadows (using foundation dark) */
     --depth-shadow-xs:
-      0 1px 3px var(--core-dark) / 0.12, 0 1px 2px var(--core-dark) / 0.08;
+      0 1px 3px color-mix(in oklab, var(--core-dark) 12%, transparent), 0 1px 2px color-mix(in oklab, var(--core-dark) 8%, transparent);
     --depth-shadow-sm:
-      0 4px 8px var(--core-dark) / 0.15, 0 2px 4px var(--core-dark) / 0.1;
+      0 4px 8px color-mix(in oklab, var(--core-dark) 15%, transparent), 0 2px 4px color-mix(in oklab, var(--core-dark) 10%, transparent);
     --depth-shadow-md:
-      0 12px 24px var(--core-dark) / 0.18, 0 4px 8px var(--core-dark) / 0.12;
+      0 12px 24px color-mix(in oklab, var(--core-dark) 18%, transparent), 0 4px 8px color-mix(in oklab, var(--core-dark) 12%, transparent);
     --depth-shadow-lg:
-      0 24px 48px var(--core-dark) / 0.22, 0 8px 16px var(--core-dark) / 0.15;
+      0 24px 48px color-mix(in oklab, var(--core-dark) 22%, transparent), 0 8px 16px color-mix(in oklab, var(--core-dark) 15%, transparent);
     --depth-shadow-xl:
-      0 40px 80px var(--core-dark) / 0.25, 0 16px 32px var(--core-dark) / 0.18;
+      0 40px 80px color-mix(in oklab, var(--core-dark) 25%, transparent), 0 16px 32px color-mix(in oklab, var(--core-dark) 18%, transparent);
 
-    /* Colored glow shadows (using primary/trust) */
-    --depth-glow-primary: 0 0 40px var(--core-primary) / 0.15;
-    --depth-glow-trust: 0 0 40px var(--core-trust) / 0.15;
-    --depth-glow-warm: 0 0 40px var(--core-trust) / 0.18;
+    /* Colored glow shadows (using primary/trust) - use opacity via color-mix */
+    --depth-glow-primary: 0 0 40px color-mix(in oklab, var(--core-primary) 15%, transparent);
+    --depth-glow-trust: 0 0 40px color-mix(in oklab, var(--core-trust) 15%, transparent);
+    --depth-glow-warm: 0 0 40px color-mix(in oklab, var(--core-trust) 18%, transparent);
 
     /* Internal glow for glass panels */
-    --glass-inner-glow: inset 0 0 60px var(--core-primary) / 0.04;
+    --glass-inner-glow: inset 0 0 60px color-mix(in oklab, var(--core-primary) 4%, transparent);
 
     /* Material hierarchy: surfaces are intentionally not interchangeable. */
     --material-smoke: color-mix(in oklab, var(--env-current-glass-tint) 72%, transparent);
@@ -266,9 +273,9 @@
     --material-specular: linear-gradient(115deg, color-mix(in oklab, white 12%, transparent), transparent 24%, transparent 72%, color-mix(in oklab, var(--core-primary) 6%, transparent));
 
     /* Luminous edge treatment */
-    --edge-luminous: 0 0 0 1px var(--core-primary) / 0.35;
+    --edge-luminous: 0 0 0 1px color-mix(in oklab, var(--core-primary) 35%, transparent);
     --edge-luminous-hover:
-      0 0 0 1px var(--core-primary), 0 0 20px var(--core-primary) / 0.3;
+      0 0 0 1px var(--core-primary), 0 0 20px color-mix(in oklab, var(--core-primary) 30%, transparent);
 
     /* ========================================
        MOTION TOKENS
@@ -294,7 +301,7 @@
     --btn-shadow-hover: var(--depth-shadow-md), var(--depth-glow-primary);
     --btn-shadow-active: var(--depth-shadow-xs);
     --btn-shadow-focus:
-      0 0 0 3px var(--core-primary) / 0.25, var(--depth-shadow-sm);
+      0 0 0 3px color-mix(in oklab, var(--core-primary) 25%, transparent), var(--depth-shadow-sm);
 
     /* ========================================
        ENVIRONMENT TRANSITION (set by JS scroll observer)
@@ -328,7 +335,7 @@
 @layer utilities {
   .glass-subtle {
     position: relative;
-    background: var(--env-current-glass-tint) / var(--glass-opacity-subtle);
+    background: color-mix(in oklab, var(--env-current-glass-tint) calc(var(--glass-opacity-subtle) * 100%), transparent);
     backdrop-filter: blur(var(--glass-blur-sm));
     border: var(--glass-border-subtle);
     box-shadow: var(--glass-highlight-subtle), var(--depth-shadow-xs);
@@ -354,7 +361,7 @@
 
   .glass-light {
     position: relative;
-    background: var(--env-current-glass-tint) / var(--glass-opacity-light);
+    background: color-mix(in oklab, var(--env-current-glass-tint) calc(var(--glass-opacity-light) * 100%), transparent);
     backdrop-filter: blur(var(--glass-blur-md));
     border: var(--glass-border-light);
     box-shadow:
@@ -378,7 +385,7 @@
 
   .glass-medium {
     position: relative;
-    background: var(--env-current-glass-tint) / var(--glass-opacity-medium);
+    background: color-mix(in oklab, var(--env-current-glass-tint) calc(var(--glass-opacity-medium) * 100%), transparent);
     backdrop-filter: blur(var(--glass-blur-lg));
     border: var(--glass-border-medium);
     box-shadow:
@@ -401,7 +408,7 @@
   }
 
   .glass-strong {
-    background: var(--env-current-glass-tint) / var(--glass-opacity-strong);
+    background: color-mix(in oklab, var(--env-current-glass-tint) calc(var(--glass-opacity-strong) * 100%), transparent);
     backdrop-filter: blur(var(--glass-blur-xl));
     border: var(--glass-border-strong);
     box-shadow:
@@ -410,7 +417,7 @@
   }
 
   .glass-hero {
-    background: var(--env-current-glass-tint) / var(--glass-opacity-hero);
+    background: color-mix(in oklab, var(--env-current-glass-tint) calc(var(--glass-opacity-hero) * 100%), transparent);
     backdrop-filter: blur(var(--glass-blur-xl));
     border: var(--glass-border-strong);
     box-shadow:
@@ -468,10 +475,25 @@
       background var(--motion-cinematic) var(--easing-decelerate),
       opacity var(--motion-narrative) var(--easing-standard);
   }
+
+  /* Mobile blur caps */
+  @media (max-width: 768px) {
+    .glass-subtle { backdrop-filter: blur(var(--glass-blur-mobile-xs)); }
+    .glass-light { backdrop-filter: blur(var(--glass-blur-mobile-sm)); }
+    .glass-medium { backdrop-filter: blur(var(--glass-blur-mobile-md)); }
+    .glass-strong { backdrop-filter: blur(var(--glass-blur-mobile-lg)); }
+    .glass-hero { backdrop-filter: blur(var(--glass-blur-mobile-xl)); }
+    
+    .assembly-panel { backdrop-filter: blur(var(--glass-blur-mobile-md)); }
+    .assembly-visual .assembly-plane { backdrop-filter: blur(var(--glass-blur-mobile-md)); }
+    .assembly-visual .assembly-core { backdrop-filter: blur(var(--glass-blur-mobile-lg)); }
+    .site-header { backdrop-filter: blur(var(--glass-blur-mobile-lg)); }
+    nav[aria-label="Primary"] { backdrop-filter: blur(var(--glass-blur-mobile-md)); }
+  }
 }
 
 /* ========================================
-   ANIMATIONS
+   ANIMATIONS (GPU-friendly: transform/opacity only)
    ======================================== */
 @layer animations {
   @keyframes ripple {
@@ -486,15 +508,9 @@
   }
 
   @keyframes btn-press {
-    0% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(0.975);
-    }
-    100% {
-      transform: scale(1);
-    }
+    0% { transform: scale(1); }
+    50% { transform: scale(0.975); }
+    100% { transform: scale(1); }
   }
 
   @keyframes btn-lift {
@@ -509,12 +525,84 @@
   }
 
   @keyframes pulse-glow {
-    0%,
-    100% {
-      box-shadow: 0 0 20px var(--core-primary) / 0.15;
+    0%, 100% {
+      opacity: 0.5;
     }
     50% {
-      box-shadow: 0 0 40px var(--core-primary) / 0.3;
+      opacity: 1;
+    }
+  }
+
+  @keyframes core-breathe {
+    0%, 100% {
+      opacity: 0.6;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.03);
+    }
+  }
+
+  @keyframes core-glow-pulse {
+    0%, 100% {
+      box-shadow: 0 0 50px color-mix(in oklab, var(--primary) 12%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 90px color-mix(in oklab, var(--primary) 20%, transparent);
+    }
+  }
+
+  @keyframes orbit-drift {
+    to { transform: rotate(360deg) skewX(-12deg); }
+  }
+
+  @keyframes signal-pulse {
+    0%, 100% {
+      box-shadow: 0 0 0 5px color-mix(in oklab, var(--primary) 12%, transparent);
+    }
+    50% {
+      box-shadow: 0 0 0 12px color-mix(in oklab, var(--primary) 0%, transparent);
+    }
+  }
+
+  @keyframes status-pulse {
+    0%, 100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.5;
+      transform: scale(0.8);
+    }
+  }
+
+  @keyframes capability-reveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes assemble {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes mobile-menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-0.5rem) scaleY(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: none;
     }
   }
 }
@@ -538,7 +626,7 @@
   .btn-tactile:focus-visible {
     outline: none;
     box-shadow:
-      0 0 0 3px var(--core-primary) / 0.25,
+      0 0 0 3px color-mix(in oklab, var(--core-primary) 25%, transparent),
       var(--depth-shadow-sm);
   }
 
@@ -589,5 +677,34 @@
     border: 1px solid color-mix(in oklab, var(--core-primary) 50%, transparent);
     box-shadow: 0 0 12px var(--env-current-glow), inset 0 1px 0 color-mix(in oklab, var(--core-primary) 15%, transparent);
     color: var(--env-current-glow);
+  }
+
+  /* Tiered glass for below-fold panels */
+  .glass-below-fold {
+    position: relative;
+    background: color-mix(in oklab, var(--env-current-glass-tint) 15%, transparent);
+    backdrop-filter: blur(var(--glass-blur-sm));
+    border: 1px solid color-mix(in oklab, var(--core-primary) 15%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, var(--core-primary) 10%, transparent),
+      0 4px 16px color-mix(in oklab, var(--core-dark) 10%, transparent);
+  }
+  .glass-below-fold::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      circle at var(--env-glow-x, 50%) var(--env-glow-y, 50%),
+      color-mix(in oklab, var(--env-current-glow) 20%, transparent),
+      transparent 70%
+    );
+    opacity: calc(var(--env-specular) * 0.3);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  @media (max-width: 768px) {
+    .glass-below-fold { backdrop-filter: blur(var(--glass-blur-mobile-xs)); }
   }
 }

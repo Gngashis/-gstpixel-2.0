@@ -27,6 +27,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLHeaderElement>(null);
   const headerEnv = useElementEnvironment(headerRef);
+  const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -34,6 +35,28 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+        menuTriggerRef.current?.focus();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024 && open) {
+        setOpen(false);
+      }
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [open]);
 
   const isDarkPhase = headerEnv?.id !== undefined && headerEnv.id >= 3;
 
@@ -109,9 +132,11 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               Start your project
             </ButtonLink>
             <Button
+              ref={menuTriggerRef}
               variant="quiet"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
+              aria-controls="mobile-nav"
               onClick={() => setOpen(!open)}
               className="px-3 lg:hidden"
               style={{
@@ -127,6 +152,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </div>
         {open && (
           <nav
+            id="mobile-nav"
             aria-label="Mobile"
             className="mobile-nav"
             data-open

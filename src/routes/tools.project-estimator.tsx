@@ -355,7 +355,15 @@ function Page() {
                   to="/start-your-project"
                   className="w-full"
                   search={{
-                    interest: type,
+                    interest:
+                      type === "web-application" ||
+                      type === "mobile-application"
+                        ? "application"
+                        : type === "ecommerce" || type === "custom-platform"
+                          ? "website"
+                          : type === "not-sure"
+                            ? "unsure"
+                            : type,
                     context: `Project estimator: ${projectTypes.find((t) => t.value === type)?.label}; audience: ${audience || "not specified"}; interaction: ${interactionLevels.find((l) => l.value === level)?.label || "not selected"}; capabilities: ${caps.join(", ") || "none"}`,
                   }}
                 >
