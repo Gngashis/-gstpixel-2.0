@@ -86,6 +86,16 @@ const outcomes = [
   },
 ] as const;
 
+const handoffNeeds = {
+  "digital-presence": "website",
+  "product-app": "application",
+  operations: "ai",
+  "business-start": "registration",
+  compliance: "compliance",
+  strategy: "consultancy",
+  growth: "growth",
+} as const;
+
 export const Route = createFileRoute("/tools/service-finder")({
   head: () => ({
     meta: [
@@ -202,22 +212,7 @@ function Page() {
                     to="/start-your-project"
                     className="w-full"
                     search={{
-                      interest:
-                        result.id === "digital-presence"
-                          ? "website"
-                          : result.id === "product-app"
-                            ? "application"
-                            : result.id === "operations"
-                              ? "ai"
-                              : result.id === "business-start"
-                                ? "registration"
-                                : result.id === "compliance"
-                                  ? "compliance"
-                                  : result.id === "strategy"
-                                    ? "consultancy"
-                                    : result.id === "growth"
-                                      ? "growth"
-                                      : "unsure",
+                      interest: handoffNeeds[result.id],
                       context: `Service finder: ${result.paths}`,
                     }}
                   >

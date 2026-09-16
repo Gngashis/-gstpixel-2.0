@@ -12,6 +12,10 @@ import {
   Server,
   Database,
   Zap,
+  Route as RouteIcon,
+  ClipboardList,
+  Gauge,
+  ScanSearch,
 } from "lucide-react";
 import {
   PageIntro,
@@ -84,6 +88,46 @@ const tools = [
     features: ["Step-by-step", "Local progress", "No uploads"],
     category: "Preparation",
   },
+  {
+    slug: "business-roadmap",
+    title: "Business idea roadmap",
+    description: "Turn an early idea into a practical digital sequence.",
+    icon: RouteIcon,
+    features: ["Stage-based", "Editable steps", "No AI claims"],
+    category: "Planning",
+  },
+  {
+    slug: "website-requirements",
+    title: "Website requirements",
+    description: "Create a structured starting brief for a website project.",
+    icon: ClipboardList,
+    features: ["Audience-led", "Goal mapping", "Copy summary"],
+    category: "Briefing",
+  },
+  {
+    slug: "digital-readiness",
+    title: "Digital readiness",
+    description: "Score the foundations behind your next digital move.",
+    icon: Gauge,
+    features: ["0–15 signal", "Five dimensions", "Next steps"],
+    category: "Assessment",
+  },
+  {
+    slug: "website-improvement",
+    title: "Website improvement",
+    description: "Prioritise improvements from your own observations.",
+    icon: ScanSearch,
+    features: ["Self-assessment", "No site scan", "Evidence-led"],
+    category: "Improvement",
+  },
+  {
+    slug: "project-planning",
+    title: "Project planning assistant",
+    description: "Shape phases and decisions for a useful first plan.",
+    icon: Target,
+    features: ["Fixed sequence", "Dependencies", "Copy summary"],
+    category: "Planning",
+  },
 ] as const;
 
 const techStack = [
@@ -139,13 +183,13 @@ export const Route = createFileRoute("/tools/")({
       {
         name: "description",
         content:
-          "Use GSTPIXEL's project estimator, service finder, GST calculator, and business checklist.",
+          "Use GSTPIXEL's free browser-based tools for planning, requirements, readiness, and business setup.",
       },
       { property: "og:title", content: "Business Tools — GSTPIXEL" },
       {
         property: "og:description",
         content:
-          "Four transparent tools for planning digital and business needs.",
+          "Transparent browser-based tools for planning digital and business needs.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
