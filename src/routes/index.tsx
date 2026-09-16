@@ -222,7 +222,7 @@ function Home() {
             className="workflow"
           >
             <div
-              className="glass-below-fold"
+              className="assembly-panel"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <span>Input</span>
@@ -230,7 +230,7 @@ function Home() {
             </div>
             <i>→</i>
             <div
-              className="glass-below-fold"
+              className="assembly-panel"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <span>Rule</span>
@@ -238,7 +238,7 @@ function Home() {
             </div>
             <i>→</i>
             <div
-              className="glass-below-fold"
+              className="assembly-panel"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <span>Output</span>
