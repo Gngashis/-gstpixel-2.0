@@ -218,9 +218,12 @@ function getInterpolatedPhase(progress: number): {
   const interpolatedGlowX = `${lerp(currentGlowX, nextGlowX, phaseProgress)}%`;
   const interpolatedGlowY = `${lerp(currentGlowY, nextGlowY, phaseProgress)}%`;
 
+  // Generate a continuously interpolated gradient using the interpolated bg and glow
+  const interpolatedGradient = `radial-gradient(ellipse at ${interpolatedGlowX} ${interpolatedGlowY}, ${interpolatedGlow}, transparent 70%), linear-gradient(180deg, ${interpolatedBg}, ${interpolatedBg})`;
+
   return {
     bg: interpolatedBg,
-    gradient: currentPhase.gradient, // Gradients handled by CSS cross-fade
+    gradient: interpolatedGradient,
     glow: interpolatedGlow,
     glassTint: interpolatedGlassTint,
     glowX: interpolatedGlowX,
@@ -267,6 +270,7 @@ export function useScrollEnvironment(): {
         const interp = getInterpolatedPhase(clampedProgress);
         root.style.setProperty("--env-progress", clampedProgress.toString());
         root.style.setProperty("--env-current-bg", interp.bg);
+        root.style.setProperty("--env-current-gradient", interp.gradient);
         root.style.setProperty("--env-current-glow", interp.glow);
         root.style.setProperty("--env-current-glass-tint", interp.glassTint);
         root.style.setProperty("--env-glow-x", interp.glowX);

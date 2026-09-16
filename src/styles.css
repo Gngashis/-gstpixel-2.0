@@ -73,7 +73,7 @@ html {
 }
 body {
   margin: 0;
-  background: var(--background);
+  background: var(--env-current-bg, var(--background));
   color: var(--foreground);
   font-family: var(--font-body);
   letter-spacing: 0;
