@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
   Braces,
@@ -7,7 +7,7 @@ import {
   Gauge,
   Sparkles,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import {
   ScrollReveal,
   StaggeredReveal,
@@ -70,14 +70,12 @@ function Home() {
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
               <div className="mt-9 flex flex-wrap gap-3">
-                <Button asChild>
-                  <Link to="/start-your-project">
-                    Start your project <ArrowRight size={16} />
-                  </Link>
-                </Button>
-                <Button asChild variant="secondary">
-                  <Link to="/services">Explore services</Link>
-                </Button>
+                <ButtonLink to="/start-your-project">
+                  Start your project <ArrowRight size={16} />
+                </ButtonLink>
+                <ButtonLink to="/services" variant="secondary">
+                  Explore services
+                </ButtonLink>
               </div>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.4}>
@@ -322,11 +320,14 @@ function Home() {
               </ScrollReveal>
             </div>
             <ScrollReveal variant="scaleIn" delay={0.2}>
-              <Button asChild variant="secondary" className="luminous-edge">
-                <Link to="/work" style={{ borderRadius: "0.5rem" }}>
-                  View all concepts
-                </Link>
-              </Button>
+              <ButtonLink
+                to="/work"
+                variant="secondary"
+                className="luminous-edge"
+                style={{ borderRadius: "0.5rem" }}
+              >
+                View all concepts
+              </ButtonLink>
             </ScrollReveal>
           </div>
           <StaggeredReveal

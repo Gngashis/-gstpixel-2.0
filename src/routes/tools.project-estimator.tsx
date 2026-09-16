@@ -6,7 +6,7 @@ import {
   StaggeredReveal,
   SectionHeader,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { ArrowRight, Target, X, Check } from "lucide-react";
 
 const projectTypes = [
@@ -351,17 +351,16 @@ function Page() {
 
             {type && (
               <ScrollReveal variant="scaleIn" delay={0.4}>
-                <Button asChild className="w-full">
-                  <Link
-                    to="/start-your-project"
-                    search={{
-                      interest: type,
-                      context: `Project estimator: ${projectTypes.find((t) => t.value === type)?.label}; audience: ${audience || "not specified"}; interaction: ${interactionLevels.find((l) => l.value === level)?.label || "not selected"}; capabilities: ${caps.join(", ") || "none"}`,
-                    }}
-                  >
-                    Continue to enquiry <ArrowRight size={16} />
-                  </Link>
-                </Button>
+                <ButtonLink
+                  to="/start-your-project"
+                  className="w-full"
+                  search={{
+                    interest: type,
+                    context: `Project estimator: ${projectTypes.find((t) => t.value === type)?.label}; audience: ${audience || "not specified"}; interaction: ${interactionLevels.find((l) => l.value === level)?.label || "not selected"}; capabilities: ${caps.join(", ") || "none"}`,
+                  }}
+                >
+                  Continue to enquiry <ArrowRight size={16} />
+                </ButtonLink>
               </ScrollReveal>
             )}
           </aside>

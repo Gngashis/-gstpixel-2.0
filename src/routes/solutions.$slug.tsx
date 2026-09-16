@@ -7,7 +7,7 @@ import {
   SectionHeader,
   ScrollReveal,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { solutions } from "@/lib/content";
 
 export const Route = createFileRoute("/solutions/$slug")({
@@ -94,11 +94,12 @@ function Page() {
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
-              <Button asChild>
-                <Link to="/start-your-project" search={{ interest: x.slug }}>
-                  Continue with this path <ArrowRight size={16} />
-                </Link>
-              </Button>
+              <ButtonLink
+                to="/start-your-project"
+                search={{ interest: x.slug }}
+              >
+                Continue with this path <ArrowRight size={16} />
+              </ButtonLink>
             </ScrollReveal>
           </div>
         </div>

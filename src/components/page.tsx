@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import {
   useReducedMotion,
@@ -156,11 +156,9 @@ export function StartBand({
           <h2>{title}</h2>
         </ScrollReveal>
         <ScrollReveal variant="scaleIn" delay={0.2}>
-          <Button asChild>
-            <Link to="/start-your-project">
-              Start your project <ArrowRight size={16} />
-            </Link>
-          </Button>
+          <ButtonLink to="/start-your-project">
+            Start your project <ArrowRight size={16} />
+          </ButtonLink>
         </ScrollReveal>
       </div>
     </section>

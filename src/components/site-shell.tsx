@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { useElementEnvironment } from "@/lib/scroll-environment";
 
 const nav = [
@@ -101,18 +101,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Button
-              asChild
+            <ButtonLink
+              to="/start-your-project"
               className="hidden sm:inline-flex luminous-edge"
-              style={{ borderRadius: "0.5rem" }}
+              style={{ borderRadius: "0.5rem", padding: "0.6rem 1.25rem" }}
             >
-              <Link
-                to="/start-your-project"
-                style={{ padding: "0.6rem 1.25rem" }}
-              >
-                Start your project
-              </Link>
-            </Button>
+              Start your project
+            </ButtonLink>
             <Button
               variant="quiet"
               aria-label={open ? "Close menu" : "Open menu"}
@@ -164,15 +159,14 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             >
               Contact<span aria-hidden="true">↗</span>
             </Link>
-            <Button
-              asChild
+            <ButtonLink
+              to="/start-your-project"
+              onClick={() => setOpen(false)}
               className="mt-3 w-full luminous-edge"
               style={{ borderRadius: "0.5rem" }}
             >
-              <Link to="/start-your-project" onClick={() => setOpen(false)}>
-                Start your project
-              </Link>
-            </Button>
+              Start your project
+            </ButtonLink>
           </nav>
         )}
       </header>

@@ -14,7 +14,7 @@ import {
   SectionHeader,
   ScrollReveal,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { conceptProjects } from "@/lib/content";
 
 export const Route = createFileRoute("/work/$slug")({
@@ -155,22 +155,18 @@ function Page() {
         <div className="site-container">
           <ScrollReveal variant="fadeInUp" delay={0}>
             <div className="concept-navigation">
-              <Button asChild variant="secondary">
-                <Link to="/work">
-                  <ArrowLeft size={16} /> Back to Concept Lab
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link
-                  to="/start-your-project"
-                  search={{
-                    interest: x.slug,
-                    context: `Concept Lab: ${x.title}`,
-                  }}
-                >
-                  Discuss a real project <ArrowRight size={16} />
-                </Link>
-              </Button>
+              <ButtonLink to="/work" variant="secondary">
+                <ArrowLeft size={16} /> Back to Concept Lab
+              </ButtonLink>
+              <ButtonLink
+                to="/start-your-project"
+                search={{
+                  interest: x.slug,
+                  context: `Concept Lab: ${x.title}`,
+                }}
+              >
+                Discuss a real project <ArrowRight size={16} />
+              </ButtonLink>
             </div>
           </ScrollReveal>
         </div>

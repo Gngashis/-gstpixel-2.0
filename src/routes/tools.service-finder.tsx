@@ -6,7 +6,7 @@ import {
   StaggeredReveal,
   SectionHeader,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import {
   ArrowRight,
   Target,
@@ -198,17 +198,16 @@ function Page() {
                   before starting an enquiry.
                 </p>
                 <ScrollReveal variant="scaleIn" delay={0.2}>
-                  <Button asChild className="w-full">
-                    <Link
-                      to="/start-your-project"
-                      search={{
-                        interest: result.title,
-                        context: `Service finder: ${result.paths}`,
-                      }}
-                    >
-                      Use this recommendation <ArrowRight size={16} />
-                    </Link>
-                  </Button>
+                  <ButtonLink
+                    to="/start-your-project"
+                    className="w-full"
+                    search={{
+                      interest: result.title,
+                      context: `Service finder: ${result.paths}`,
+                    }}
+                  >
+                    Use this recommendation <ArrowRight size={16} />
+                  </ButtonLink>
                 </ScrollReveal>
               </StaggeredReveal>
             ) : (

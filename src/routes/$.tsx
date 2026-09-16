@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 export const Route = createFileRoute("/$")({
   head: () => ({
     meta: [
@@ -28,18 +28,16 @@ function Page() {
         <h1>This part hasn’t been assembled.</h1>
         <p>The address may have changed, or the page may not exist.</p>
         <div className="flex flex-wrap gap-3">
-          <Button asChild>
-            <Link to="/">Return home</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link to="/services">Explore services</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link to="/tools">Useful tools</Link>
-          </Button>
-          <Button asChild variant="secondary">
-            <Link to="/start-your-project">Start your project</Link>
-          </Button>
+          <ButtonLink to="/">Return home</ButtonLink>
+          <ButtonLink to="/services" variant="secondary">
+            Explore services
+          </ButtonLink>
+          <ButtonLink to="/tools" variant="secondary">
+            Useful tools
+          </ButtonLink>
+          <ButtonLink to="/start-your-project" variant="secondary">
+            Start your project
+          </ButtonLink>
         </div>
       </div>
     </main>

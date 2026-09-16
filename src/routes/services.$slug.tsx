@@ -7,7 +7,7 @@ import {
   SectionHeader,
   ScrollReveal,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import { services } from "@/lib/content";
 
 export const Route = createFileRoute("/services/$slug")({
@@ -139,16 +139,15 @@ function Page() {
                 </p>
               </div>
               <div className="cta-actions">
-                <Button asChild>
-                  <Link to="/start-your-project" search={{ interest: s.slug }}>
-                    Start your project <ArrowRight size={16} />
-                  </Link>
-                </Button>
-                <Button asChild variant="secondary">
-                  <Link to="/tools/service-finder">
-                    Not sure? Use the service finder
-                  </Link>
-                </Button>
+                <ButtonLink
+                  to="/start-your-project"
+                  search={{ interest: s.slug }}
+                >
+                  Start your project <ArrowRight size={16} />
+                </ButtonLink>
+                <ButtonLink to="/tools/service-finder" variant="secondary">
+                  Not sure? Use the service finder
+                </ButtonLink>
               </div>
             </div>
           </ScrollReveal>

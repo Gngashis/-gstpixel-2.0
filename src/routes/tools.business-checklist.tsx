@@ -6,7 +6,7 @@ import {
   StaggeredReveal,
   SectionHeader,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 import {
   ArrowRight,
   CheckCircle2,
@@ -269,17 +269,16 @@ function Page() {
 
             {progress > 0 && (
               <ScrollReveal variant="scaleIn" delay={0.5}>
-                <Button asChild className="w-full">
-                  <Link
-                    to="/start-your-project"
-                    search={{
-                      interest: "Business setup or compliance",
-                      context: `Business checklist: ${progress}/${total} preparation items completed`,
-                    }}
-                  >
-                    Discuss business support <ArrowRight size={16} />
-                  </Link>
-                </Button>
+                <ButtonLink
+                  to="/start-your-project"
+                  className="w-full"
+                  search={{
+                    interest: "Business setup or compliance",
+                    context: `Business checklist: ${progress}/${total} preparation items completed`,
+                  }}
+                >
+                  Discuss business support <ArrowRight size={16} />
+                </ButtonLink>
               </ScrollReveal>
             )}
           </aside>

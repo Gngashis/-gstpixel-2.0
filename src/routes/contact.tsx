@@ -17,7 +17,7 @@ import {
   SectionHeader,
   ScrollReveal,
 } from "@/components/page";
-import { Button } from "@/components/ui/button";
+import { Button, ButtonLink } from "@/components/ui/button";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -155,14 +155,13 @@ function Page() {
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
-              <Button asChild className="mt-6 w-full sm:w-auto luminous-edge">
-                <Link
-                  to="/start-your-project"
-                  style={{ borderRadius: "0.5rem" }}
-                >
-                  Start your project <ArrowRight size={16} />
-                </Link>
-              </Button>
+              <ButtonLink
+                to="/start-your-project"
+                className="mt-6 w-full sm:w-auto luminous-edge"
+                style={{ borderRadius: "0.5rem" }}
+              >
+                Start your project <ArrowRight size={16} />
+              </ButtonLink>
             </ScrollReveal>
           </div>
 
