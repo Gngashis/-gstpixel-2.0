@@ -258,6 +258,13 @@
     /* Internal glow for glass panels */
     --glass-inner-glow: inset 0 0 60px var(--core-primary) / 0.04;
 
+    /* Material hierarchy: surfaces are intentionally not interchangeable. */
+    --material-smoke: color-mix(in oklab, var(--env-current-glass-tint) 72%, transparent);
+    --material-clear: color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent);
+    --material-polymer: color-mix(in oklab, var(--core-dark-elevated) 72%, transparent);
+    --material-crystal: color-mix(in oklab, var(--env-current-glass-tint) 88%, transparent);
+    --material-specular: linear-gradient(115deg, color-mix(in oklab, white 12%, transparent), transparent 24%, transparent 72%, color-mix(in oklab, var(--core-primary) 6%, transparent));
+
     /* Luminous edge treatment */
     --edge-luminous: 0 0 0 1px var(--core-primary) / 0.35;
     --edge-luminous-hover:

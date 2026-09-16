@@ -335,6 +335,7 @@ export function AssemblyVisual({
           className="assembly-plane"
           style={{
             ...getStageTransform(index, stagePositions[index]),
+            zIndex: hoveredStage === index ? 8 : 2 + index,
             // Glass material properties
             background: `color-mix(in oklab, var(--env-current-glass-tint) 85%, transparent)`,
             backdropFilter: "blur(24px)",
@@ -342,7 +343,7 @@ export function AssemblyVisual({
             boxShadow: `
               inset 0 1px 0 color-mix(in oklab, ${stage.color} 20%, transparent),
               0 8px 32px color-mix(in oklab, ${stage.color} 15%, transparent),
-              ${isHovered ? `0 0 0 1px ${stage.color}, 0 0 24px ${stage.color}30` : "0 0 20px color-mix(in oklab, var(--color-brand-primary) 8%, transparent)"}
+              ${hoveredStage === index ? `0 0 0 1px ${stage.color}, 0 0 24px ${stage.color}30` : "0 0 20px color-mix(in oklab, var(--color-brand-primary) 8%, transparent)"}
             `,
             borderRadius: "0.75rem",
             transition: `
@@ -369,7 +370,7 @@ export function AssemblyVisual({
                 inset: "-1px",
                 borderRadius: "inherit",
                 border: `1px solid ${stage.color}`,
-                opacity: isHovered ? 1 : 0,
+                opacity: hoveredStage === index ? 1 : 0,
                 pointerEvents: "none",
                 transition: `opacity ${timing.micro.base}ms ${easing.standard}`,
                 filter: `drop-shadow(0 0 8px ${stage.color})`,
@@ -459,8 +460,6 @@ export function AssemblyVisual({
     </div>
   );
 }
-
-const isHovered = false; // This will be handled per-element via onMouseEnter
 
 export function AssemblyVisualStatic({
   className = "",

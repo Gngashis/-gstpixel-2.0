@@ -218,8 +218,13 @@ function getInterpolatedPhase(progress: number): {
   const interpolatedGlowX = `${lerp(currentGlowX, nextGlowX, phaseProgress)}%`;
   const interpolatedGlowY = `${lerp(currentGlowY, nextGlowY, phaseProgress)}%`;
 
-  // Generate a continuously interpolated gradient using the interpolated bg and glow
-  const interpolatedGradient = `radial-gradient(ellipse at ${interpolatedGlowX} ${interpolatedGlowY}, ${interpolatedGlow}, transparent 70%), linear-gradient(180deg, ${interpolatedBg}, ${interpolatedBg})`;
+  // Keep multiple low-contrast fields present between phases so scrolling
+  // feels like movement through one environment rather than a color swap.
+  const interpolatedGradient = `
+    radial-gradient(ellipse 90% 72% at ${interpolatedGlowX} ${interpolatedGlowY}, ${interpolatedGlow}, transparent 68%),
+    radial-gradient(ellipse 54% 42% at ${lerp(currentGlowX, 100 - nextGlowX, phaseProgress)}% ${lerp(nextGlowY, currentGlowY, phaseProgress)}%, color-mix(in oklab, ${interpolatedGlow} 34%, transparent), transparent 72%),
+    linear-gradient(118deg, color-mix(in oklab, ${interpolatedBg} 94%, oklch(0.72 0.15 195 / 0.06)), ${interpolatedBg} 54%, color-mix(in oklab, ${interpolatedBg} 92%, oklch(0.68 0.12 75 / 0.06)))
+  `;
 
   return {
     bg: interpolatedBg,

@@ -147,8 +147,21 @@ export function StartBand({
   title?: string;
 }) {
   return (
-    <section className="start-band">
+    <section className="start-band env-section" data-env-phase="6">
       <div className="site-container">
+        <div className="start-band-trace" aria-hidden="true">
+          <span>IDEA</span>
+          <i />
+          <span>DESIGN</span>
+          <i />
+          <span>BUILD</span>
+          <i />
+          <span>AUTOMATE</span>
+          <i />
+          <span>OPERATE</span>
+          <i />
+          <span>GROW</span>
+        </div>
         <ScrollReveal variant="fadeInUp" delay={0}>
           <p className="label text-primary">Begin</p>
         </ScrollReveal>

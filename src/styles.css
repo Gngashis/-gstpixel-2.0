@@ -288,6 +288,7 @@ footer a:hover {
   .start-band .site-container {
     grid-template-columns: 1fr auto;
   }
+
 }
 @media (prefers-reduced-motion: reduce) {
   html {
@@ -3331,4 +3332,156 @@ footer a:hover {
 
 .form-control.error:focus {
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 15%, transparent);
+}
+
+/* Final cascade for the premium assembly pass. */
+.assembly-plane {
+  width: 44%;
+  height: 31%;
+  background: var(--material-specular), var(--material-smoke);
+  backdrop-filter: blur(16px) saturate(125%);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--primary) 8%, transparent),
+    0 12px 34px color-mix(in oklab, var(--ink) 24%, transparent);
+}
+
+.assembly-plane:hover {
+  background: var(--material-specular), var(--material-clear);
+}
+
+.assembly-core {
+  width: 10rem;
+  height: 10rem;
+  background: var(--material-specular), var(--material-crystal);
+}
+
+.assembly-path {
+  background: linear-gradient(90deg, transparent, color-mix(in oklab, var(--primary) 75%, white), transparent);
+  box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 28%, transparent);
+}
+
+.interface-spec > div {
+  background: var(--material-specular), var(--material-polymer);
+  border-left: 2px solid color-mix(in oklab, var(--primary) 34%, transparent);
+  transition: transform 240ms var(--easing-standard), border-color 240ms var(--easing-standard);
+}
+
+.interface-spec > div:hover {
+  transform: translateX(0.5rem);
+  border-left-color: var(--primary);
+}
+
+.workflow div {
+  background: var(--material-clear);
+  box-shadow: var(--glass-highlight-subtle), var(--depth-shadow-sm);
+  transition: transform 240ms var(--easing-standard), border-color 240ms var(--easing-standard);
+}
+
+.workflow div:hover {
+  transform: translateY(-0.35rem);
+  border-left-color: var(--primary);
+}
+
+.operation-ledger > div {
+  transition: background 220ms var(--easing-standard), padding-left 220ms var(--easing-standard);
+}
+
+.operation-ledger > div:hover {
+  padding-left: 1.6rem;
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+.principles > div {
+  border-left: 1px solid color-mix(in oklab, var(--primary) 38%, transparent);
+  border-radius: 0 !important;
+  background: transparent;
+  box-shadow: none;
+}
+
+.process-line li {
+  background: color-mix(in oklab, var(--material-polymer) 74%, transparent);
+  transition: background 220ms var(--easing-standard), transform 220ms var(--easing-standard);
+}
+
+.process-line li:hover {
+  position: relative;
+  z-index: 1;
+  transform: translateY(-0.25rem);
+}
+
+.start-band {
+  position: relative;
+  overflow: hidden;
+}
+
+.start-band::before {
+  content: "";
+  position: absolute;
+  inset: 15% -10% auto;
+  height: 22rem;
+  background: radial-gradient(ellipse at 50% 50%, color-mix(in oklab, var(--primary) 12%, transparent), transparent 68%);
+  pointer-events: none;
+}
+
+.start-band .site-container {
+  position: relative;
+}
+
+.start-band-trace {
+  display: flex;
+  align-items: center;
+  gap: clamp(0.35rem, 1.4vw, 1rem);
+  margin-bottom: 3rem;
+  color: var(--ink-muted);
+  font: 500 0.55rem var(--font-mono);
+  letter-spacing: 0.14em;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+.start-band-trace i {
+  width: clamp(1rem, 4vw, 4rem);
+  height: 1px;
+  background: linear-gradient(90deg, color-mix(in oklab, var(--primary) 70%, transparent), transparent);
+}
+
+.start-band-trace span:last-child {
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .assembly-visual {
+    min-height: 38rem;
+  }
+
+  .assembly-plane {
+    width: 68%;
+    min-width: 0;
+    height: 21%;
+    min-height: 7.5rem;
+    padding: 1rem;
+  }
+
+  .assembly-plane:nth-of-type(4),
+  .assembly-plane:nth-of-type(5),
+  .assembly-plane:nth-of-type(6) {
+    width: 62%;
+  }
+
+  .assembly-core {
+    width: 7.5rem;
+    height: 7.5rem;
+  }
+
+  .start-band-trace {
+    overflow: hidden;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+    font-size: 0.45rem;
+  }
+
+  .start-band-trace i {
+    min-width: 0.75rem;
+  }
 }
