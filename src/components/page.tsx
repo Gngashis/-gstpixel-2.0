@@ -36,7 +36,7 @@ export function ScrollReveal({
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
   const hydrated = useHydrated();
-  const visible = useIntersection(ref);
+  const visible = useIntersection(ref as React.RefObject<HTMLElement>);
 
   const variants = {
     fadeInUp: {

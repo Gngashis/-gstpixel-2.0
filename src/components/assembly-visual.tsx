@@ -88,7 +88,7 @@ export function AssemblyVisual({
   const [progress, setProgress] = useState(0);
   const [hoveredStage, setHoveredStage] = useState<number | null>(null);
   const pointerRef = useRef({ x: 0.5, y: 0.5 });
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
   const phaseRef = useRef(phase);
   phaseRef.current = phase;
 
@@ -114,7 +114,7 @@ export function AssemblyVisual({
 
     const animate = (now: number) => {
       const elapsed = now - startTime;
-      const current = sequence[currentIndex];
+      const current = sequence[currentIndex] ?? sequence[sequence.length - 1]!;
 
       if (current.phase !== "idle") {
         const newProgress = Math.min(1, elapsed / current.duration);
@@ -160,6 +160,7 @@ export function AssemblyVisual({
     };
 
     const container = containerRef.current;
+    if (!container) return;
     container.addEventListener("mousemove", handleMouseMove);
     rafRef.current = requestAnimationFrame(updatePointer);
 
@@ -258,7 +259,7 @@ export function AssemblyVisual({
       ? 1
       : 0;
 
-  const primaryColor = stages[0].color;
+  const primaryColor = stages[0]!.color;
 
   return (
     <div
@@ -329,7 +330,7 @@ export function AssemblyVisual({
         style={{
           position: "absolute",
           inset: "-20%",
-          background: `radial-gradient(ellipse at 30% 20%, ${primaryColor}15, transparent 60%), radial-gradient(ellipse at 70% 80%, ${stages[1].color}10, transparent 50%)`,
+          background: `radial-gradient(ellipse at 30% 20%, ${primaryColor}15, transparent 60%), radial-gradient(ellipse at 70% 80%, ${stages[1]!.color}10, transparent 50%)`,
           pointerEvents: "none",
           opacity: ambientOpacity,
           transition: `opacity ${timing.narrative.base}ms ${easing.decelerate}`,
@@ -387,8 +388,8 @@ export function AssemblyVisual({
         {stages.slice(0, 3).map((_, i) => (
           <line
             key={i}
-            x1={`${stagePositions[i].x * 100}%`}
-            y1={`${stagePositions[i].y * 100}%`}
+            x1={`${stagePositions[i]!.x * 100}%`}
+            y1={`${stagePositions[i]!.y * 100}%`}
             x2={`${corePosition.x * 100}%`}
             y2={`${corePosition.y * 100}%`}
             stroke={primaryColor}
@@ -416,7 +417,7 @@ export function AssemblyVisual({
           key={stage.id}
           className="assembly-plane"
           style={{
-            ...getStageTransform(index, stagePositions[index]),
+            ...getStageTransform(index, stagePositions[index]!),
             zIndex: hoveredStage === index ? 8 : 2 + index,
             background: `color-mix(in oklab, var(--env-current-glass-tint) 85%, transparent)`,
             backdropFilter: "blur(24px)",
@@ -537,7 +538,9 @@ export function AssemblyVisualStatic({
     <div
       className={`assembly-visual ${className}`}
       aria-label="The GSTPIXEL Assembly — six connected stages from idea to growth"
-      style={{ "--primary-color": "oklch(0.79 0.142 197)" }}
+      style={
+        { "--primary-color": "oklch(0.79 0.142 197)" } as React.CSSProperties
+      }
     >
       <div
         className="assembly-ambient-glow"
@@ -568,8 +571,8 @@ export function AssemblyVisualStatic({
         {stages.slice(0, 3).map((_, i) => (
           <line
             key={i}
-            x1={`${stagePositions[i].x * 100}%`}
-            y1={`${stagePositions[i].y * 100}%`}
+            x1={`${stagePositions[i]!.x * 100}%`}
+            y1={`${stagePositions[i]!.y * 100}%`}
             x2={`${corePosition.x * 100}%`}
             y2={`${corePosition.y * 100}%`}
             stroke="oklch(0.79 0.142 197)"
@@ -586,7 +589,7 @@ export function AssemblyVisualStatic({
           key={stage.id}
           className="assembly-plane"
           style={{
-            ...stagePositions[index],
+            ...stagePositions[index]!,
             zIndex: index + 1,
             background: `color-mix(in oklab, var(--env-idea-glass-tint) 85%, transparent)`,
             backdropFilter: "blur(24px)",
@@ -645,7 +648,6 @@ export function AssemblyVisualStatic({
           inset 0 -1px 0 color-mix(in oklab, oklch(0.79 0.142 197) 10%, transparent)
         `,
           zIndex: 10,
-          borderRadius: "50%",
           left: "50%",
           top: "50%",
           position: "absolute",

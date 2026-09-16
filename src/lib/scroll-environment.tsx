@@ -122,9 +122,9 @@ function parseOklch(
   );
   if (!match) return null;
   return {
-    l: parseFloat(match[1]),
-    c: parseFloat(match[2]),
-    h: parseFloat(match[3]),
+    l: parseFloat(match[1]!),
+    c: parseFloat(match[2]!),
+    h: parseFloat(match[3]!),
     alpha: match[4] ? parseFloat(match[4]) : 1,
   };
 }
@@ -161,12 +161,13 @@ function getInterpolatedPhase(progress: number): {
 } {
   const p = Math.max(0, Math.min(1, progress));
 
-  let currentPhase = phases[0];
-  let nextPhase = phases[1];
+  let currentPhase = phases[0]!;
+  let nextPhase = phases[1]!;
   let phaseProgress = 0;
 
   for (let i = 0; i < phases.length; i++) {
     const phase = phases[i];
+    if (!phase) continue;
     if (p >= phase.start && p <= phase.end) {
       currentPhase = phase;
       nextPhase = phases[i + 1] ?? phase;
@@ -239,7 +240,7 @@ export function useScrollEnvironment(): {
 } {
   const reduced = useReducedMotion();
   const [progress, setProgress] = useState(0);
-  const rafRef = useRef<number>();
+  const rafRef = useRef<number | undefined>(undefined);
   const lastProgressRef = useRef(0);
 
   useEffect(() => {
