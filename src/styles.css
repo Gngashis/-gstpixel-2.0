@@ -3524,3 +3524,337 @@ footer a:hover {
     min-width: 0.75rem;
   }
 }
+
+/* Deliberate phone composition for 320px–430px screens. */
+@media (max-width: 767px) {
+  html,
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  .site-container {
+    width: min(100% - 2rem, 76rem);
+  }
+
+  .site-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  .site-header > .site-container {
+    min-height: 4rem;
+    padding-inline: 0.25rem;
+  }
+
+  .mobile-nav {
+    max-height: calc(100svh - 4rem);
+    overflow-y: auto;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+
+  .mobile-nav > a {
+    min-height: 3.25rem;
+    align-items: center;
+    padding: 0.85rem 0.75rem;
+    font: 600 0.78rem var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .home-hero {
+    padding: 4.5rem 0 3rem;
+  }
+
+  .home-hero h1 {
+    max-width: 11ch;
+    margin-top: 1rem;
+    font-size: clamp(2.8rem, 14vw, 4.25rem);
+    line-height: 0.96;
+  }
+
+  .hero-copy,
+  .section-copy {
+    margin-top: 1.25rem;
+    font-size: 0.98rem;
+    line-height: 1.65;
+  }
+
+  .home-hero .mt-9 {
+    display: grid;
+    gap: 0.65rem;
+    margin-top: 1.75rem;
+  }
+
+  .home-hero .mt-9 > a {
+    width: 100%;
+  }
+
+  .hero-meta {
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+    font-size: 0.5rem;
+  }
+
+  .assembly-visual {
+    min-height: 31rem;
+    margin: 0 -0.75rem;
+  }
+
+  .assembly-plane {
+    width: 45%;
+    height: 22%;
+    min-height: 6.5rem;
+    padding: 0.75rem;
+    border-radius: 0.65rem;
+  }
+
+  /* The planes are absolute siblings after the ambient/orbit layers. */
+  .assembly-plane:nth-of-type(6) { left: 4% !important; top: 3% !important; }
+  .assembly-plane:nth-of-type(7) { left: 52% !important; top: 17% !important; }
+  .assembly-plane:nth-of-type(8) { left: 4% !important; top: 38% !important; }
+  .assembly-plane:nth-of-type(9) { left: 52% !important; top: 52% !important; }
+  .assembly-plane:nth-of-type(10) { left: 4% !important; top: 73% !important; }
+  .assembly-plane:nth-of-type(11) { left: 52% !important; top: 81% !important; }
+
+  .plane-label {
+    font-size: 0.48rem;
+    letter-spacing: 0.1em;
+  }
+
+  .plane-icon {
+    margin-top: 0.5rem;
+  }
+
+  .plane-icon svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .plane-title {
+    font-size: 1rem;
+  }
+
+  .assembly-core {
+    width: 7rem;
+    height: 7rem;
+  }
+
+  .assembly-core svg {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .core-label {
+    font-size: 0.5rem;
+  }
+
+  .orbit-one {
+    left: 18%;
+    top: 18%;
+    width: 16rem;
+    height: 16rem;
+  }
+
+  .orbit-two {
+    left: 24%;
+    top: 24%;
+    width: 12rem;
+    height: 12rem;
+  }
+
+  .assembly-status {
+    right: 0.75rem;
+    max-width: 11rem;
+    font-size: 0.48rem;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .assembly-capability-preview {
+    padding-top: 9rem;
+  }
+
+  .capability-indicator {
+    max-width: calc(100% - 2rem);
+    padding: 0.42rem 0.7rem;
+    font-size: 0.54rem;
+  }
+
+  .content-band {
+    padding: 3.75rem 0;
+  }
+
+  .content-band h2,
+  .start-band h2 {
+    font-size: clamp(2rem, 10vw, 3rem);
+    line-height: 1.02;
+  }
+
+  .section-title {
+    margin-top: 0.75rem;
+  }
+
+  .outcome-list {
+    margin-top: 2rem;
+  }
+
+  .outcome-list > a {
+    grid-template-columns: 2rem 1fr auto;
+    gap: 0.65rem;
+    min-height: 4.5rem;
+    padding: 1rem 0;
+  }
+
+  .outcome-list strong {
+    font-size: 1.1rem;
+    line-height: 1.15;
+  }
+
+  .editorial-split,
+  .detail-grid,
+  .contact-grid,
+  .tool-layout {
+    gap: 2rem;
+  }
+
+  .interface-spec > div {
+    min-height: 5.75rem;
+    padding: 1rem;
+  }
+
+  .workflow {
+    gap: 0.5rem;
+  }
+
+  .workflow div {
+    padding: 1.25rem;
+  }
+
+  .workflow i {
+    transform: rotate(90deg);
+  }
+
+  .operation-ledger > div {
+    grid-template-columns: 1.75rem 1fr auto !important;
+    gap: 0.5rem;
+    min-height: 4.25rem;
+    padding: 1rem !important;
+  }
+
+  .concept-row,
+  .tool-cards,
+  .service-family-grid,
+  .solution-cards {
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .concept-card-content,
+  .tool-card,
+  .service-card,
+  .solution-card {
+    padding: 1.25rem;
+  }
+
+  .tool-card-header {
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .tool-category {
+    white-space: normal;
+    text-align: right;
+  }
+
+  .service-card,
+  .solution-card {
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem;
+  }
+
+  .solution-card-content {
+    grid-column: 1 / -1;
+  }
+
+  .form-control {
+    min-height: 3rem;
+    font-size: 1rem;
+  }
+
+  .choice-grid,
+  .segmented-grid,
+  .capability-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .choice-grid label,
+  .segmented-option,
+  .capability-chip,
+  .choice-stack label,
+  .checklist label {
+    min-height: 3.25rem;
+    padding: 0.9rem;
+  }
+
+  .result-panel {
+    padding: 1.25rem;
+  }
+
+  .result-panel h2 {
+    font-size: 1.65rem;
+  }
+
+  .enquiry-progress {
+    margin-bottom: 2.5rem;
+  }
+
+  .enquiry-progress small {
+    position: static;
+    display: block;
+    padding-top: 0.65rem;
+    font-size: 0.68rem;
+  }
+
+  .enquiry-shell legend {
+    margin-bottom: 1.25rem;
+    font-size: clamp(1.8rem, 9vw, 2.5rem);
+  }
+
+  .enquiry-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+    margin-inline: -1rem;
+    padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom));
+    background: color-mix(in oklab, var(--env-current-glass-tint) 94%, transparent);
+    backdrop-filter: blur(18px);
+    border-top: 1px solid var(--border);
+  }
+
+  .enquiry-actions > * {
+    min-width: 7rem;
+  }
+
+  .contact-guided,
+  .contact-direct {
+    padding: 1.25rem !important;
+  }
+
+  .start-band {
+    padding: 4rem 0 max(4rem, env(safe-area-inset-bottom));
+  }
+
+  .start-band-trace {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .start-band-trace::-webkit-scrollbar {
+    display: none;
+  }
+
+  footer {
+    padding-bottom: max(3rem, env(safe-area-inset-bottom)) !important;
+  }
+}
