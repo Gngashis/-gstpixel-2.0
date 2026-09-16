@@ -8,7 +8,12 @@ export type Service = {
   needs: string[];
   process: string[];
 };
-export type Solution = { slug: string; title: string; summary: string; services: string[] };
+export type Solution = {
+  slug: string;
+  title: string;
+  summary: string;
+  services: string[];
+};
 
 export const services: Service[] = [
   {
@@ -17,7 +22,11 @@ export const services: Service[] = [
     family: "Digital Development",
     summary:
       "Purposeful public websites, ecommerce experiences, and digital platforms built around real business goals.",
-    helps: ["Website design and development", "Ecommerce and digital platforms", "Digital business systems"],
+    helps: [
+      "Website design and development",
+      "Ecommerce and digital platforms",
+      "Digital business systems",
+    ],
     whoFor:
       "Businesses that need a credible, maintainable online presence — from a first business website to an ecommerce or content-led platform.",
     needs: [
@@ -39,7 +48,11 @@ export const services: Service[] = [
     family: "Digital Development",
     summary:
       "Usable, maintainable applications for customers, teams, and new digital products.",
-    helps: ["Web applications", "Mobile applications", "Product interface systems"],
+    helps: [
+      "Web applications",
+      "Mobile applications",
+      "Product interface systems",
+    ],
     whoFor:
       "Teams and founders who need a working product — a customer-facing app, an internal tool, or the first version of a new digital product.",
     needs: [
@@ -61,7 +74,12 @@ export const services: Service[] = [
     family: "AI and Automation",
     summary:
       "Clear workflows that connect inputs, decisions, and useful outputs without hiding the logic.",
-    helps: ["AI integrations", "Workflow automation", "Process digitization", "Custom automation"],
+    helps: [
+      "AI integrations",
+      "Workflow automation",
+      "Process digitization",
+      "Custom automation",
+    ],
     whoFor:
       "Businesses losing time to repetitive work — data entry, document handling, follow-ups, or reporting — who want automation they can actually understand and trust.",
     needs: [
@@ -83,7 +101,13 @@ export const services: Service[] = [
     family: "Business Services",
     summary:
       "Structured support for starting and operating a business with clarity around requirements and next steps.",
-    helps: ["GST-related services", "FSSAI-related services", "Business registration", "Compliance support", "Business setup assistance"],
+    helps: [
+      "GST-related services",
+      "FSSAI-related services",
+      "Business registration",
+      "Compliance support",
+      "Business setup assistance",
+    ],
     whoFor:
       "New and operating businesses that need practical help with registrations, GST- and FSSAI-related assistance, and staying organized around their obligations.",
     needs: [
@@ -105,7 +129,12 @@ export const services: Service[] = [
     family: "Consulting",
     summary:
       "Practical guidance connecting business decisions, digital transformation, technology strategy, and growth.",
-    helps: ["Business consultancy", "Digital transformation", "Technology strategy", "Business-growth support"],
+    helps: [
+      "Business consultancy",
+      "Digital transformation",
+      "Technology strategy",
+      "Business-growth support",
+    ],
     whoFor:
       "Owners and teams at a decision point — choosing a direction, planning a digital move, or deciding which investment actually comes next.",
     needs: [
@@ -124,16 +153,76 @@ export const services: Service[] = [
 ];
 
 export const solutions: Solution[] = [
-  { slug: "start-a-business", title: "Start a business", summary: "Map the essential registration, operating, and digital foundations before adding optional complexity.", services: ["Business setup & compliance", "Business & technology consulting"] },
-  { slug: "build-a-website", title: "Create a website", summary: "Turn a business objective into a credible, accessible, and maintainable digital presence.", services: ["Websites & digital platforms", "Business & technology consulting"] },
-  { slug: "build-an-application", title: "Build an application", summary: "Define the users, workflows, and technical scope for a web or mobile product.", services: ["Web & mobile applications", "AI & automation"] },
-  { slug: "automate-work", title: "Automate work", summary: "Identify repetitive work and connect the right processes before introducing automation.", services: ["AI & automation", "Business & technology consulting"] },
-  { slug: "gst-compliance-help", title: "Get GST or compliance help", summary: "Find the relevant support path without assuming one set of requirements fits every business.", services: ["Business setup & compliance"] },
-  { slug: "choose-a-direction", title: "Decide what to do next", summary: "Start with the outcome and receive a transparent, editable recommendation.", services: ["Business & technology consulting"] },
+  {
+    slug: "start-a-business",
+    title: "Start a business",
+    summary:
+      "Map the essential registration, operating, and digital foundations before adding optional complexity.",
+    services: [
+      "Business setup & compliance",
+      "Business & technology consulting",
+    ],
+  },
+  {
+    slug: "build-a-website",
+    title: "Create a website",
+    summary:
+      "Turn a business objective into a credible, accessible, and maintainable digital presence.",
+    services: [
+      "Websites & digital platforms",
+      "Business & technology consulting",
+    ],
+  },
+  {
+    slug: "build-an-application",
+    title: "Build an application",
+    summary:
+      "Define the users, workflows, and technical scope for a web or mobile product.",
+    services: ["Web & mobile applications", "AI & automation"],
+  },
+  {
+    slug: "automate-work",
+    title: "Automate work",
+    summary:
+      "Identify repetitive work and connect the right processes before introducing automation.",
+    services: ["AI & automation", "Business & technology consulting"],
+  },
+  {
+    slug: "gst-compliance-help",
+    title: "Get GST or compliance help",
+    summary:
+      "Find the relevant support path without assuming one set of requirements fits every business.",
+    services: ["Business setup & compliance"],
+  },
+  {
+    slug: "choose-a-direction",
+    title: "Decide what to do next",
+    summary:
+      "Start with the outcome and receive a transparent, editable recommendation.",
+    services: ["Business & technology consulting"],
+  },
 ];
 
 export const conceptProjects = [
-  { slug: "atlas-stay", title: "Atlas Stay", industry: "Luxury travel", summary: "A booking-led hospitality interface exploring calm discovery and clear decision states." },
-  { slug: "form-work", title: "Form / Work", industry: "Professional services", summary: "A modular client-intake system connecting advisory work with structured delivery." },
-  { slug: "mise-market", title: "Mise Market", industry: "Ecommerce", summary: "A product-led food marketplace concept focused on provenance, speed, and repeat purchase." },
+  {
+    slug: "atlas-stay",
+    title: "Atlas Stay",
+    industry: "Luxury travel",
+    summary:
+      "A booking-led hospitality interface exploring calm discovery and clear decision states.",
+  },
+  {
+    slug: "form-work",
+    title: "Form / Work",
+    industry: "Professional services",
+    summary:
+      "A modular client-intake system connecting advisory work with structured delivery.",
+  },
+  {
+    slug: "mise-market",
+    title: "Mise Market",
+    industry: "Ecommerce",
+    summary:
+      "A product-led food marketplace concept focused on provenance, speed, and repeat purchase.",
+  },
 ];

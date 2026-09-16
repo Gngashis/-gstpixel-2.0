@@ -1,2 +1,47 @@
-import { createFileRoute,Link } from "@tanstack/react-router";import { Button } from "@/components/ui/button";
-export const Route=createFileRoute("/$")({head:()=>({meta:[{title:"Page Not Found — GSTPIXEL"},{name:"description",content:"This GSTPIXEL page could not be found."},{property:"og:title",content:"Page Not Found — GSTPIXEL"},{property:"og:description",content:"Return to GSTPIXEL or explore the service map."},{name:"robots",content:"noindex"},{property:"og:type",content:"website"},{name:"twitter:card",content:"summary"}]}),component:Page});function Page(){return <main className="recovery-page drafting-grid"><div><p className="label text-primary">404 / Missing</p><h1>This part hasn’t been assembled.</h1><p>The address may have changed, or the page may not exist.</p><div className="flex flex-wrap gap-3"><Button asChild><Link to="/">Return home</Link></Button><Button asChild variant="secondary"><Link to="/services">Explore services</Link></Button><Button asChild variant="secondary"><Link to="/tools">Useful tools</Link></Button><Button asChild variant="secondary"><Link to="/start-your-project">Start your project</Link></Button></div></div></main>}
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+export const Route = createFileRoute("/$")({
+  head: () => ({
+    meta: [
+      { title: "Page Not Found — GSTPIXEL" },
+      {
+        name: "description",
+        content: "This GSTPIXEL page could not be found.",
+      },
+      { property: "og:title", content: "Page Not Found — GSTPIXEL" },
+      {
+        property: "og:description",
+        content: "Return to GSTPIXEL or explore the service map.",
+      },
+      { name: "robots", content: "noindex" },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: Page,
+});
+function Page() {
+  return (
+    <main className="recovery-page drafting-grid">
+      <div>
+        <p className="label text-primary">404 / Missing</p>
+        <h1>This part hasn’t been assembled.</h1>
+        <p>The address may have changed, or the page may not exist.</p>
+        <div className="flex flex-wrap gap-3">
+          <Button asChild>
+            <Link to="/">Return home</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link to="/services">Explore services</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link to="/tools">Useful tools</Link>
+          </Button>
+          <Button asChild variant="secondary">
+            <Link to="/start-your-project">Start your project</Link>
+          </Button>
+        </div>
+      </div>
+    </main>
+  );
+}

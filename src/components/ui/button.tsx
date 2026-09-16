@@ -8,13 +8,18 @@ export const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/88 active:translate-y-px",
-        primary: "bg-primary text-primary-foreground hover:bg-primary/88 active:translate-y-px",
-        secondary: "border border-border bg-surface text-foreground hover:border-primary/50 hover:bg-surface-strong",
-        outline: "border border-border bg-transparent text-foreground hover:bg-surface",
+        default:
+          "bg-primary text-primary-foreground hover:bg-primary/88 active:translate-y-px",
+        primary:
+          "bg-primary text-primary-foreground hover:bg-primary/88 active:translate-y-px",
+        secondary:
+          "border border-border bg-surface text-foreground hover:border-primary/50 hover:bg-surface-strong",
+        outline:
+          "border border-border bg-transparent text-foreground hover:bg-surface",
         ghost: "text-muted-foreground hover:bg-surface hover:text-foreground",
         quiet: "text-muted-foreground hover:bg-surface hover:text-foreground",
-        destructive: "bg-destructive text-destructive-foreground hover:opacity-90",
+        destructive:
+          "bg-destructive text-destructive-foreground hover:opacity-90",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
@@ -28,11 +33,18 @@ export const buttonVariants = cva(
   },
 );
 
-export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof buttonVariants> & {
-  asChild?: boolean;
-};
+export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants> & {
+    asChild?: boolean;
+  };
 
-export function Button({ asChild, variant = "default", size = "default", className, ...props }: ButtonProps) {
+export function Button({
+  asChild,
+  variant = "default",
+  size = "default",
+  className,
+  ...props
+}: ButtonProps) {
   const Comp = asChild ? Slot : "button";
   return (
     <Comp

@@ -1,4 +1,5 @@
 # GSTPIXEL implementation roadmap
+
 - [x] Build design system and shared shell
 - [x] Build structured content and all public routes
 - [x] Build four functional tools
@@ -7,6 +8,7 @@
 - [x] Record remaining launch blockers
 
 ## Launch blockers
+
 - [ ] Approved logo file — awaiting upload
 - [ ] Verified enquiry inbox and acknowledgement — awaiting GSTPIXEL
 - [ ] Verified portfolio and detailed service proof — awaiting approval
