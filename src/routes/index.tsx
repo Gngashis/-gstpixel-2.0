@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowRight,
   Braces,
@@ -143,19 +143,15 @@ function Home() {
                   Websites, applications, ecommerce, and business platforms are
                   designed as connected parts—not isolated deliverables.
                 </p>
-                <Button
-                  asChild
+                <ButtonLink
+                  to="/services/$slug"
+                  params={{ slug: "web-mobile-applications" }}
                   variant="secondary"
                   className="mt-6 luminous-edge"
+                  style={{ borderRadius: "0.5rem" }}
                 >
-                  <Link
-                    to="/services/$slug"
-                    params={{ slug: "web-mobile-applications" }}
-                    style={{ borderRadius: "0.5rem" }}
-                  >
-                    Explore digital development
-                  </Link>
-                </Button>
+                  Explore digital development
+                </ButtonLink>
               </StaggeredReveal>
             </div>
             <div className="interface-spec">
@@ -258,19 +254,15 @@ function Home() {
                 stay connected to the wider system. Requirements are explained
                 carefully, without promises or assumptions.
               </p>
-              <Button
-                asChild
+              <ButtonLink
+                to="/services/$slug"
+                params={{ slug: "business-setup-compliance" }}
                 variant="secondary"
                 className="mt-6 luminous-edge"
+                style={{ borderRadius: "0.5rem" }}
               >
-                <Link
-                  to="/services/$slug"
-                  params={{ slug: "business-setup-compliance" }}
-                  style={{ borderRadius: "0.5rem" }}
-                >
-                  Explore business services
-                </Link>
-              </Button>
+                Explore business services
+              </ButtonLink>
             </StaggeredReveal>
           </div>
           <div className="operation-ledger">
