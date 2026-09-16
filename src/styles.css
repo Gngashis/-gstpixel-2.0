@@ -64,6 +64,8 @@
   --ink-muted: oklch(0.72 0.018 250);
   --ink-line: oklch(1 0 0 / 10%);
   --trust: oklch(0.64 0.1 55);
+  --env-specular: 0.15;
+  --env-illumination: 0.5;
 }
 * {
   border-color: var(--border);

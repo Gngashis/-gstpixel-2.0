@@ -108,12 +108,13 @@ function Home() {
             variant="fadeInUp"
             className="outcome-list"
           >
+            <span className="assembly-node" style={{ position: "absolute", top: "-1rem", left: "-1rem", zIndex: "1" }}>01</span>
             {solutions.map((x, i) => (
               <Link
                 key={x.slug}
                 to="/solutions/$slug"
                 params={{ slug: x.slug }}
-                className="glass-light luminous-edge"
+                className="assembly-panel assembly-connector"
                 style={{ borderRadius: "0.75rem", padding: "1.5rem" }}
               >
                 <span className="label">0{i + 1}</span>
@@ -275,7 +276,7 @@ function Home() {
               ].map((x, i) => (
                 <div
                   key={x}
-                  className="glass-light luminous-edge"
+                  className="assembly-panel assembly-connector"
                   style={{
                     borderRadius: "0.5rem",
                     padding: "1.25rem",
@@ -374,7 +375,7 @@ function Home() {
           >
             <Link
               to="/tools/project-estimator"
-              className="glass-medium luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{
                 borderRadius: "0.5rem",
                 padding: "1.5rem",
@@ -388,7 +389,7 @@ function Home() {
             </Link>
             <Link
               to="/tools/service-finder"
-              className="glass-medium luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{
                 borderRadius: "0.5rem",
                 padding: "1.5rem",
@@ -402,7 +403,7 @@ function Home() {
             </Link>
             <Link
               to="/tools/gst-calculator"
-              className="glass-medium luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{
                 borderRadius: "0.5rem",
                 padding: "1.5rem",
@@ -416,7 +417,7 @@ function Home() {
             </Link>
             <Link
               to="/tools/business-checklist"
-              className="glass-medium luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{
                 borderRadius: "0.5rem",
                 padding: "1.5rem",
@@ -450,21 +451,21 @@ function Home() {
             className="principles"
           >
             <div
-              className="glass-light luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <b>One integrated view.</b> Product, automation, operations, and
               strategy stay connected.
             </div>
             <div
-              className="glass-light luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <b>Clear before clever.</b> Every interaction must help someone
               understand or act.
             </div>
             <div
-              className="glass-light luminous-edge"
+              className="assembly-panel assembly-connector"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <b>Evidence over theatre.</b> No fabricated proof, hidden
@@ -493,7 +494,7 @@ function Home() {
               (x, i) => (
                 <li
                   key={x}
-                  className="glass-light luminous-edge"
+                  className="assembly-panel assembly-connector"
                   style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
                 >
                   <span>0{i + 1}</span>
@@ -520,7 +521,7 @@ function Home() {
           <ScrollReveal
             variant="fadeInUp"
             delay={0.2}
-            className="empty-state glass-light"
+            className="empty-state assembly-panel"
             style={{ borderRadius: "0.5rem", padding: "2rem" }}
           >
             <p>No approved resources are published yet.</p>

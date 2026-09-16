@@ -226,6 +226,9 @@ function getInterpolatedPhase(progress: number): {
     linear-gradient(118deg, color-mix(in oklab, ${interpolatedBg} 94%, oklch(0.72 0.15 195 / 0.06)), ${interpolatedBg} 54%, color-mix(in oklab, ${interpolatedBg} 92%, oklch(0.68 0.12 75 / 0.06)))
   `;
 
+  const specular = (0.12 + phaseProgress * 0.2 + (currentPhase.id % 2) * 0.05).toFixed(2);
+  const illumination = (0.5 + phaseProgress * 0.25 + (currentPhase.id % 2) * 0.05).toFixed(2);
+
   return {
     bg: interpolatedBg,
     gradient: interpolatedGradient,
@@ -235,6 +238,8 @@ function getInterpolatedPhase(progress: number): {
     glowY: interpolatedGlowY,
     phaseName: currentPhase.name,
     phaseProgress,
+    specular,
+    illumination,
   };
 }
 
@@ -280,6 +285,8 @@ export function useScrollEnvironment(): {
         root.style.setProperty("--env-current-glass-tint", interp.glassTint);
         root.style.setProperty("--env-glow-x", interp.glowX);
         root.style.setProperty("--env-glow-y", interp.glowY);
+        root.style.setProperty("--env-specular", interp.specular);
+        root.style.setProperty("--env-illumination", interp.illumination);
       }
     };
 
