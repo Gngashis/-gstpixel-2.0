@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
+import { Children, useEffect, useRef, useState } from "react";
 import {
   useReducedMotion,
   useIntersection,
@@ -99,7 +99,7 @@ export function StaggeredReveal({
   baseDelay = 0.08,
   variant = "fadeInUp",
 }: {
-  children: React.ReactNode[];
+  children: React.ReactNode;
   className?: string;
   baseDelay?: number;
   variant?: "fadeInUp" | "fadeIn" | "scaleIn";
@@ -112,7 +112,7 @@ export function StaggeredReveal({
 
   return (
     <div className={className}>
-      {children.map((child, index) => (
+      {Children.toArray(children).map((child, index) => (
         <ScrollReveal key={index} delay={baseDelay * index} variant={variant}>
           {child}
         </ScrollReveal>
