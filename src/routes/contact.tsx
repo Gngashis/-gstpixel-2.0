@@ -81,7 +81,7 @@ function Page() {
     {
       icon: MapPin,
       title: "Based in Jaigaon, West Bengal",
-      desc: "Physical office at Ramgaon, Near Anthony School, Jaigaon – 736182. Visit us or schedule a meeting.",
+      desc: "Physical office at Ramgaon, Near Anthony School, Jaigaon – 736182. Visit us or contact us to arrange a meeting.",
     },
     {
       icon: Shield,

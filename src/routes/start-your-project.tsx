@@ -874,10 +874,10 @@ function Page() {
                 className="principle-icon"
                 aria-hidden="true"
               />
-              <strong>Every field is optional</strong>
+              <strong>Answer only what helps</strong>
               <p>
-                Answer only what helps. Skip what doesn't. The enquiry adapts to
-                what you provide.
+                Most fields are optional. Required fields are marked when you
+                reach the contact step. The enquiry adapts to what you provide.
               </p>
             </div>
             <div className="principle-card">

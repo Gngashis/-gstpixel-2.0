@@ -101,11 +101,21 @@ export const Route = createFileRoute("/tools/business-checklist")({
 
 function Page() {
   const [done, setDone] = useState<string[]>([]);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   useEffect(() => {
     try {
       const saved = localStorage.getItem("gstpixel-checklist");
-      if (saved) setDone(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (
+          Array.isArray(parsed) &&
+          parsed.every((item) => typeof item === "string")
+        ) {
+          const validIds = new Set(steps.map((s) => s.id));
+          setDone(parsed.filter((id) => validIds.has(id)));
+        }
+      }
     } catch {
       /* optional storage */
     }
@@ -131,7 +141,12 @@ function Page() {
     );
   };
 
-  const handleReset = () => setDone([]);
+  const handleReset = () => setShowResetConfirm(true);
+
+  const confirmReset = () => {
+    setDone([]);
+    setShowResetConfirm(false);
+  };
 
   return (
     <>
@@ -219,16 +234,64 @@ function Page() {
               ))}
             </StaggeredReveal>
 
-            {(progress > 0 || progress < total) && (
+            {progress > 0 && (
               <ScrollReveal variant="scaleIn" delay={0.6}>
                 <div className="checklist-actions">
-                  {progress > 0 && (
-                    <Button variant="quiet" onClick={handleReset}>
-                      Reset checklist
-                    </Button>
-                  )}
+                  <Button variant="quiet" onClick={handleReset}>
+                    Reset checklist
+                  </Button>
                 </div>
               </ScrollReveal>
+            )}
+
+            {showResetConfirm && (
+              <div
+                className="reset-confirm"
+                role="alertdialog"
+                aria-labelledby="reset-title"
+                aria-describedby="reset-desc"
+                style={{
+                  marginTop: "1rem",
+                  padding: "1rem",
+                  border: "1px solid var(--destructive)",
+                  borderRadius: "0.5rem",
+                  background:
+                    "color-mix(in oklab, var(--destructive) 10%, transparent)",
+                }}
+              >
+                <p id="reset-title" style={{ fontWeight: 600 }}>
+                  Reset checklist?
+                </p>
+                <p
+                  id="reset-desc"
+                  style={{
+                    fontSize: "0.85rem",
+                    marginTop: "0.5rem",
+                    color: "var(--muted-foreground)",
+                  }}
+                >
+                  This will clear all completed items. This action cannot be
+                  undone.
+                </p>
+                <div
+                  style={{ display: "flex", gap: "0.5rem", marginTop: "1rem" }}
+                >
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={confirmReset}
+                  >
+                    Confirm reset
+                  </Button>
+                  <Button
+                    variant="quiet"
+                    size="sm"
+                    onClick={() => setShowResetConfirm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
 
