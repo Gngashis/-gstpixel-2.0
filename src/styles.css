@@ -62,7 +62,11 @@
   --input: oklch(1 0 0 / 20%);
   --ring: oklch(0.79 0.142 197);
   --surface: color-mix(in oklab, var(--material-polymer) 82%, transparent);
-  --surface-strong: color-mix(in oklab, var(--material-polymer) 96%, transparent);
+  --surface-strong: color-mix(
+    in oklab,
+    var(--material-polymer) 96%,
+    transparent
+  );
   --ink: oklch(0.105 0.018 260);
   --ink-foreground: oklch(0.97 0.006 250);
   --ink-muted: oklch(0.75 0.016 250);
@@ -142,13 +146,19 @@ a {
 }
 .nav-link:hover {
   color: var(--ink-foreground);
-  background: color-mix(in oklab, var(--env-current-glass-tint) 85%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent);
+  background: color-mix(
+    in oklab,
+    var(--env-current-glass-tint) 85%,
+    transparent
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--primary) 30%, transparent);
 }
 .nav-link-active {
   color: var(--ink-foreground);
   background: color-mix(in oklab, var(--primary) 16%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 45%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--primary) 45%, transparent);
 }
 
 /* Tactile controls: press compression + rising edge light. */
@@ -475,7 +485,6 @@ a {
   font: 700 clamp(2.2rem, 5vw, 4.5rem)/1 var(--font-display);
 }
 
-
 .path-one {
   width: 54%;
   top: 42%;
@@ -488,7 +497,6 @@ a {
   left: 38%;
   transform: rotate(-18deg);
 }
-
 
 .outcome-list {
   margin-top: 3rem;
@@ -597,7 +605,9 @@ a {
 
 .operation-ledger .ledger-row > svg {
   color: color-mix(in oklab, var(--primary) 65%, transparent);
-  transition: transform 220ms var(--easing-standard), color 220ms var(--easing-standard);
+  transition:
+    transform 220ms var(--easing-standard),
+    color 220ms var(--easing-standard);
 }
 
 .operation-ledger .ledger-row:hover > strong {
@@ -1026,7 +1036,6 @@ a {
   color: var(--ink-muted);
 }
 
-
 .core-label {
   font: 500 0.6rem var(--font-mono);
   text-transform: uppercase;
@@ -1034,7 +1043,6 @@ a {
   text-align: center;
   line-height: 1.3;
 }
-
 
 .path-one {
   width: 58%;
@@ -1049,7 +1057,6 @@ a {
   left: 34%;
   transform: rotate(-14deg);
 }
-
 
 .status-dot {
   width: 0.45rem;
@@ -1072,7 +1079,6 @@ a {
   }
 }
 
-
 @media (prefers-reduced-motion: reduce) {
   .status-dot,
   .signal-dot {
@@ -1082,8 +1088,6 @@ a {
 }
 
 @media (max-width: 768px) {
-
-
 }
 
 .service-family-grid {
@@ -1469,7 +1473,11 @@ a {
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
-  background: color-mix(in oklab, var(--env-current-glass-tint) 60%, transparent);
+  background: color-mix(
+    in oklab,
+    var(--env-current-glass-tint) 60%,
+    transparent
+  );
   color: var(--ink-muted);
 }
 
@@ -1657,7 +1665,11 @@ a {
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
-  background: color-mix(in oklab, var(--env-current-glass-tint) 60%, transparent);
+  background: color-mix(
+    in oklab,
+    var(--env-current-glass-tint) 60%,
+    transparent
+  );
   color: var(--ink-muted);
 }
 
@@ -3159,7 +3171,6 @@ a {
 
 /* Final cascade for the premium assembly pass. */
 
-
 .interface-spec > div {
   background: var(--material-specular), var(--material-polymer);
   border-left: 2px solid color-mix(in oklab, var(--primary) 34%, transparent);
@@ -3266,8 +3277,6 @@ a {
 }
 
 @media (max-width: 768px) {
-
-
   .start-band-trace {
     overflow: hidden;
     gap: 0.35rem;
@@ -3353,14 +3362,11 @@ a {
     font-size: 0.5rem;
   }
 
-
   /* The planes are absolute siblings after the ambient/orbit layers. */
-
 
   .core-label {
     font-size: 0.5rem;
   }
-
 
   .content-band {
     padding: 3.75rem 0;
@@ -3508,7 +3514,11 @@ a {
     z-index: 10;
     margin-inline: -1rem;
     padding: 0.75rem 1rem max(0.75rem, env(safe-area-inset-bottom));
-    background: color-mix(in oklab, var(--env-current-glass-tint) 94%, transparent);
+    background: color-mix(
+      in oklab,
+      var(--env-current-glass-tint) 94%,
+      transparent
+    );
     backdrop-filter: blur(18px);
     border-top: 1px solid var(--border);
   }
@@ -3715,8 +3725,18 @@ a {
   );
   opacity: calc(0.68 + var(--stage-weight) * 0.32);
   box-shadow:
-    0 1px 0 color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 18%), transparent),
-    0 0 0 1px color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 34%), transparent);
+    0 1px 0
+      color-mix(
+        in oklab,
+        var(--primary) calc(var(--stage-weight) * 18%),
+        transparent
+      ),
+    0 0 0 1px
+      color-mix(
+        in oklab,
+        var(--primary) calc(var(--stage-weight) * 34%),
+        transparent
+      );
   transition:
     background 600ms var(--easing-decelerate),
     opacity 600ms var(--easing-decelerate),
@@ -3731,14 +3751,26 @@ a {
   height: 1.85rem;
   flex: none;
   border-radius: 0.5rem;
-  color: color-mix(in oklab, var(--primary) calc(60% + var(--stage-weight) * 40%), var(--ink-muted));
+  color: color-mix(
+    in oklab,
+    var(--primary) calc(60% + var(--stage-weight) * 40%),
+    var(--ink-muted)
+  );
   background: linear-gradient(
     150deg,
-    color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 26%), transparent),
+    color-mix(
+      in oklab,
+      var(--primary) calc(var(--stage-weight) * 26%),
+      transparent
+    ),
     transparent
   );
   box-shadow: inset 0 0 0 1px
-    color-mix(in oklab, var(--primary) calc(18% + var(--stage-weight) * 30%), transparent);
+    color-mix(
+      in oklab,
+      var(--primary) calc(18% + var(--stage-weight) * 30%),
+      transparent
+    );
 }
 
 .asm-stage-text {
@@ -3751,7 +3783,11 @@ a {
   font: 500 0.55rem var(--font-mono);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--ink-muted) calc(70% + var(--stage-weight) * 30%), white);
+  color: color-mix(
+    in oklab,
+    var(--ink-muted) calc(70% + var(--stage-weight) * 30%),
+    white
+  );
 }
 
 .asm-stage-text strong {
@@ -3826,11 +3862,340 @@ a {
   }
   .asm-stage {
     opacity: 1;
-    background: color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent);
+    background: color-mix(
+      in oklab,
+      var(--env-current-glass-tint) 42%,
+      transparent
+    );
   }
   .asm-track-fill {
     stroke-dashoffset: 40;
   }
+}
+
+/* --- Digital Readiness Assessment --- */
+
+.dr-progress {
+  margin-bottom: 1.5rem;
+}
+
+.dr-category {
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  font: inherit;
+  color: inherit;
+}
+
+.dr-category fieldset,
+.dr-category legend {
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: auto;
+}
+
+.dr-category-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.dr-category-toggle:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.dr-category-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dr-category-title {
+  font: 700 1.15rem var(--font-display);
+}
+
+.dr-category-meta {
+  font: 500 0.65rem var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted-foreground);
+}
+
+.dr-category-blurb {
+  margin-top: 0.5rem;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.dr-questions {
+  margin-top: 1.25rem;
+}
+
+.dr-question {
+  margin-top: 1.25rem;
+}
+
+.dr-question-prompt {
+  font: 600 0.95rem var(--font-body);
+  margin-bottom: 0.75rem;
+}
+
+.dr-options {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.dr-option {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.375rem;
+  background: var(--background);
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    box-shadow 0.2s;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.dr-option:hover {
+  border-color: color-mix(in oklab, var(--primary) 40%, transparent);
+}
+
+.dr-option.selected {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.dr-option:has(input:focus-visible) {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+.dr-option--na {
+  border-style: dashed;
+  opacity: 0.75;
+}
+
+.dr-option--na.selected {
+  opacity: 1;
+  border-style: solid;
+}
+
+.dr-option-check {
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--primary);
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.dr-option.selected .dr-option-check {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.dr-option-text {
+  flex: 1;
+  min-width: 0;
+}
+
+/* --- Result panel --- */
+
+.dr-result-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.dr-score-ring {
+  position: relative;
+  display: inline-block;
+  width: 10rem;
+  height: 10rem;
+  margin: 1rem 0;
+}
+
+.dr-ring {
+  width: 100%;
+  height: 100%;
+}
+
+.dr-ring-fill {
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.dr-score-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dr-score-number {
+  font: 700 2rem var(--font-display) / 1;
+  color: var(--ink-foreground);
+}
+
+.dr-score-label {
+  font: 500 0.7rem var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-muted);
+}
+
+.dr-result-meta {
+  font: 500 0.75rem var(--font-mono);
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
+}
+
+.dr-categories-section {
+  margin-bottom: 1.5rem;
+}
+
+.dr-categories-section h3,
+.dr-section h3 {
+  font: 600 0.85rem var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  margin-bottom: 1rem;
+}
+
+.dr-category-bars {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dr-bar-row {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.dr-bar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.dr-bar-title {
+  font: 500 0.8rem var(--font-body);
+  color: var(--ink-foreground);
+}
+
+.dr-bar-value {
+  font: 700 0.75rem var(--font-mono);
+  color: var(--primary);
+}
+
+.dr-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ink-line);
+  overflow: hidden;
+}
+
+.dr-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--primary);
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dr-section {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ink-line);
+}
+
+.dr-tag-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.dr-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.65rem;
+  border: 1px solid var(--ink-line);
+  border-radius: 9999px;
+  font: 500 0.75rem var(--font-body);
+  color: var(--ink-foreground);
+}
+
+.dr-tag--strength {
+  border-color: color-mix(in oklab, var(--primary) 40%, transparent);
+  color: var(--primary);
+}
+
+.dr-tag--gap {
+  border-color: color-mix(in oklab, var(--trust) 40%, transparent);
+  color: var(--trust);
+}
+
+.dr-actions {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  counter-reset: dr-action;
+}
+
+.dr-action {
+  counter-increment: dr-action;
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--ink-line);
+}
+
+.dr-action:last-child {
+  border-bottom: none;
+}
+
+.dr-action::before {
+  content: counter(dr-action);
+  font: 700 0.7rem var(--font-mono);
+  color: var(--primary);
+}
+
+.dr-action-title {
+  font: 600 0.95rem var(--font-body);
+  color: var(--ink-foreground);
 }
 
 /* Home outcome cards: a stack of assembly panels rather than plain list rows.
@@ -3914,7 +4279,6 @@ a {
   }
 }
 
-
 /* Intrinsic-sizing guard.
    Grid and flex items default to min-width:auto, so any wide descendant (a
    ch-based max-width, a nowrap label, a long token) becomes the track's
@@ -3959,18 +4323,37 @@ a {
   position: relative;
   aspect-ratio: 16/9;
   overflow: hidden;
-  background-color: color-mix(in oklab, var(--env-current-glass-tint) 52%, transparent);
+  background-color: color-mix(
+    in oklab,
+    var(--env-current-glass-tint) 52%,
+    transparent
+  );
   background-image:
-    linear-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(
+      color-mix(in oklab, var(--primary) 12%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--primary) 12%, transparent) 1px,
+      transparent 1px
+    ),
     repeating-linear-gradient(
       115deg,
       color-mix(in oklab, white 4%, transparent) 0 2px,
       transparent 2px 9px
     );
-  background-size: 30px 30px, 30px 30px, auto;
+  background-size:
+    30px 30px,
+    30px 30px,
+    auto;
   mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(
+    180deg,
+    #000 0%,
+    #000 62%,
+    transparent 100%
+  );
   transition: background-color 600ms var(--easing-decelerate);
 }
 
@@ -4042,7 +4425,6 @@ a {
   align-self: start;
 }
 
-
 /* Need-choice icon chip: holds a real icon now that the name leak is fixed. */
 .need-choice-icon {
   display: grid;
@@ -4056,15 +4438,16 @@ a {
     color-mix(in oklab, var(--primary) 20%, transparent),
     transparent
   );
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 26%, transparent);
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--primary) 26%, transparent);
 }
 
 .need-choice.selected .need-choice-icon {
   color: var(--primary);
-  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 60%, transparent),
+  box-shadow:
+    inset 0 0 0 1px color-mix(in oklab, var(--primary) 60%, transparent),
     0 0 20px color-mix(in oklab, var(--primary) 22%, transparent);
 }
-
 
 /* Physical press: the button compresses and its shadow tightens, so the
    control reads as a solid object rather than a coloured rectangle. */
