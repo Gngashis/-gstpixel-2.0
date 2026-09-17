@@ -3713,7 +3713,7 @@ a {
     0,
     0
   );
-  opacity: calc(0.52 + var(--stage-weight) * 0.48);
+  opacity: calc(0.68 + var(--stage-weight) * 0.32);
   box-shadow:
     0 1px 0 color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 18%), transparent),
     0 0 0 1px color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 34%), transparent);
@@ -3748,10 +3748,10 @@ a {
 }
 
 .asm-stage-meta {
-  font: 500 0.5rem var(--font-mono);
+  font: 500 0.55rem var(--font-mono);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: color-mix(in oklab, var(--ink-muted) calc(70% + var(--stage-weight) * 30%), white);
 }
 
 .asm-stage-text strong {
@@ -4063,4 +4063,24 @@ a {
   color: var(--primary);
   box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 60%, transparent),
     0 0 20px color-mix(in oklab, var(--primary) 22%, transparent);
+}
+
+
+/* Physical press: the button compresses and its shadow tightens, so the
+   control reads as a solid object rather than a coloured rectangle. */
+.btn-tactile:active,
+.tactile:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: var(--btn-shadow-active, var(--depth-shadow-xs));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tactile,
+  .btn-tactile {
+    transition: none;
+  }
+  .tactile:hover,
+  .tactile:active {
+    transform: none;
+  }
 }
