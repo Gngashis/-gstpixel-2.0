@@ -47,14 +47,32 @@ export const toolCatalog = [
 const toolBySlug = Object.fromEntries(toolCatalog.map((t) => [t.slug, t]));
 export const getTool = (slug: string) => toolBySlug[slug];
 
-/** Verified business details. Nothing here is invented; do not add unverified claims. */
+/**
+ * Verified business details. Nothing here is invented; do not add unverified claims.
+ *
+ * Rules for this module:
+ * - Only add facts that are evidenced in the repository or confirmed by the founder.
+ * - Do not add business hours, response SLAs, turnaround guarantees, customer counts,
+ *   ratings, certifications, partnerships, or a legal structure that is not documented.
+ * - `support@gstpixel.com` is the only verified support channel. `gstpixel.in` is a
+ *   registered brand domain only; no mailbox on it is treated as working.
+ */
 export const businessFacts = {
   name: "GSTPIXEL",
   tagline: "Start Right. Stay Compliant. Grow Online.",
   founder: "Ashis Gurung",
   founderTitle: "Founder & Business Consultant",
+  /** Longer form, used where the digital-services scope needs to be explicit. */
+  founderTitleExtended: "Founder · Digital Solutions & Business Consultant",
   address: "Ramgaon, Near Anthony School, Jaigaon – 736182, West Bengal, India",
+  /** Short form for inline use where the full postal address is too long. */
+  location: "Jaigaon, West Bengal, India",
+  /** Allowed local-to-national positioning line. No other office locations exist. */
+  positioning:
+    "Based in Jaigaon, West Bengal. Building for businesses everywhere.",
   gstin: "19ESPPG2569P1ZP",
+  domain: "gstpixel.com",
+  domainAlternate: "gstpixel.in",
   phone: { label: "+91 90465 20548", href: "tel:+919046520548" },
   phoneAlt: { label: "+91 81160 76725", href: "tel:+918116076725" },
   phoneBhutan: { label: "+975 77260538", href: "tel:+97577260538" },

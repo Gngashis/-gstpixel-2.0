@@ -256,7 +256,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             <Brand />
             <p className="mt-4 text-sm text-ink-muted">
               <strong style={{ color: "var(--ink-foreground)" }}>
-                Start Right. Stay Compliant. Grow Online.
+                {businessFacts.tagline}
               </strong>
               <br />
               Business consulting and services, digital development, and
@@ -304,7 +304,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
         <div className="site-container footer-legal mt-10 pt-5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
-          © 2026 GSTPIXEL · gstpixel.com
+          © {new Date().getFullYear()} {businessFacts.name} ·{" "}
+          {businessFacts.domain}
         </div>
       </footer>
     </div>

@@ -27,7 +27,7 @@ import { JsonLd } from "@/components/json-ld";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "GSTPIXEL — Start Right. Stay Compliant. Grow Online." },
+      { title: `${businessFacts.name} — ${businessFacts.tagline}` },
       {
         name: "description",
         content:
@@ -35,7 +35,7 @@ export const Route = createFileRoute("/")({
       },
       {
         property: "og:title",
-        content: "GSTPIXEL — Start Right. Stay Compliant. Grow Online.",
+        content: `${businessFacts.name} — ${businessFacts.tagline}`,
       },
       {
         property: "og:description",
@@ -83,7 +83,7 @@ function Home() {
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.25}>
               <p className="label text-primary hero-tagline">
-                Start Right. Stay Compliant. Grow Online.
+                {businessFacts.tagline}
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>

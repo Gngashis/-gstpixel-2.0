@@ -15,6 +15,7 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { buildCanonical } from "@/lib/seo";
+import { businessFacts } from "@/lib/content";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -57,14 +58,14 @@ function Page() {
     },
     {
       icon: Shield,
-      title: "No third-party scripts",
-      desc: "No advertising pixels, social media trackers, or fingerprinting libraries are loaded. Only first-party assets required for the site to function.",
+      title: "No trackers or ad scripts",
+      desc: "No advertising pixels, social media trackers, or fingerprinting libraries are loaded. The single exception is web typography: fonts are served from Google's font CDN, so your browser makes that one third-party request.",
       status: "active",
     },
     {
       icon: Lock,
-      title: "HTTPS enforced",
-      desc: "All connections use TLS. The site is deployed with HSTS and secure headers via Cloudflare.",
+      title: "Served over HTTPS",
+      desc: "The site is delivered over TLS through its Cloudflare hosting. Header-level hardening such as HSTS is managed at the hosting edge and is not configured in this codebase, so it is not asserted here.",
       status: "active",
     },
     {
@@ -188,8 +189,8 @@ function Page() {
               <h2 className="section-title">Contact us directly.</h2>
               <p style={{ maxWidth: "52ch", color: "var(--ink-muted)" }}>
                 Email{" "}
-                <a href="mailto:support@gstpixel.com" className="underline">
-                  support@gstpixel.com
+                <a href={businessFacts.email.href} className="underline">
+                  {businessFacts.email.label}
                 </a>
                 with "Privacy" in the subject line. We will respond within a
                 reasonable timeframe.

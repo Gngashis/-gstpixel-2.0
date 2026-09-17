@@ -151,7 +151,7 @@ function AboutContent() {
     {
       icon: CheckCircle2,
       title: "Verifiable business identity",
-      desc: "Registered GSTIN, physical address, direct contact details published.",
+      desc: "GSTIN, postal address, and direct contact details are published — all independently verifiable.",
     },
     {
       icon: CheckCircle2,
@@ -166,7 +166,7 @@ function AboutContent() {
     {
       icon: CheckCircle2,
       title: "Privacy by default",
-      desc: "No analytics, tracking, or third-party scripts without consent.",
+      desc: "No analytics, ad pixels, or social trackers. Web fonts load from Google's CDN — the only third-party request this site makes.",
     },
     {
       icon: CheckCircle2,
@@ -243,7 +243,7 @@ function AboutContent() {
         <div className="site-container">
           <SectionHeader
             label="Founder & Leadership"
-            title="Ashis Gurung — Founder & Business Consultant"
+            title={`${businessFacts.founder} — ${businessFacts.founderTitle}`}
           />
           <StaggeredReveal
             baseDelay={0.08}
@@ -290,7 +290,7 @@ function AboutContent() {
                   }}
                 >
                   <strong style={{ font: "700 1.5rem var(--font-display)" }}>
-                    Ashis Gurung
+                    {businessFacts.founder}
                   </strong>
                   <span
                     className="glass-light"
@@ -301,7 +301,7 @@ function AboutContent() {
                       textTransform: "uppercase",
                     }}
                   >
-                    Founder & Business Consultant
+                    {businessFacts.founderTitle}
                   </span>
                   <span
                     className="glass-light"
@@ -313,7 +313,7 @@ function AboutContent() {
                       color: "var(--color-brand-trust)",
                     }}
                   >
-                    Digital Solutions & Business Consultant
+                    Digital Solutions
                   </span>
                 </div>
                 <p
@@ -324,9 +324,9 @@ function AboutContent() {
                     maxWidth: "50ch",
                   }}
                 >
-                  Building GSTPIXEL from Jaigaon, West Bengal — assembling
-                  digital products, AI automation, business services, and
-                  consultancy into one coherent system for businesses across
+                  Building {businessFacts.name} from {businessFacts.location} —
+                  assembling digital products, AI automation, business services,
+                  and consultancy into one coherent system for businesses across
                   India and beyond.
                 </p>
                 <div
@@ -342,24 +342,26 @@ function AboutContent() {
                     className="flex items-center gap-0.5"
                     style={{ color: "var(--foreground)" }}
                   >
-                    <MapPin size={16} aria-hidden="true" /> Jaigaon, West
-                    Bengal, India
+                    <MapPin size={16} aria-hidden="true" />{" "}
+                    {businessFacts.location}
                   </span>
                   <a
-                    href="mailto:support@gstpixel.com"
+                    href={businessFacts.email.href}
                     className="flex items-center gap-0.5"
                     style={{ color: "var(--foreground)" }}
                   >
-                    <Mail size={16} aria-hidden="true" /> support@gstpixel.com
+                    <Mail size={16} aria-hidden="true" />{" "}
+                    {businessFacts.email.label}
                   </a>
                   <a
-                    href="https://wa.me/919046520548"
+                    href={businessFacts.whatsapp.href}
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-0.5"
                     style={{ color: "var(--foreground)" }}
                   >
-                    <MessageSquare size={16} aria-hidden="true" /> WhatsApp
+                    <MessageSquare size={16} aria-hidden="true" />{" "}
+                    {businessFacts.whatsapp.label}
                   </a>
                 </div>
               </div>
@@ -393,11 +395,11 @@ function AboutContent() {
                       color: "var(--muted-foreground)",
                     }}
                   >
-                    GSTPIXEL is based in Ramgaon, Near Anthony School, Jaigaon –
-                    736182, West Bengal. Our local presence means genuine
-                    accessibility for nearby businesses. Our digital-first
-                    approach means we serve clients across India, Bhutan, and
-                    globally with the same rigour and care.
+                    {businessFacts.name} is based at {businessFacts.address}.
+                    Our local presence means genuine accessibility for nearby
+                    businesses. Our digital-first approach means we can work
+                    with businesses across India, Bhutan, and beyond — with the
+                    same rigour and care.
                   </p>
                 </div>
               </div>
