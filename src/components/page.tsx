@@ -27,11 +27,13 @@ export function ScrollReveal({
   className = "",
   delay = 0,
   variant = "fadeInUp",
+  style: extraStyle,
 }: {
   children: React.ReactNode;
   className?: string;
   delay?: number;
   variant?: "fadeInUp" | "fadeIn" | "scaleIn";
+  style?: React.CSSProperties;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -71,6 +73,7 @@ export function ScrollReveal({
   const isVisible = hydrated ? visible : true;
 
   const style: React.CSSProperties = {
+    ...extraStyle,
     ...(isVisible ? variants[variant] : initialVariants[variant]),
     transition: isVisible
       ? `${transition.duration}s ${transition.easing} ${transition.delay}s`

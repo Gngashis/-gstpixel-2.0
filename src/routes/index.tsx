@@ -444,7 +444,10 @@ function Home() {
               context into your project enquiry. Not sure where to begin? The{" "}
               <Link to="/tools/service-finder">service finder</Link> points to
               the capability that fits, and the{" "}
-              <Link to="/services/business-setup-compliance">
+              <Link
+                to="/services/$slug"
+                params={{ slug: "business-setup-compliance" }}
+              >
                 business checklist
               </Link>{" "}
               pairs with registration and compliance work.

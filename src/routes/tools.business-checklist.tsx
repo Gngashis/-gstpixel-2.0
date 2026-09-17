@@ -113,7 +113,7 @@ function Page() {
           Array.isArray(parsed) &&
           parsed.every((item) => typeof item === "string")
         ) {
-          const validIds = new Set(steps.map((s) => s.id));
+          const validIds = new Set<string>(steps.map((s) => s.id));
           setDone(parsed.filter((id) => validIds.has(id)));
         }
       }

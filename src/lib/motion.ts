@@ -49,7 +49,7 @@ export function useScrollProgress(): number {
 }
 
 export function useElementScrollProgress(
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   options?: { offsetStart?: number; offsetEnd?: number },
 ): number {
   const [progress, setProgress] = useState(0);
@@ -92,7 +92,7 @@ export function useIntersection(
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry?.isIntersecting) {
           setVisible(true);
           observer.disconnect();
         }
@@ -249,7 +249,7 @@ export const slideInFromRight = {
 export function useAnimationFrame(
   callback: (time: number, delta: number) => void,
 ): void {
-  const requestRef = useRef<number>();
+  const requestRef = useRef<number>(0);
   const previousTimeRef = useRef<number>(0);
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
@@ -268,7 +268,7 @@ export function useAnimationFrame(
 }
 
 export function useTimeout(callback: () => void, delay: number): void {
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
   useEffect(() => {
@@ -280,7 +280,7 @@ export function useTimeout(callback: () => void, delay: number): void {
 }
 
 export function useInterval(callback: () => void, delay: number | null): void {
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const callbackRef = useRef(callback);
   callbackRef.current = callback;
   useEffect(() => {

@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import {
   type ButtonHTMLAttributes,
   type AnchorHTMLAttributes,
+  forwardRef,
   useState,
   useRef,
   useEffect,
@@ -63,193 +64,214 @@ export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
     autoResetMs?: number;
   };
 
-export function Button({
-  asChild,
-  variant = "default",
-  size = "default",
-  className,
-  loading = false,
-  loadingText,
-  successText,
-  errorText,
-  autoResetMs = 2000,
-  state = "default",
-  children,
-  onClick,
-  disabled,
-  ...props
-}: ButtonProps) {
-  const Comp = asChild ? Slot : "button";
-  const [internalState, setInternalState] = useState<
-    "default" | "loading" | "success" | "error"
-  >(loading ? "loading" : state);
-  const [ripple, setRipple] = useState<{
-    x: number;
-    y: number;
-    size: number;
-  } | null>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const autoResetRef = useRef<ReturnType<typeof setTimeout>>();
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+  function Button(
+    {
+      asChild,
+      variant = "default",
+      size = "default",
+      className,
+      loading = false,
+      loadingText,
+      successText,
+      errorText,
+      autoResetMs = 2000,
+      state: stateProp = "default",
+      children,
+      onClick,
+      disabled,
+      ...props
+    }: ButtonProps,
+    ref,
+  ) {
+    const state = stateProp ?? "default";
+    const Comp = asChild ? Slot : "button";
+    const internalRef = useRef<HTMLButtonElement>(null);
+    const autoResetRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const [ripple, setRipple] = useState<{
+      x: number;
+      y: number;
+      size: number;
+    } | null>(null);
 
-  useEffect(() => {
-    if (loading) {
-      setInternalState("loading");
-    } else if (state !== "default") {
-      setInternalState(state);
-    } else {
-      setInternalState("default");
-    }
-  }, [loading, state]);
+    const setMergedRef = (node: HTMLButtonElement | null) => {
+      internalRef.current = node;
+      if (typeof ref === "function") ref(node);
+      else if (ref)
+        (ref as React.MutableRefObject<HTMLButtonElement | null>).current =
+          node;
+    };
 
-  useEffect(() => {
-    if (
-      (internalState === "success" || internalState === "error") &&
-      autoResetMs > 0
-    ) {
-      autoResetRef.current = setTimeout(() => {
+    const [internalState, setInternalState] = useState<
+      "default" | "loading" | "success" | "error"
+    >(loading ? "loading" : state);
+
+    useEffect(() => {
+      if (loading) {
+        setInternalState("loading");
+      } else if (state !== "default") {
+        setInternalState(state);
+      } else {
         setInternalState("default");
-      }, autoResetMs);
-      return () => clearTimeout(autoResetRef.current);
-    }
-  }, [internalState, autoResetMs]);
+      }
+    }, [loading, state]);
 
-  /* A single click path for every state. Previously the handler was bound only
-     while the button was in its loading state, so ordinary <Button onClick>
-     buttons never fired. */
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!asChild) {
-      const rect = buttonRef.current?.getBoundingClientRect();
-      if (rect) {
-        setRipple({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-          size: Math.max(rect.width, rect.height) * 2,
-        });
+    useEffect(() => {
+      if (
+        (internalState === "success" || internalState === "error") &&
+        autoResetMs > 0
+      ) {
+        autoResetRef.current = setTimeout(() => {
+          setInternalState("default");
+        }, autoResetMs);
+        return () => clearTimeout(autoResetRef.current);
+      }
+      return undefined;
+    }, [internalState, autoResetMs]);
+
+    const triggerSuccess = () => {
+      setInternalState("success");
+      if (autoResetMs > 0) {
+        autoResetRef.current = setTimeout(
+          () => setInternalState("default"),
+          autoResetMs,
+        );
+      }
+    };
+
+    const triggerError = () => {
+      setInternalState("error");
+      if (autoResetMs > 0) {
+        autoResetRef.current = setTimeout(
+          () => setInternalState("default"),
+          autoResetMs,
+        );
+      }
+    };
+
+    const isLoading = internalState === "loading";
+    const isSuccess = internalState === "success";
+    const isError = internalState === "error";
+
+    // When using asChild (Slot), we MUST render exactly ONE valid React element child.
+    // Radix Slot does not accept fragments, multiple elements, or non-element children.
+    // We ensure this by:
+    // 1. Only rendering ripple when NOT using asChild
+    // 2. For asChild, ensuring we only ever pass a single valid React element to Slot
+    // 3. For loading/success/error states with asChild, we wrap in a single span
+    // 4. Validating that children is a single valid element when asChild is true
+
+    const getContent = () => {
+      if (isLoading) {
+        return (
+          <span className="inline-flex items-center justify-center gap-2">
+            <Loader2 className="size-5 animate-spin" aria-hidden="true" />
+            <span className="sr-only">{loadingText ?? "Loading..."}</span>
+          </span>
+        );
+      }
+      if (isSuccess) {
+        return (
+          <span className="inline-flex items-center justify-center gap-2">
+            <Check className="size-5" aria-hidden="true" />
+            <span>{successText ?? "Success"}</span>
+          </span>
+        );
+      }
+      if (isError) {
+        return (
+          <span className="inline-flex items-center justify-center gap-2">
+            <X className="size-5" aria-hidden="true" />
+            <span>{errorText ?? "Error"}</span>
+          </span>
+        );
+      }
+      return children;
+    };
+
+    const content = getContent();
+
+    // When using asChild, ensure we pass exactly one valid React element to Slot
+    // If content is not a single valid element, wrap it
+    let slotContent = content;
+    if (asChild) {
+      // Check if content is a single valid React element
+      const isSingleValidElement = isValidElement(content);
+
+      if (!isSingleValidElement) {
+        // Wrap in a single span to satisfy Slot's requirement
+        slotContent = <span>{content}</span>;
       }
     }
-    onClick?.(e);
-  };
 
-  const triggerSuccess = () => {
-    setInternalState("success");
-    if (autoResetMs > 0) {
-      autoResetRef.current = setTimeout(
-        () => setInternalState("default"),
-        autoResetMs,
-      );
-    }
-  };
+    /* A single click path for every state. Previously the handler was bound only
+       while the button was in its loading state, so ordinary <Button onClick>
+       buttons never fired. */
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      if (!asChild) {
+        const rect = internalRef.current?.getBoundingClientRect();
+        if (rect) {
+          setRipple({
+            x: e.clientX - rect.left,
+            y: e.clientY - rect.top,
+            size: Math.max(rect.width, rect.height) * 2,
+          });
+        }
+      }
+      onClick?.(e);
+    };
 
-  const triggerError = () => {
-    setInternalState("error");
-    if (autoResetMs > 0) {
-      autoResetRef.current = setTimeout(
-        () => setInternalState("default"),
-        autoResetMs,
-      );
-    }
-  };
-
-  const isLoading = internalState === "loading";
-  const isSuccess = internalState === "success";
-  const isError = internalState === "error";
-
-  // When using asChild (Slot), we MUST render exactly ONE valid React element child.
-  // Radix Slot does not accept fragments, multiple elements, or non-element children.
-  // We ensure this by:
-  // 1. Only rendering ripple when NOT using asChild
-  // 2. For asChild, ensuring we only ever pass a single valid React element to Slot
-  // 3. For loading/success/error states with asChild, we wrap in a single span
-  // 4. Validating that children is a single valid element when asChild is true
-
-  const getContent = () => {
-    if (isLoading) {
-      return (
-        <span className="inline-flex items-center justify-center gap-2">
-          <Loader2 className="size-5 animate-spin" aria-hidden="true" />
-          <span className="sr-only">{loadingText ?? "Loading..."}</span>
-        </span>
-      );
-    }
-    if (isSuccess) {
-      return (
-        <span className="inline-flex items-center justify-center gap-2">
-          <Check className="size-5" aria-hidden="true" />
-          <span>{successText ?? "Success"}</span>
-        </span>
-      );
-    }
-    if (isError) {
-      return (
-        <span className="inline-flex items-center justify-center gap-2">
-          <X className="size-5" aria-hidden="true" />
-          <span>{errorText ?? "Error"}</span>
-        </span>
-      );
-    }
-    return children;
-  };
-
-  const content = getContent();
-
-  // When using asChild, ensure we pass exactly one valid React element to Slot
-  // If content is not a single valid element, wrap it
-  let slotContent = content;
-  if (asChild) {
-    // Check if content is a single valid React element
-    const isSingleValidElement = isValidElement(content);
-
-    if (!isSingleValidElement) {
-      // Wrap in a single span to satisfy Slot's requirement
-      slotContent = <span>{content}</span>;
-    }
-  }
-
-  return (
-    <Comp
-      ref={buttonRef}
-      className={cn(
-        buttonVariants({ variant, size, state: internalState }),
-        className,
-      )}
-      disabled={disabled || isLoading}
-      aria-busy={isLoading}
-      aria-live={isLoading ? "polite" : undefined}
-      onClick={handleClick}
-      {...props}
-    >
-      {/* Ripple effect only when NOT using asChild (Slot requires single child) */}
-      {!asChild && ripple && (
-        <span
-          className="absolute rounded-full bg-primary/20 pointer-events-none"
-          style={{
-            left: ripple.x - ripple.size / 2,
-            top: ripple.y - ripple.size / 2,
-            width: ripple.size,
-            height: ripple.size,
-            animation: "ripple 400ms ease-out forwards",
-          }}
-        />
-      )}
-      {slotContent}
-    </Comp>
-  );
-}
+    return (
+      <Comp
+        ref={setMergedRef}
+        className={cn(
+          buttonVariants({ variant, size, state: internalState }),
+          className,
+        )}
+        disabled={disabled || isLoading}
+        aria-busy={isLoading}
+        aria-live={isLoading ? "polite" : undefined}
+        onClick={handleClick}
+        {...props}
+      >
+        {/* Ripple effect only when NOT using asChild (Slot requires single child) */}
+        {!asChild && ripple && (
+          <span
+            className="absolute rounded-full bg-primary/20 pointer-events-none"
+            style={{
+              left: ripple.x - ripple.size / 2,
+              top: ripple.y - ripple.size / 2,
+              width: ripple.size,
+              height: ripple.size,
+              animation: "ripple 400ms ease-out forwards",
+            }}
+          />
+        )}
+        {slotContent}
+      </Comp>
+    );
+  },
+);
 
 export type ButtonLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> &
   VariantProps<typeof buttonVariants> & {
     to: string;
+    search?: Record<string, string>;
+    params?: Record<string, string>;
     loading?: boolean;
     loadingText?: string;
     successText?: string;
     errorText?: string;
     autoResetMs?: number;
     replace?: boolean;
+    disabled?: boolean;
     state?: "default" | "loading" | "success" | "error";
   };
 
 export function ButtonLink({
   to,
+  search,
+  params,
   variant = "default",
   size = "default",
   className,
@@ -258,13 +280,14 @@ export function ButtonLink({
   successText,
   errorText,
   autoResetMs = 2000,
-  state = "default",
+  state: stateProp = "default",
   children,
   onClick,
   disabled,
   replace = false,
   ...props
 }: ButtonLinkProps) {
+  const state = stateProp ?? "default";
   const [internalState, setInternalState] = useState<
     "default" | "loading" | "success" | "error"
   >(loading ? "loading" : state);
@@ -274,7 +297,7 @@ export function ButtonLink({
     size: number;
   } | null>(null);
   const linkRef = useRef<HTMLAnchorElement>(null);
-  const autoResetRef = useRef<ReturnType<typeof setTimeout>>();
+  const autoResetRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     if (loading) {
@@ -299,13 +322,16 @@ export function ButtonLink({
         }
         await onClick(e);
       };
-      linkRef.current?.addEventListener("click", handleClick as EventListener);
-      return () =>
-        linkRef.current?.removeEventListener(
-          "click",
-          handleClick as EventListener,
-        );
+      const listener = ((e: Event) =>
+        handleClick(
+          e as unknown as React.MouseEvent<HTMLAnchorElement>,
+        )) as EventListener;
+      linkRef.current?.addEventListener("click", listener);
+      return () => {
+        linkRef.current?.removeEventListener("click", listener);
+      };
     }
+    return undefined;
   }, [internalState, onClick]);
 
   useEffect(() => {
@@ -318,6 +344,7 @@ export function ButtonLink({
       }, autoResetMs);
       return () => clearTimeout(autoResetRef.current);
     }
+    return undefined;
   }, [internalState, autoResetMs]);
 
   const triggerSuccess = () => {
@@ -381,10 +408,14 @@ export function ButtonLink({
     return children;
   };
 
+  const { href: _href, target: _target, ...linkProps } = props;
+
   return (
     <Link
       ref={linkRef}
       to={to}
+      {...(search !== undefined && { search })}
+      {...(params !== undefined && { params })}
       replace={replace}
       className={cn(
         buttonVariants({ variant, size, state: internalState }),
@@ -395,7 +426,7 @@ export function ButtonLink({
       aria-busy={isLoading}
       aria-live={isLoading ? "polite" : undefined}
       onClick={handleLinkClick}
-      {...props}
+      {...linkProps}
     >
       {ripple && (
         <span

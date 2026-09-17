@@ -85,7 +85,7 @@ function AssemblyRail() {
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const headerRef = useRef<HTMLHeaderElement>(null);
+  const headerRef = useRef<HTMLElement>(null);
   const headerEnv = useElementEnvironment(headerRef);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
 
