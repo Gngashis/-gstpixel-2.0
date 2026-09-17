@@ -256,7 +256,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 export type ButtonLinkProps = AnchorHTMLAttributes<HTMLAnchorElement> &
   VariantProps<typeof buttonVariants> & {
     to: string;
-    search?: Record<string, string>;
+    search?: Record<string, unknown>;
     params?: Record<string, string>;
     loading?: boolean;
     loadingText?: string;
@@ -410,6 +410,23 @@ export function ButtonLink({
 
   const { href: _href, target: _target, ...linkProps } = props;
 
+  if (isDisabled) {
+    return (
+      <span
+        className={cn(
+          buttonVariants({ variant, size, state: internalState }),
+          className,
+          "pointer-events-none opacity-45",
+        )}
+        aria-disabled="true"
+        tabIndex={-1}
+        {...linkProps}
+      >
+        {getContent()}
+      </span>
+    );
+  }
+
   return (
     <Link
       ref={linkRef}
@@ -420,9 +437,7 @@ export function ButtonLink({
       className={cn(
         buttonVariants({ variant, size, state: internalState }),
         className,
-        isDisabled && "pointer-events-none opacity-45",
       )}
-      aria-disabled={isDisabled}
       aria-busy={isLoading}
       aria-live={isLoading ? "polite" : undefined}
       onClick={handleLinkClick}

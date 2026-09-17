@@ -9,6 +9,9 @@ import {
   Code,
   Globe,
   HelpCircle,
+  Mail,
+  MessageCircle,
+  Phone,
   Target,
   TrendingUp,
   X,
@@ -22,6 +25,12 @@ import {
   SectionHeader,
 } from "@/components/page";
 import { Button } from "@/components/ui/button";
+import { CopyButton } from "@/lib/free-tools";
+import {
+  encodeContactSummary,
+  formatEnquirySummary,
+  resolveHandoffNeed,
+} from "@/lib/enquiry-handoff";
 import { businessFacts } from "@/lib/content";
 import { buildCanonical } from "@/lib/seo";
 
@@ -57,6 +66,8 @@ export const Route = createFileRoute("/start-your-project")({
   component: Page,
 });
 
+const STORAGE_VERSION = 1;
+
 const needs = [
   { id: "website", label: "Website or digital platform", icon: "Globe" },
   { id: "application", label: "Web or mobile application", icon: "Code" },
@@ -80,8 +91,6 @@ const needs = [
   { id: "unsure", label: "Not sure yet", icon: "HelpCircle" },
 ] as const;
 
-const needIds = needs.map((n) => n.id);
-
 /* Icons are declared by name in the data above; resolve them for rendering so
    the label text never leaks into the UI. */
 const needIcons: Record<string, LucideIcon> = {
@@ -96,50 +105,6 @@ const needIcons: Record<string, LucideIcon> = {
 
 const resolveNeedIcon = (name: string): LucideIcon =>
   needIcons[name] ?? HelpCircle;
-
-function resolveNeedId(incoming: string | undefined): string {
-  if (!incoming) return "";
-  if (needIds.includes(incoming as (typeof needIds)[number])) return incoming;
-  const lower = incoming.toLowerCase();
-  if (
-    lower.includes("website") ||
-    lower.includes("ecommerce") ||
-    lower.includes("digital platform")
-  )
-    return "website";
-  if (
-    lower.includes("web app") ||
-    lower.includes("mobile app") ||
-    lower.includes("application")
-  )
-    return "application";
-  if (lower.includes("ai") || lower.includes("automation")) return "ai";
-  if (
-    lower.includes("gst") ||
-    lower.includes("fssai") ||
-    lower.includes("compliance")
-  )
-    return "compliance";
-  if (
-    lower.includes("registration") ||
-    lower.includes("business setup") ||
-    lower.includes("setup")
-  )
-    return "registration";
-  if (
-    lower.includes("consult") ||
-    lower.includes("transformation") ||
-    lower.includes("strategy")
-  )
-    return "consultancy";
-  if (
-    lower.includes("growth") ||
-    lower.includes("reach") ||
-    lower.includes("conversion")
-  )
-    return "growth";
-  return "unsure";
-}
 
 const stages = [
   {
@@ -230,6 +195,47 @@ function restoreForm(value: unknown): Partial<Form> {
   return restored;
 }
 
+type DraftReadResult = {
+  form: Partial<Form>;
+  step: number;
+  exists: boolean;
+  preservedFields: string[];
+};
+
+function readDraft(): DraftReadResult {
+  const fallback: DraftReadResult = {
+    form: {},
+    step: 0,
+    exists: false,
+    preservedFields: [],
+  };
+
+  try {
+    const raw = sessionStorage.getItem("gstpixel-enquiry");
+    if (!raw) return fallback;
+
+    const parsed = JSON.parse(raw) as {
+      version?: number;
+      step?: unknown;
+      form?: unknown;
+    };
+    if (parsed.version !== STORAGE_VERSION) return fallback;
+
+    const form = restoreForm(parsed.form);
+    const step =
+      typeof parsed.step === "number"
+        ? Math.max(0, Math.min(stepLabels.length - 1, parsed.step))
+        : 0;
+    const preservedFields = Object.entries(form)
+      .filter(([key, value]) => key !== "need" && key !== "details" && value)
+      .map(([key]) => key);
+
+    return { form, step, exists: true, preservedFields };
+  } catch {
+    return fallback;
+  }
+}
+
 const budgetOptions = [
   { value: "", label: "Prefer not to say" },
   { value: "under-1l", label: "Under ₹1 lakh" },
@@ -257,16 +263,21 @@ function Page() {
   const search = Route.useSearch();
   const interest = search["interest"];
   const context = search["context"];
-  const [step, setStep] = useState(0);
-  const resolvedNeed = resolveNeedId(search["interest"] as string | undefined);
-  const hasFreshContext = Boolean(search["interest"] || search["context"]);
-  const [form, setForm] = useState<Form>({
+  const freshNeed = resolveHandoffNeed(interest);
+  const freshContext = typeof context === "string" ? context : "";
+  const hasFreshContext = Boolean(interest || freshContext);
+
+  const draft = readDraft();
+
+  const [step, setStep] = useState(() => (hasFreshContext ? 0 : draft.step));
+  const [form, setForm] = useState<Form>(() => ({
     ...empty,
-    need: resolvedNeed,
-    details: search["context"] ?? "",
-  });
+    ...draft.form,
+    need: freshNeed || draft.form.need || "",
+    details: freshContext || draft.form.details || "",
+  }));
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
-  const [hadDraft, setHadDraft] = useState(false);
+  const [hadDraft, setHadDraft] = useState(draft.exists);
 
   const set = (key: keyof Form, value: string) => {
     setForm((current) => ({ ...current, [key]: value }));
@@ -274,49 +285,30 @@ function Page() {
   };
 
   useEffect(() => {
-    let draftExists = false;
     try {
-      const saved = sessionStorage.getItem("gstpixel-enquiry");
-      if (saved) {
-        draftExists = true;
-        if (!hasFreshContext) {
-          const restored = restoreForm(JSON.parse(saved));
-          setForm((current) => ({
-            ...current,
-            ...restored,
-            ...(resolvedNeed ? { need: resolvedNeed } : {}),
-            ...(context ? { details: context } : {}),
-          }));
-        }
-      }
-    } catch {
-      /* storage is optional */
-    } finally {
-      setHadDraft(draftExists);
-    }
-  }, [context, hasFreshContext, resolvedNeed]);
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem("gstpixel-enquiry", JSON.stringify(form));
+      sessionStorage.setItem(
+        "gstpixel-enquiry",
+        JSON.stringify({ version: STORAGE_VERSION, step, form }),
+      );
     } catch {
       /* storage is optional */
     }
-  }, [form]);
+  }, [step, form]);
 
   const handleResetDraft = () => {
-    setForm({ ...empty, need: resolvedNeed, details: context ?? "" });
+    setForm({ ...empty, need: freshNeed || "", details: freshContext });
+    setStep(0);
+    setErrors({});
+    setHadDraft(false);
     try {
       sessionStorage.removeItem("gstpixel-enquiry");
     } catch {
       /* storage is optional */
     }
-    setStep(0);
-    setErrors({});
-    setHadDraft(false);
   };
 
-  const showDraftNotice = hasFreshContext && hadDraft;
+  const showDraftNotice =
+    hasFreshContext && hadDraft && draft.preservedFields.length > 0;
 
   const deriveErrors = (
     s: number,
@@ -348,12 +340,6 @@ function Page() {
     return newErrors;
   };
 
-  const validateStep = (s: number): boolean => {
-    const newErrors = deriveErrors(s, form);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
   const focusFirstError = (errorKeys: string[]) => {
     if (errorKeys.length === 0) return;
     const firstErrorKey = errorKeys[0] as keyof Form;
@@ -367,7 +353,7 @@ function Page() {
     const newErrors = deriveErrors(step, form);
     if (Object.keys(newErrors).length === 0) {
       setErrors({});
-      setStep((current) => Math.min(5, current + 1));
+      setStep((current) => Math.min(stepLabels.length - 1, current + 1));
     } else {
       setErrors(newErrors);
       focusFirstError(Object.keys(newErrors));
@@ -385,10 +371,35 @@ function Page() {
     }
   };
 
-  const canContinue =
-    step === 0 ? Boolean(form.need) : step === 1 ? Boolean(form.stage) : true;
-
   const progress = ((step + 1) / stepLabels.length) * 100;
+
+  const summary = formatEnquirySummary({
+    needLabel: needs.find((n) => n.id === form.need)?.label,
+    stageLabel: stages.find((s) => s.id === form.stage)?.label,
+    details: form.details,
+    budgetLabel: budgetOptions.find((b) => b.value === form.budget)?.label,
+    timingLabel: timingOptions.find((t) => t.value === form.timing)?.label,
+    name: form.name,
+    email: form.email,
+    reply: form.reply,
+    phone: form.phone,
+  });
+
+  const fullSummary = [
+    summary,
+    "",
+    "Sent via gstpixel.com enquiry flow.",
+    "This is not a confirmed submission until GSTPIXEL acknowledges it.",
+    "",
+    `${businessFacts.name}`,
+    `${businessFacts.founder}, ${businessFacts.founderTitle}`,
+    `Phone: ${businessFacts.phone.label}`,
+    `WhatsApp: ${businessFacts.whatsapp.href}`,
+    `Email: ${businessFacts.email.label}`,
+  ].join("\n");
+
+  const encodedSummary = encodeContactSummary(fullSummary);
+  const emailSubject = encodeContactSummary("GSTPIXEL project enquiry");
 
   return (
     <>
@@ -437,8 +448,9 @@ function Page() {
                   color: "var(--muted-foreground)",
                 }}
               >
-                You arrived with fresh context from a tool. A previous draft
-                also exists.
+                You arrived with fresh context. Your previously entered contact
+                and planning details have been kept so you do not have to retype
+                them.
               </p>
               <Button
                 variant="quiet"
@@ -446,7 +458,7 @@ function Page() {
                 onClick={handleResetDraft}
                 style={{ marginTop: "0.5rem" }}
               >
-                Start fresh with tool context
+                Start completely fresh
               </Button>
             </div>
           )}
@@ -768,14 +780,50 @@ function Page() {
                       </div>
                     ))}
                   </StaggeredReveal>
+
                   <div className="notice" role="status">
                     <strong>Submission is not configured yet.</strong>
                     <p>
-                      Your enquiry has not been sent. GSTPIXEL will need to
-                      confirm its recipient inbox and acknowledgement process
-                      before delivery can be enabled.
+                      Your enquiry has not been sent. Copy the summary below or
+                      use WhatsApp, phone, or email to share it. Opening those
+                      apps does not mean GSTPIXEL has received your enquiry.
                     </p>
                   </div>
+
+                  <div className="completion-actions">
+                    <CopyButton text={fullSummary} label="Copy summary" />
+                    <Button asChild variant="secondary">
+                      <a
+                        href={`https://wa.me/919046520548?text=${encodedSummary}`}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <MessageCircle size={16} aria-hidden="true" />
+                        Open WhatsApp
+                      </a>
+                    </Button>
+                    <Button asChild variant="secondary">
+                      <a
+                        href={`mailto:${businessFacts.email.label}?subject=${emailSubject}&body=${encodedSummary}`}
+                      >
+                        <Mail size={16} aria-hidden="true" />
+                        Email
+                      </a>
+                    </Button>
+                    <Button asChild variant="secondary">
+                      <a href={businessFacts.phone.href}>
+                        <Phone size={16} aria-hidden="true" />
+                        Call
+                      </a>
+                    </Button>
+                  </div>
+
+                  <pre
+                    className="summary-preview"
+                    aria-label="Enquiry summary preview"
+                  >
+                    {fullSummary}
+                  </pre>
                 </div>
               </ScrollReveal>
             )}
@@ -796,9 +844,14 @@ function Page() {
                   {step === 4 ? "Review" : "Continue"} <ArrowRight size={16} />
                 </Button>
               ) : (
-                <Button disabled>
-                  <Check size={16} /> Sending unavailable
-                </Button>
+                <>
+                  <Button variant="quiet" onClick={() => setStep(0)}>
+                    <ArrowLeft size={16} /> Edit enquiry
+                  </Button>
+                  <Button variant="quiet" onClick={handleResetDraft}>
+                    <Check size={16} /> Start over
+                  </Button>
+                </>
               )}
             </div>
           </ScrollReveal>
@@ -843,12 +896,13 @@ function Page() {
                     key={route.label}
                     href={route.href}
                     className="contact-method glass-light luminous-edge"
+                    target={route.label === "Email" ? undefined : "_blank"}
+                    rel={route.label === "Email" ? undefined : "noreferrer"}
                     style={{
                       borderRadius: "0.5rem",
                       padding: "1rem",
                       display: "flex",
-                      flexDirection: "column",
-                      gap: "0.2rem",
+                      gap: "1rem",
                     }}
                   >
                     <span

@@ -3145,6 +3145,33 @@ a {
   line-height: 1.6;
 }
 
+.completion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.completion-actions > * {
+  flex: 1 1 auto;
+  min-width: 8.75rem;
+}
+
+.summary-preview {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--background);
+  font: 400 0.85rem var(--font-mono);
+  color: var(--foreground);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-height: 20rem;
+  overflow-y: auto;
+}
+
 .enquiry-principles {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
