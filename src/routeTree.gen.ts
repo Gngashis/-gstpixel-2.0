@@ -33,6 +33,7 @@ import { Route as ToolsProjectEstimatorRouteImport } from './routes/tools.projec
 import { Route as ToolsProjectPlanningRouteImport } from './routes/tools.project-planning'
 import { Route as ToolsServiceFinderRouteImport } from './routes/tools.service-finder'
 import { Route as ToolsWebsiteImprovementRouteImport } from './routes/tools.website-improvement'
+import { Route as ToolsWebsiteRequirementGeneratorRouteImport } from './routes/tools/website-requirement-generator'
 import { Route as ToolsWebsiteRequirementsRouteImport } from './routes/tools.website-requirements'
 import { Route as WorkIndexRouteImport } from './routes/work.index'
 import { Route as WorkSlugRouteImport } from './routes/work.$slug'
@@ -157,6 +158,12 @@ const ToolsWebsiteImprovementRoute = ToolsWebsiteImprovementRouteImport.update({
   path: '/website-improvement',
   getParentRoute: () => ToolsRouteRoute,
 } as any)
+const ToolsWebsiteRequirementGeneratorRoute =
+  ToolsWebsiteRequirementGeneratorRouteImport.update({
+    id: '/website-requirement-generator',
+    path: '/website-requirement-generator',
+    getParentRoute: () => ToolsRouteRoute,
+  } as any)
 const ToolsWebsiteRequirementsRoute =
   ToolsWebsiteRequirementsRouteImport.update({
     id: '/website-requirements',
@@ -196,6 +203,7 @@ export interface FileRoutesByFullPath {
   '/tools/project-planning': typeof ToolsProjectPlanningRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
   '/tools/website-improvement': typeof ToolsWebsiteImprovementRoute
+  '/tools/website-requirement-generator': typeof ToolsWebsiteRequirementGeneratorRoute
   '/tools/website-requirements': typeof ToolsWebsiteRequirementsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/services/': typeof ServicesIndexRoute
@@ -221,6 +229,7 @@ export interface FileRoutesByTo {
   '/tools/project-planning': typeof ToolsProjectPlanningRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
   '/tools/website-improvement': typeof ToolsWebsiteImprovementRoute
+  '/tools/website-requirement-generator': typeof ToolsWebsiteRequirementGeneratorRoute
   '/tools/website-requirements': typeof ToolsWebsiteRequirementsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/services': typeof ServicesIndexRoute
@@ -251,6 +260,7 @@ export interface FileRoutesById {
   '/tools/project-planning': typeof ToolsProjectPlanningRoute
   '/tools/service-finder': typeof ToolsServiceFinderRoute
   '/tools/website-improvement': typeof ToolsWebsiteImprovementRoute
+  '/tools/website-requirement-generator': typeof ToolsWebsiteRequirementGeneratorRoute
   '/tools/website-requirements': typeof ToolsWebsiteRequirementsRoute
   '/work/$slug': typeof WorkSlugRoute
   '/services/': typeof ServicesIndexRoute
@@ -282,6 +292,7 @@ export interface FileRouteTypes {
     | '/tools/project-planning'
     | '/tools/service-finder'
     | '/tools/website-improvement'
+    | '/tools/website-requirement-generator'
     | '/tools/website-requirements'
     | '/work/$slug'
     | '/services/'
@@ -307,6 +318,7 @@ export interface FileRouteTypes {
     | '/tools/project-planning'
     | '/tools/service-finder'
     | '/tools/website-improvement'
+    | '/tools/website-requirement-generator'
     | '/tools/website-requirements'
     | '/work/$slug'
     | '/services'
@@ -336,6 +348,7 @@ export interface FileRouteTypes {
     | '/tools/project-planning'
     | '/tools/service-finder'
     | '/tools/website-improvement'
+    | '/tools/website-requirement-generator'
     | '/tools/website-requirements'
     | '/work/$slug'
     | '/services/'
@@ -528,6 +541,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsWebsiteImprovementRouteImport
       parentRoute: typeof ToolsRouteRoute
     }
+    '/tools/website-requirement-generator': {
+      id: '/tools/website-requirement-generator'
+      path: '/website-requirement-generator'
+      fullPath: '/tools/website-requirement-generator'
+      preLoaderRoute: typeof ToolsWebsiteRequirementGeneratorRouteImport
+      parentRoute: typeof ToolsRouteRoute
+    }
     '/tools/website-requirements': {
       id: '/tools/website-requirements'
       path: '/website-requirements'
@@ -589,6 +609,7 @@ interface ToolsRouteRouteChildren {
   ToolsProjectPlanningRoute: typeof ToolsProjectPlanningRoute
   ToolsServiceFinderRoute: typeof ToolsServiceFinderRoute
   ToolsWebsiteImprovementRoute: typeof ToolsWebsiteImprovementRoute
+  ToolsWebsiteRequirementGeneratorRoute: typeof ToolsWebsiteRequirementGeneratorRoute
   ToolsWebsiteRequirementsRoute: typeof ToolsWebsiteRequirementsRoute
   ToolsIndexRoute: typeof ToolsIndexRoute
 }
@@ -602,6 +623,7 @@ const ToolsRouteRouteChildren: ToolsRouteRouteChildren = {
   ToolsProjectPlanningRoute: ToolsProjectPlanningRoute,
   ToolsServiceFinderRoute: ToolsServiceFinderRoute,
   ToolsWebsiteImprovementRoute: ToolsWebsiteImprovementRoute,
+  ToolsWebsiteRequirementGeneratorRoute: ToolsWebsiteRequirementGeneratorRoute,
   ToolsWebsiteRequirementsRoute: ToolsWebsiteRequirementsRoute,
   ToolsIndexRoute: ToolsIndexRoute,
 }
