@@ -5,3 +5,9 @@ node_modules/
 package-lock.json
 .aider*
 src/routeTree.gen.ts
+
+# AGENT9 — Playwright / browser QA artifacts
+playwright-report/
+test-results/
+qa-screenshots/
+blob-report/

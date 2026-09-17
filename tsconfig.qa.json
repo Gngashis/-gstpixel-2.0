@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["tests/**/*.ts", "playwright.config.ts"],
+  "compilerOptions": {
+    "types": ["vite/client", "node", "@playwright/test"],
+    "exactOptionalPropertyTypes": false,
+    "noPropertyAccessFromIndexSignature": false
+  }
+}
