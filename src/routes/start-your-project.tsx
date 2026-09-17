@@ -1,6 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  Check,
+  CheckCircle2,
+  Code,
+  Globe,
+  HelpCircle,
+  Target,
+  TrendingUp,
+  X,
+  Zap,
+  type LucideIcon,
+} from "lucide-react";
 import {
   PageIntro,
   ScrollReveal,
@@ -54,6 +68,21 @@ const needs = [
 ] as const;
 
 const needIds = needs.map((n) => n.id);
+
+/* Icons are declared by name in the data above; resolve them for rendering so
+   the label text never leaks into the UI. */
+const needIcons: Record<string, LucideIcon> = {
+  Building: Building2,
+  Code,
+  Globe,
+  HelpCircle,
+  Target,
+  TrendingUp,
+  Zap,
+};
+
+const resolveNeedIcon = (name: string): LucideIcon =>
+  needIcons[name] ?? HelpCircle;
 
 function resolveNeedId(incoming: string | undefined): string {
   if (!incoming) return "";
@@ -433,9 +462,10 @@ function Page() {
                         />
                         <div className="need-choice-content">
                           <div className="need-choice-icon" aria-hidden="true">
-                            <span className="icon-placeholder">
-                              {need.icon}
-                            </span>
+                            {(() => {
+                              const Icon = resolveNeedIcon(need.icon);
+                              return <Icon size={18} />;
+                            })()}
                           </div>
                           <strong>{need.label}</strong>
                         </div>

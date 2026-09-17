@@ -89,11 +89,12 @@ function Page() {
                       <div className="family-icon" aria-hidden="true">
                         <Icon size={28} />
                       </div>
-                      <div>
-                        <p className="label text-primary">{family}</p>
-                        <h2 className="family-title">
-                          {familyServices.length} services
-                        </h2>
+                      <div className="family-heading">
+                        <h2 className="family-title">{family}</h2>
+                        <p className="family-count">
+                          {familyServices.length}{" "}
+                          {familyServices.length === 1 ? "service" : "services"}
+                        </p>
                       </div>
                     </div>
                   </ScrollReveal>

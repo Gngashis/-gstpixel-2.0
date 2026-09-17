@@ -102,31 +102,6 @@ export function Button({
   }, [loading, state]);
 
   useEffect(() => {
-    if (internalState === "loading" && onClick) {
-      const handleClick = async (e: React.MouseEvent<HTMLButtonElement>) => {
-        const rect = buttonRef.current?.getBoundingClientRect();
-        if (rect) {
-          setRipple({
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-            size: Math.max(rect.width, rect.height) * 2,
-          });
-        }
-        await onClick(e);
-      };
-      buttonRef.current?.addEventListener(
-        "click",
-        handleClick as EventListener,
-      );
-      return () =>
-        buttonRef.current?.removeEventListener(
-          "click",
-          handleClick as EventListener,
-        );
-    }
-  }, [internalState, onClick]);
-
-  useEffect(() => {
     if (
       (internalState === "success" || internalState === "error") &&
       autoResetMs > 0
@@ -137,6 +112,23 @@ export function Button({
       return () => clearTimeout(autoResetRef.current);
     }
   }, [internalState, autoResetMs]);
+
+  /* A single click path for every state. Previously the handler was bound only
+     while the button was in its loading state, so ordinary <Button onClick>
+     buttons never fired. */
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!asChild) {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (rect) {
+        setRipple({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+          size: Math.max(rect.width, rect.height) * 2,
+        });
+      }
+    }
+    onClick?.(e);
+  };
 
   const triggerSuccess = () => {
     setInternalState("success");
@@ -223,6 +215,7 @@ export function Button({
       disabled={disabled || isLoading}
       aria-busy={isLoading}
       aria-live={isLoading ? "polite" : undefined}
+      onClick={handleClick}
       {...props}
     >
       {/* Ripple effect only when NOT using asChild (Slot requires single child) */}

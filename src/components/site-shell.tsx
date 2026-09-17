@@ -14,12 +14,71 @@ const nav = [
   ["About", "/about"],
 ] as const;
 
+/** The six Assembly stages, mirrored from the environment engine for the rail. */
+const assemblyStages = [
+  "Idea",
+  "Design",
+  "Build",
+  "Automate",
+  "Operate",
+  "Grow",
+] as const;
+
 export function Brand() {
   return (
     <span className="brand-mark">
       <span aria-hidden="true" className="brand-cell" />
       GSTPIXEL<span className="text-primary">_</span>
     </span>
+  );
+}
+
+/**
+ * The continuous environment surface.
+ *
+ * One fixed, viewport-sized layer holds a band per Assembly stage. Bands are
+ * cross-faded by opacity only, so the environment evolves continuously as the
+ * visitor scrolls without repainting gradients or widening the document.
+ */
+function EnvironmentAtmosphere() {
+  return (
+    <div className="env-atmosphere" aria-hidden="true">
+      {assemblyStages.map((stage, index) => (
+        <div
+          key={stage}
+          className="env-band"
+          data-stage={index}
+          style={{ opacity: `var(--env-w${index}, 0)` }}
+        />
+      ))}
+      <div className="env-sheen" />
+      <div className="env-grain" />
+    </div>
+  );
+}
+
+/**
+ * Assembly progression rail.
+ *
+ * Each stage node brightens from its own environment weight, so the rail reads
+ * as one continuous journey from Idea to Grow rather than a step indicator.
+ * Purely decorative — the stages are also described in the hero copy.
+ */
+function AssemblyRail() {
+  return (
+    <div className="assembly-rail" aria-hidden="true">
+      <div className="assembly-rail-track">
+        <span className="assembly-rail-fill" />
+      </div>
+      <ol className="assembly-rail-stages">
+        {assemblyStages.map((stage, index) => (
+          <li key={stage} style={{ opacity: `var(--env-rail-${index}, 0.35)` }}>
+            <i />
+            <span>{stage}</span>
+          </li>
+        ))}
+      </ol>
+    </div>
   );
 }
 
@@ -49,6 +108,17 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open]);
 
+  /* Hold the page still behind the open menu, and restore the previous value
+     rather than assuming it was scrollable. */
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024 && open) {
@@ -63,6 +133,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen text-foreground env-section">
+      <EnvironmentAtmosphere />
       <a href="#main" className="skip-link">
         Skip to content
       </a>
@@ -70,9 +141,10 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         ref={headerRef}
         className={`site-header${scrolled ? " site-header-scrolled" : ""} ${isDarkPhase ? " site-header-dark" : ""}`}
         style={{
-          background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 85%, transparent)`,
-          backdropFilter: "blur(24px)",
-          borderBottom: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 25%, transparent)` : "var(--ink-line)"}`,
+          background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-current-glass-tint)"} 82%, transparent)`,
+          backdropFilter: "blur(20px) saturate(1.25)",
+          borderBottom: `1px solid color-mix(in oklab, var(--color-brand-primary) 18%, transparent)`,
+          boxShadow: scrolled ? "var(--depth-shadow-md)" : "none",
         }}
       >
         <div className="site-container flex h-16 items-center justify-between">
@@ -86,13 +158,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           </Link>
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-7 lg:flex"
+            className="hidden items-center gap-1 lg:flex"
             style={{
-              background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 60%, transparent)`,
-              backdropFilter: "blur(16px)",
-              border: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 20%, transparent)` : "var(--ink-line)"}`,
+              background: `color-mix(in oklab, var(--env-current-glass-tint) 62%, transparent)`,
+              backdropFilter: "blur(16px) saturate(1.2)",
+              border: `1px solid color-mix(in oklab, var(--color-brand-primary) 16%, transparent)`,
               borderRadius: "9999px",
-              padding: "0.35rem 0.75rem",
+              padding: "0.3rem 0.5rem",
               boxShadow: "var(--depth-shadow-sm), var(--glass-inner-glow)",
             }}
           >
@@ -102,23 +174,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 to={to}
                 className="nav-link"
                 activeProps={{ className: "nav-link-active" }}
-                style={{
-                  position: "relative",
-                  padding: "0.4rem 0.6rem",
-                  borderRadius: "9999px",
-                  transition: "color 0.15s, background 0.2s, box-shadow 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  const target = e.currentTarget;
-                  target.style.background = `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 100%, transparent)`;
-                  target.style.boxShadow =
-                    "inset 0 0 0 1px color-mix(in oklab, var(--color-brand-primary) 30%, transparent)";
-                }}
-                onMouseLeave={(e) => {
-                  const target = e.currentTarget;
-                  target.style.background = "transparent";
-                  target.style.boxShadow = "none";
-                }}
               >
                 {label}
               </Link>
@@ -127,7 +182,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <ButtonLink
               to="/start-your-project"
-              className="hidden sm:inline-flex luminous-edge"
+              className="hidden sm:inline-flex luminous-edge tactile"
               style={{ borderRadius: "0.5rem", padding: "0.6rem 1.25rem" }}
             >
               Start your project
@@ -139,67 +194,64 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               aria-expanded={open}
               aria-controls="mobile-nav"
               onClick={() => setOpen(!open)}
-              className="px-3 lg:hidden"
+              className="tactile px-3 lg:hidden"
               style={{
-                background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 100%, transparent)`,
-                backdropFilter: "blur(16px)",
-                border: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 20%, transparent)` : "var(--ink-line)"}`,
+                background: `color-mix(in oklab, var(--env-current-glass-tint) 74%, transparent)`,
+                backdropFilter: "blur(14px)",
+                border: `1px solid color-mix(in oklab, var(--color-brand-primary) 22%, transparent)`,
                 borderRadius: "0.5rem",
+                color: "var(--ink-foreground)",
               }}
             >
               {open ? <X /> : <Menu />}
             </Button>
           </div>
         </div>
+        <AssemblyRail />
         {open && (
-          <nav
-            id="mobile-nav"
-            aria-label="Mobile"
-            className="mobile-nav"
-            data-open
-            style={{
-              background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-idea-glass-tint)"} 95%, transparent)`,
-              backdropFilter: "blur(24px)",
-              borderTop: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 20%, transparent)` : "var(--ink-line)"}`,
-            }}
-          >
-            {nav.map(([label, to]) => (
-              <Link
-                key={to}
-                to={to}
-                onClick={() => setOpen(false)}
-                style={{
-                  borderBottom: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 15%, transparent)` : "var(--ink-line)"}`,
-                  background: "transparent",
-                }}
-              >
-                {label}
-                <span aria-hidden="true">↗</span>
-              </Link>
-            ))}
-            <Link
-              to="/contact"
+          <>
+            <button
+              type="button"
+              className="mobile-nav-scrim"
+              aria-label="Close menu"
+              tabIndex={-1}
               onClick={() => setOpen(false)}
+            />
+            <nav
+              id="mobile-nav"
+              aria-label="Mobile"
+              className="mobile-nav"
+              data-open
               style={{
-                borderBottom: `1px solid ${headerEnv ? `color-mix(in oklab, var(--color-brand-primary) 15%, transparent)` : "var(--ink-line)"}`,
+                background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-current-glass-tint)"} 92%, transparent)`,
+                backdropFilter: "blur(22px) saturate(1.2)",
+                borderTop: `1px solid color-mix(in oklab, var(--color-brand-primary) 20%, transparent)`,
               }}
             >
-              Contact<span aria-hidden="true">↗</span>
-            </Link>
-            <ButtonLink
-              to="/start-your-project"
-              onClick={() => setOpen(false)}
-              className="mt-3 w-full luminous-edge"
-              style={{ borderRadius: "0.5rem" }}
-            >
-              Start your project
-            </ButtonLink>
-          </nav>
+              {nav.map(([label, to]) => (
+                <Link key={to} to={to} onClick={() => setOpen(false)}>
+                  {label}
+                  <span aria-hidden="true">↗</span>
+                </Link>
+              ))}
+              <Link to="/contact" onClick={() => setOpen(false)}>
+                Contact<span aria-hidden="true">↗</span>
+              </Link>
+              <ButtonLink
+                to="/start-your-project"
+                onClick={() => setOpen(false)}
+                className="tactile mt-4 w-full luminous-edge"
+                style={{ borderRadius: "0.5rem" }}
+              >
+                Start your project
+              </ButtonLink>
+            </nav>
+          </>
         )}
       </header>
       <main id="main">{children}</main>
-      <footer className="border-t border-border bg-ink py-12 text-ink-foreground">
-        <div className="site-container grid gap-10 md:grid-cols-[1fr_2fr]">
+      <footer className="site-footer">
+        <div className="site-container grid gap-10 md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <div>
             <Brand />
             <p className="mt-4 text-sm text-ink-muted">
@@ -210,7 +262,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               Business consulting and services, digital development, and
               automation—assembled as one system.
             </p>
-            <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-muted">
+            <p className="footer-contact mt-4 text-sm text-ink-muted">
               <a href={businessFacts.phone.href}>{businessFacts.phone.label}</a>
               <a
                 href={businessFacts.whatsapp.href}
@@ -222,33 +274,36 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               <a href={businessFacts.email.href}>{businessFacts.email.label}</a>
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-6 text-sm sm:grid-cols-4">
-            <div>
+          <nav
+            aria-label="Footer"
+            className="grid grid-cols-2 gap-6 text-sm sm:grid-cols-4"
+          >
+            <div className="footer-column">
               <p className="label">Explore</p>
               <Link to="/services">Services</Link>
               <Link to="/solutions">Solutions</Link>
               <Link to="/work">Work</Link>
             </div>
-            <div>
+            <div className="footer-column">
               <p className="label">Decide</p>
               <Link to="/tools">Tools</Link>
               <Link to="/tools/service-finder">Service finder</Link>
               <Link to="/tools/project-estimator">Estimator</Link>
             </div>
-            <div>
+            <div className="footer-column">
               <p className="label">Company</p>
               <Link to="/about">About</Link>
               <Link to="/insights">Insights</Link>
               <Link to="/contact">Contact</Link>
             </div>
-            <div>
+            <div className="footer-column">
               <p className="label">Begin</p>
               <Link to="/start-your-project">Start your project</Link>
               <Link to="/privacy">Privacy</Link>
             </div>
-          </div>
+          </nav>
         </div>
-        <div className="site-container mt-10 border-t border-ink-line pt-5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
+        <div className="site-container footer-legal mt-10 pt-5 font-mono text-[10px] uppercase tracking-widest text-ink-muted">
           © 2026 GSTPIXEL · gstpixel.com
         </div>
       </footer>

@@ -40,29 +40,33 @@
 :root {
   --background: oklch(0.965 0.008 250);
   --foreground: oklch(0.16 0.016 252);
-  --card: oklch(0.99 0.003 250);
-  --card-foreground: oklch(0.16 0.016 252);
-  --popover: oklch(0.99 0.003 250);
-  --popover-foreground: oklch(0.16 0.016 252);
+  --card: color-mix(in oklab, var(--material-polymer) 88%, transparent);
+  --card-foreground: oklch(0.97 0.006 250);
+  --popover: oklch(0.16 0.02 258 / 96%);
+  --popover-foreground: oklch(0.97 0.006 250);
   --primary: oklch(0.79 0.142 197);
   --primary-foreground: oklch(0.12 0.018 250);
-  --secondary: oklch(0.9 0.012 248);
-  --secondary-foreground: oklch(0.19 0.02 250);
+  --secondary: color-mix(in oklab, var(--material-polymer) 70%, transparent);
+  --secondary-foreground: oklch(0.97 0.006 250);
   --muted: oklch(0.92 0.009 250);
-  --muted-foreground: oklch(0.47 0.02 250);
-  --accent: oklch(0.88 0.02 250);
-  --accent-foreground: oklch(0.16 0.016 252);
+  --muted-foreground: oklch(0.75 0.016 250);
+  --accent: oklch(1 0 0 / 10%);
+  --accent-foreground: oklch(0.97 0.006 250);
   --destructive: oklch(0.59 0.2 28);
   --destructive-foreground: oklch(0.98 0 0);
-  --border: oklch(0.25 0.016 250 / 15%);
-  --input: oklch(0.25 0.016 250 / 20%);
+  /* The site runs inside a dark environment, so structural surfaces are dark
+     glass and light plates are reserved for inputs and the primary action.
+     Keeping these as the single source of truth avoids pale slabs scattered
+     across dark sections. */
+  --border: oklch(1 0 0 / 14%);
+  --input: oklch(1 0 0 / 20%);
   --ring: oklch(0.79 0.142 197);
-  --surface: oklch(0.99 0.003 250 / 62%);
-  --surface-strong: oklch(1 0 0 / 84%);
+  --surface: color-mix(in oklab, var(--material-polymer) 82%, transparent);
+  --surface-strong: color-mix(in oklab, var(--material-polymer) 96%, transparent);
   --ink: oklch(0.105 0.018 260);
   --ink-foreground: oklch(0.97 0.006 250);
-  --ink-muted: oklch(0.72 0.018 250);
-  --ink-line: oklch(1 0 0 / 10%);
+  --ink-muted: oklch(0.75 0.016 250);
+  --ink-line: oklch(1 0 0 / 12%);
   --trust: oklch(0.64 0.1 55);
   --env-specular: 0.15;
   --env-illumination: 0.5;
@@ -72,11 +76,20 @@
 }
 html {
   scroll-behavior: smooth;
+  /* Contained decorative layers mean the document can no longer exceed the
+     viewport, but clipping here guards against future regressions. `clip`
+     (not `hidden`) preserves position: sticky for the site header. */
+  overflow-x: clip;
 }
 body {
   margin: 0;
-  background: var(--env-current-bg, var(--background));
-  color: var(--foreground);
+  /* The atmosphere layers paint the evolving environment above this base, so
+     the base itself stays static and never repaints during scroll. */
+  background: var(--env-base);
+  overflow-x: clip;
+  /* The environment is dark by design; content defaults to the light ink
+     foreground. Light plates opt back into dark text explicitly. */
+  color: var(--ink-foreground);
   font-family: var(--font-body);
   letter-spacing: 0;
 }
@@ -87,6 +100,11 @@ a {
 button,
 a {
   -webkit-tap-highlight-color: transparent;
+}
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
 }
 ::selection {
   background: color-mix(in oklab, var(--primary) 35%, transparent);
@@ -109,9 +127,74 @@ a {
     border-color 0.35s;
 }
 .site-header-scrolled {
-  background: color-mix(in oklab, var(--ink) 94%, transparent);
-  box-shadow: 0 10px 40px color-mix(in oklab, var(--ink) 22%, transparent);
+  background: color-mix(in oklab, var(--ink) 88%, transparent);
   border-color: color-mix(in oklab, var(--primary) 18%, var(--ink-line));
+}
+.nav-link {
+  position: relative;
+  padding: 0.45rem 0.7rem;
+  border-radius: 9999px;
+  color: color-mix(in oklab, var(--ink-foreground) 78%, transparent);
+  transition:
+    color 0.18s var(--easing-standard),
+    background 0.2s var(--easing-standard),
+    box-shadow 0.2s var(--easing-standard);
+}
+.nav-link:hover {
+  color: var(--ink-foreground);
+  background: color-mix(in oklab, var(--env-current-glass-tint) 85%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 30%, transparent);
+}
+.nav-link-active {
+  color: var(--ink-foreground);
+  background: color-mix(in oklab, var(--primary) 16%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 45%, transparent);
+}
+
+/* Tactile controls: press compression + rising edge light. */
+.tactile {
+  transition:
+    transform 160ms var(--easing-standard),
+    box-shadow 220ms var(--easing-standard),
+    filter 200ms var(--easing-standard);
+}
+.tactile:hover {
+  transform: translateY(-1px);
+}
+.tactile:active {
+  transform: translateY(1px) scale(0.985);
+}
+
+.site-footer {
+  position: relative;
+  border-top: 1px solid var(--ink-line);
+  background: color-mix(in oklab, var(--ink) 82%, transparent);
+  color: var(--ink-foreground);
+  padding-block: clamp(3rem, 6vw, 4.5rem);
+}
+.footer-column a,
+.footer-contact a {
+  display: inline-flex;
+  align-items: center;
+  /* Comfortable touch target without visually loosening the footer. */
+  min-height: 2.75rem;
+  color: var(--ink-muted);
+  transition: color 0.18s var(--easing-standard);
+}
+.footer-column a:hover,
+.footer-contact a:hover {
+  color: var(--ink-foreground);
+}
+.footer-column a {
+  display: flex;
+}
+.footer-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+}
+.footer-legal {
+  border-top: 1px solid var(--ink-line);
 }
 .brand-mark {
   display: inline-flex;
@@ -130,12 +213,6 @@ a {
   font: 500 0.68rem var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  color: var(--ink-muted);
-  transition: color 0.15s;
-}
-.nav-link:hover,
-.nav-link-active {
-  color: var(--primary);
 }
 .mobile-nav {
   display: grid;
@@ -148,16 +225,26 @@ a {
 .mobile-nav > a {
   display: flex;
   justify-content: space-between;
-  padding: 0.8rem;
+  align-items: center;
+  /* Thumb-friendly rows on every phone width. */
+  min-height: 3.25rem;
+  padding: 0.9rem 0.25rem;
   border-bottom: 1px solid var(--ink-line);
+  color: var(--ink-foreground);
+  font-size: 1rem;
 }
-footer a {
-  display: block;
-  margin-top: 0.65rem;
-  color: var(--ink-muted);
-}
-footer a:hover {
+.mobile-nav > a:hover,
+.mobile-nav > a:focus-visible {
   color: var(--primary);
+}
+.mobile-nav-scrim {
+  position: fixed;
+  inset: 0;
+  top: 100%;
+  z-index: -1;
+  border: 0;
+  background: color-mix(in oklab, var(--ink) 62%, transparent);
+  cursor: pointer;
 }
 .skip-link {
   position: fixed;
@@ -167,7 +254,8 @@ footer a:hover {
   transform: translateY(-200%);
   background: var(--primary);
   color: var(--primary-foreground);
-  padding: 0.6rem 1rem;
+  padding: 0.75rem 1.1rem;
+  border-radius: 0.25rem;
 }
 .skip-link:focus {
   transform: none;
@@ -178,15 +266,15 @@ footer a:hover {
   letter-spacing: 0.18em;
 }
 .page-intro {
-  padding: clamp(5rem, 10vw, 9rem) 0 5rem;
-  background: var(--ink);
+  padding: clamp(4.5rem, 9vw, 8rem) 0 4.5rem;
   color: var(--ink-foreground);
   border-bottom: 1px solid var(--ink-line);
 }
 .page-intro h1 {
-  max-width: 18ch;
+  max-width: min(18ch, 100%);
   margin-top: 1.25rem;
-  font: 800 clamp(2.8rem, 7vw, 6.5rem)/0.96 var(--font-display);
+  font: 800 clamp(2.6rem, 6.4vw, 6rem)/0.96 var(--font-display);
+  text-wrap: balance;
 }
 .page-intro p:last-child {
   max-width: 48ch;
@@ -196,11 +284,13 @@ footer a:hover {
   color: var(--ink-muted);
 }
 .content-band {
-  padding: clamp(4rem, 8vw, 7rem) 0;
+  padding: clamp(3.5rem, 7vw, 6rem) 0;
+  color: var(--ink-foreground);
 }
 .content-band h2,
 .start-band h2 {
   font: 700 clamp(2rem, 5vw, 4.25rem)/1 var(--font-display);
+  text-wrap: balance;
 }
 .drafting-grid {
   background-image:
@@ -214,8 +304,13 @@ footer a:hover {
   border-radius: 0.5rem;
 }
 .start-band {
-  padding: clamp(5rem, 9vw, 8rem) 0;
-  background: var(--ink);
+  padding: clamp(4.5rem, 8vw, 7rem) 0;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklab, var(--ink) 72%, transparent) 40%,
+    color-mix(in oklab, var(--ink) 88%, transparent)
+  );
   color: var(--ink-foreground);
 }
 .start-band .site-container {
@@ -224,7 +319,7 @@ footer a:hover {
   align-items: end;
 }
 .start-band h2 {
-  max-width: 18ch;
+  max-width: min(18ch, 100%);
 }
 .form-label {
   display: block;
@@ -239,7 +334,7 @@ footer a:hover {
   border-radius: 0.25rem;
   background: var(--surface-strong);
   padding: 0.75rem;
-  color: var(--foreground);
+  color: var(--ink-foreground);
   outline: none;
 }
 .form-control:focus {
@@ -309,14 +404,21 @@ footer a:hover {
 .home-hero {
   position: relative;
   overflow: hidden;
-  padding: clamp(5rem, 10vw, 9rem) 0;
-  background: var(--ink);
+  padding: clamp(3rem, 5.5vw, 5.5rem) 0;
+  /* Translucent ink lets the environment read through, so the hero feels like
+     part of the operating environment instead of a flat panel. */
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--ink) 86%, transparent),
+    color-mix(in oklab, var(--ink) 62%, transparent) 62%,
+    transparent
+  );
   color: var(--ink-foreground);
 }
 .home-hero h1 {
-  max-width: 12ch;
-  margin-top: 1.4rem;
-  font: 800 clamp(3rem, 7vw, 6rem)/0.94 var(--font-display);
+  max-width: min(17ch, 100%);
+  margin-top: 1.1rem;
+  font: 800 clamp(2.5rem, 4.6vw, 4.6rem)/0.96 var(--font-display);
   text-wrap: balance;
 }
 .hero-kicker {
@@ -336,7 +438,7 @@ footer a:hover {
 .hero-meta {
   display: flex;
   gap: 1.5rem;
-  margin-top: 3rem;
+  margin-top: 1.9rem;
   color: var(--ink-muted);
   font: 500 0.58rem var(--font-mono);
   letter-spacing: 0.14em;
@@ -347,138 +449,33 @@ footer a:hover {
 .hero-copy,
 .section-copy {
   max-width: 48ch;
-  margin-top: 1.6rem;
+  margin-top: 1.5rem;
   color: var(--ink-muted);
   font-size: 1.06rem;
-  line-height: 1.75;
+  line-height: 1.7;
+}
+.hero-copy {
+  max-width: 44ch;
+  margin-top: 1.2rem;
 }
 .hero-tagline {
-  margin-top: 1.4rem;
+  margin-top: 1.1rem;
   letter-spacing: 0.12em;
-  color: var(--muted-foreground);
+  color: color-mix(in oklab, var(--primary) 82%, white);
 }
 .section-copy {
-  color: var(--muted-foreground);
+  color: var(--ink-muted);
 }
 .section-title {
-  max-width: 18ch;
+  /* Clamped to the container as well as the measure: an unclamped ch-based
+     max-width becomes a grid column's automatic minimum and pushes the page
+     wider than the viewport. */
+  max-width: min(18ch, 100%);
   margin-top: 1rem;
   font: 700 clamp(2.2rem, 5vw, 4.5rem)/1 var(--font-display);
 }
-.assembly-visual {
-  position: relative;
-  min-height: 32rem;
-  isolation: isolate;
-}
-.assembly-plane {
-  position: absolute;
-  width: 58%;
-  height: 42%;
-  padding: 1.5rem;
-  border: 1px solid var(--ink-line);
-  border-radius: 0.5rem;
-  background: color-mix(in oklab, var(--ink-foreground) 7%, transparent);
-  backdrop-filter: blur(18px);
-  box-shadow: inset 0 1px 0 var(--ink-line);
-  transition:
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s;
-}
-.assembly-visual:hover .plane-a {
-  transform: translate(-0.35rem, -0.35rem) rotate(-8deg);
-}
-.assembly-visual:hover .plane-b {
-  transform: translate(0.35rem, -0.2rem) rotate(5deg);
-}
-.assembly-visual:hover .plane-c {
-  transform: translate(-0.2rem, 0.3rem) rotate(-2deg);
-}
-.assembly-plane strong {
-  display: block;
-  margin-top: 1rem;
-  font: 700 1.5rem var(--font-display);
-}
-.plane-a {
-  top: 4%;
-  left: 8%;
-  transform: rotate(-8deg);
-}
-.plane-b {
-  top: 28%;
-  right: 5%;
-  transform: rotate(5deg);
-}
-.plane-c {
-  bottom: 3%;
-  left: 15%;
-  transform: rotate(-2deg);
-  border-color: color-mix(in oklab, var(--primary) 35%, transparent);
-}
-.assembly-core {
-  position: absolute;
-  left: 46%;
-  top: 47%;
-  display: grid;
-  place-items: center;
-  gap: 0.5rem;
-  width: 8rem;
-  height: 8rem;
-  border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
-  border-radius: 50%;
-  background: color-mix(in oklab, var(--ink) 70%, transparent);
-  color: var(--primary);
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--primary) 20%, transparent);
-  z-index: 10;
-}
-.assembly-core::before {
-  content: "";
-  position: absolute;
-  inset: -2rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, color-mix(in oklab, var(--primary) 20%, transparent), transparent 70%);
-  opacity: 0.6;
-  animation: core-glow-pulse 4s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-.assembly-core::after {
-  content: "";
-  position: absolute;
-  inset: 0.5rem;
-  border-radius: 50%;
-  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
-  opacity: 0.6;
-  animation: core-breathe 4s ease-in-out infinite;
-  pointer-events: none;
-}
-.assembly-orbit {
-  position: absolute;
-  left: 26%;
-  top: 28%;
-  width: 16rem;
-  height: 16rem;
-  border: 1px solid color-mix(in oklab, var(--primary) 16%, transparent);
-  border-radius: 50%;
-  transform: rotate(-25deg) skewX(-12deg);
-  pointer-events: none;
-}
-.orbit-two {
-  left: 31%;
-  top: 33%;
-  width: 13rem;
-  height: 13rem;
-  border-style: dashed;
-  opacity: 0.55;
-  animation: orbit-drift 18s linear infinite;
-}
-.assembly-path {
-  position: absolute;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--primary), transparent);
-  opacity: 0.45;
-  transform-origin: left center;
-  pointer-events: none;
-}
+
+
 .path-one {
   width: 54%;
   top: 42%;
@@ -491,22 +488,8 @@ footer a:hover {
   left: 38%;
   transform: rotate(-18deg);
 }
-.assembly-status {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  font: 500 0.6rem var(--font-mono);
-  letter-spacing: 0.13em;
-  color: var(--ink-muted);
-}
-.assembly-status span {
-  display: inline-block;
-  width: 0.4rem;
-  height: 0.4rem;
-  margin-right: 0.5rem;
-  border-radius: 50%;
-  background: var(--primary);
-}
+
+
 .outcome-list {
   margin-top: 3rem;
   border-top: 1px solid var(--border);
@@ -568,15 +551,62 @@ footer a:hover {
   color: var(--primary);
   text-align: center;
 }
+/* Ledger: a single surface holding aligned rows.
+   Rows are the .ledger-row elements themselves — the reveal wrapper between the
+   ledger and each row must not take part in the row grid. */
 .operation-ledger {
   border: 1px solid var(--border);
+  border-radius: 0.85rem;
   background: var(--surface);
+  overflow: hidden;
 }
-.operation-ledger > div {
+
+.operation-ledger > * {
+  display: block;
+}
+
+.operation-ledger .ledger-row {
   display: grid;
-  grid-template-columns: 2rem 1fr auto;
-  padding: 1.2rem;
+  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1.15rem 1.25rem;
+  border: 0;
   border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+.operation-ledger .ledger-row:last-child {
+  border-bottom: 0;
+}
+
+.operation-ledger .ledger-row > span:first-child {
+  font: 500 0.62rem var(--font-mono);
+  letter-spacing: 0.14em;
+  color: color-mix(in oklab, var(--primary) 80%, white);
+}
+
+.operation-ledger .ledger-row > strong {
+  font: 600 1rem var(--font-display);
+  color: var(--ink-foreground);
+  min-width: 0;
+}
+
+.operation-ledger .ledger-row > svg {
+  color: color-mix(in oklab, var(--primary) 65%, transparent);
+  transition: transform 220ms var(--easing-standard), color 220ms var(--easing-standard);
+}
+
+.operation-ledger .ledger-row:hover > strong {
+  color: var(--primary);
+}
+
+.operation-ledger .ledger-row:hover > svg {
+  transform: translateX(3px);
+  color: var(--primary);
 }
 .concept-row {
   display: grid;
@@ -650,7 +680,7 @@ footer a:hover {
 }
 .process-line li {
   padding: 1.5rem;
-  background: var(--background);
+  background: color-mix(in oklab, var(--material-polymer) 72%, transparent);
 }
 .process-line span {
   display: block;
@@ -796,7 +826,7 @@ footer a:hover {
   position: relative;
   min-height: 15rem;
   padding: 2rem;
-  background: var(--background);
+  background: color-mix(in oklab, var(--material-polymer) 78%, transparent);
 }
 .tool-directory h2 {
   margin-top: 1rem;
@@ -828,7 +858,7 @@ footer a:hover {
   border-radius: 0.25rem;
   background: var(--surface);
   padding: 0.85rem 1rem;
-  color: var(--foreground);
+  color: var(--ink-foreground);
   outline: none;
 }
 .form-control:focus {
@@ -996,119 +1026,6 @@ footer a:hover {
   color: var(--ink-muted);
 }
 
-.assembly-visual {
-  position: relative;
-  min-height: 38rem;
-  isolation: isolate;
-}
-
-.assembly-plane {
-  position: absolute;
-  width: 42%;
-  min-width: 220px;
-  height: 32%;
-  min-height: 160px;
-  padding: 1.5rem;
-  border: 1px solid var(--ink-line);
-  border-radius: 0.5rem;
-  background: color-mix(in oklab, var(--ink-foreground) 5%, transparent);
-  backdrop-filter: blur(18px);
-  box-shadow:
-    inset 0 1px 0 var(--ink-line),
-    0 4px 24px color-mix(in oklab, var(--ink) 15%, transparent);
-  transition:
-    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s,
-    box-shadow 0.3s;
-}
-
-.assembly-plane:hover {
-  border-color: color-mix(in oklab, var(--primary) 50%, transparent);
-  box-shadow:
-    inset 0 1px 0 var(--ink-line),
-    0 8px 32px color-mix(in oklab, var(--primary) 12%, transparent),
-    0 0 0 1px color-mix(in oklab, var(--primary) 20%, transparent);
-}
-
-.plane-content {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.plane-label {
-  font: 500 0.55rem var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--primary);
-  opacity: 0.8;
-}
-
-.plane-icon {
-  margin-top: 1rem;
-  opacity: 0.6;
-  transition:
-    opacity 0.2s,
-    transform 0.2s;
-}
-
-.assembly-plane:hover .plane-icon {
-  opacity: 1;
-  transform: scale(1.1);
-}
-
-.plane-title {
-  margin-top: auto;
-  font: 700 1.35rem var(--font-display);
-  color: var(--ink-foreground);
-  line-height: 1.2;
-}
-
-.assembly-core {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  display: grid;
-  place-items: center;
-  gap: 0.6rem;
-  width: 9rem;
-  height: 9rem;
-  border: 1px solid color-mix(in oklab, var(--primary) 40%, transparent);
-  border-radius: 50%;
-  background:
-    radial-gradient(
-      circle at 30% 30%,
-      color-mix(in oklab, var(--primary) 15%, transparent),
-      transparent 60%
-    ),
-    color-mix(in oklab, var(--ink) 80%, transparent);
-  color: var(--primary);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--primary) 20%, transparent);
-  z-index: 10;
-}
-.assembly-core::before {
-  content: "";
-  position: absolute;
-  inset: -2rem;
-  border-radius: 50%;
-  background: radial-gradient(circle at center, color-mix(in oklab, var(--primary) 20%, transparent), transparent 70%);
-  opacity: 0.6;
-  animation: core-glow-pulse 5s ease-in-out infinite;
-  pointer-events: none;
-  z-index: -1;
-}
-.assembly-core::after {
-  content: "";
-  position: absolute;
-  inset: 0.5rem;
-  border-radius: 50%;
-  border: 1px solid color-mix(in oklab, var(--primary) 30%, transparent);
-  opacity: 0.6;
-  animation: core-breathe 4s ease-in-out infinite;
-  pointer-events: none;
-}
 
 .core-label {
   font: 500 0.6rem var(--font-mono);
@@ -1118,46 +1035,6 @@ footer a:hover {
   line-height: 1.3;
 }
 
-.assembly-orbit {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-  transition:
-    opacity 0.6s,
-    transform 0.6s;
-}
-
-.orbit-one {
-  left: 22%;
-  top: 20%;
-  width: 22rem;
-  height: 22rem;
-  border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
-  transform: rotate(-25deg) skewX(-12deg);
-}
-
-.orbit-two {
-  left: 28%;
-  top: 26%;
-  width: 17rem;
-  height: 17rem;
-  border: 1px dashed color-mix(in oklab, var(--primary) 12%, transparent);
-  transform: rotate(-25deg) skewX(-12deg);
-  opacity: 0.5;
-  animation: orbit-drift 20s linear infinite;
-}
-
-.assembly-path {
-  position: absolute;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--primary), transparent);
-  opacity: 0;
-  transform-origin: left center;
-  pointer-events: none;
-  transition:
-    opacity 0.8s,
-    transform 0.8s;
-}
 
 .path-one {
   width: 58%;
@@ -1173,21 +1050,6 @@ footer a:hover {
   transform: rotate(-14deg);
 }
 
-.assembly-visual[data-assembled="true"] .assembly-path {
-  opacity: 0.4;
-}
-
-.assembly-status {
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
-  font: 500 0.55rem var(--font-mono);
-  letter-spacing: 0.13em;
-  color: var(--ink-muted);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
 
 .status-dot {
   width: 0.45rem;
@@ -1210,57 +1072,9 @@ footer a:hover {
   }
 }
 
-.assembly-capability-preview {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  padding-top: 12rem;
-}
-
-.capability-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid var(--ink-line);
-  border-radius: 9999px;
-  background: color-mix(in oklab, var(--ink) 60%, transparent);
-  backdrop-filter: blur(12px);
-  font: 500 0.7rem var(--font-mono);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--ink-foreground);
-  opacity: 0;
-  transform: translateY(1rem);
-  animation: capability-reveal 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.capability-indicator:nth-child(1) {
-  animation-delay: 0ms;
-}
-.capability-indicator:nth-child(2) {
-  animation-delay: 150ms;
-}
-.capability-indicator:nth-child(3) {
-  animation-delay: 300ms;
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .assembly-plane,
-  .assembly-core,
-  .assembly-orbit,
-  .assembly-path,
   .status-dot,
-  .capability-indicator,
   .signal-dot {
     animation: none !important;
     transition: none !important;
@@ -1268,46 +1082,8 @@ footer a:hover {
 }
 
 @media (max-width: 768px) {
-  .assembly-visual {
-    min-height: 50rem;
-  }
 
-  .assembly-plane {
-    width: 85%;
-    min-width: auto;
-    height: auto;
-    min-height: 120px;
-    padding: 1.25rem;
-  }
 
-  .assembly-core {
-    width: 7rem;
-    height: 7rem;
-  }
-
-  .orbit-one {
-    width: 18rem;
-    height: 18rem;
-    left: 15%;
-    top: 10%;
-  }
-
-  .orbit-two {
-    width: 14rem;
-    height: 14rem;
-    left: 20%;
-    top: 15%;
-  }
-
-  .assembly-capability-preview {
-    padding-top: 10rem;
-    gap: 0.5rem;
-  }
-
-  .capability-indicator {
-    font-size: 0.6rem;
-    padding: 0.4rem 0.75rem;
-  }
 }
 
 .service-family-grid {
@@ -1348,9 +1124,24 @@ footer a:hover {
   color: var(--primary);
 }
 
+.family-heading {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
 .family-title {
-  font: 700 1.25rem var(--font-display);
-  color: var(--foreground);
+  font: 700 clamp(1.35rem, 2.2vw, 1.9rem) var(--font-display);
+  color: var(--ink-foreground);
+  line-height: 1.1;
+}
+
+.family-count {
+  margin: 0;
+  font: 500 0.6rem var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--primary);
 }
 
 .family-services {
@@ -1364,7 +1155,7 @@ footer a:hover {
   padding: 1.25rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  background: var(--background);
+  background: color-mix(in oklab, var(--material-polymer) 78%, transparent);
   transition:
     border-color 0.2s,
     transform 0.2s,
@@ -1529,7 +1320,7 @@ footer a:hover {
   border: 1px solid var(--border);
   border-radius: 9999px;
   background: var(--surface);
-  color: var(--foreground);
+  color: var(--ink-foreground);
 }
 
 .solution-card-arrow {
@@ -1678,8 +1469,8 @@ footer a:hover {
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
-  background: var(--background);
-  color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--env-current-glass-tint) 60%, transparent);
+  color: var(--ink-muted);
 }
 
 .concept-philosophy {
@@ -1866,8 +1657,8 @@ footer a:hover {
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--border);
   border-radius: 0.25rem;
-  background: var(--background);
-  color: var(--muted-foreground);
+  background: color-mix(in oklab, var(--env-current-glass-tint) 60%, transparent);
+  color: var(--ink-muted);
 }
 
 .tool-card-footer {
@@ -2326,7 +2117,7 @@ footer a:hover {
   border-radius: 0.375rem;
   background: var(--surface);
   font: 500 0.75rem var(--font-body);
-  color: var(--foreground);
+  color: var(--ink-foreground);
   cursor: pointer;
   transition:
     border-color 0.2s,
@@ -2811,7 +2602,7 @@ footer a:hover {
 
 .topic-card h3 {
   font: 700 1.1rem var(--font-display);
-  color: var(--foreground);
+  color: var(--ink-foreground);
 }
 
 .topic-list {
@@ -3185,7 +2976,7 @@ footer a:hover {
 
 .method-value {
   font: 600 1rem var(--font-body);
-  color: var(--foreground);
+  color: var(--ink-foreground);
 }
 
 .method-alt {
@@ -3305,7 +3096,7 @@ footer a:hover {
 }
 
 .review-row strong {
-  color: var(--foreground);
+  color: var(--ink-foreground);
 }
 
 .edit-btn {
@@ -3328,13 +3119,13 @@ footer a:hover {
   padding: 1.5rem;
   border: 1px solid var(--border);
   border-radius: 0.5rem;
-  background: var(--background);
+  background: color-mix(in oklab, var(--material-polymer) 74%, transparent);
 }
 
 .notice strong {
   display: block;
   margin-bottom: 0.5rem;
-  color: var(--foreground);
+  color: var(--ink-foreground);
 }
 
 .notice p {
@@ -3367,36 +3158,7 @@ footer a:hover {
 }
 
 /* Final cascade for the premium assembly pass. */
-.assembly-plane {
-  width: 44%;
-  height: 31%;
-  background: var(--material-specular), var(--material-smoke);
-  backdrop-filter: blur(16px) saturate(125%);
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
-    inset 0 -1px 0 color-mix(in oklab, var(--primary) 8%, transparent),
-    0 12px 34px color-mix(in oklab, var(--ink) 24%, transparent);
-}
 
-.assembly-plane:hover {
-  background: var(--material-specular), var(--material-clear);
-}
-
-.assembly-core {
-  width: 10rem;
-  height: 10rem;
-  background: var(--material-specular), var(--material-crystal);
-}
-
-.assembly-path {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in oklab, var(--primary) 75%, white),
-    transparent
-  );
-  box-shadow: 0 0 12px color-mix(in oklab, var(--primary) 28%, transparent);
-}
 
 .interface-spec > div {
   background: var(--material-specular), var(--material-polymer);
@@ -3424,15 +3186,15 @@ footer a:hover {
   border-left-color: var(--primary);
 }
 
-.operation-ledger > div {
+.operation-ledger .ledger-row {
   transition:
     background 220ms var(--easing-standard),
     padding-left 220ms var(--easing-standard);
 }
 
-.operation-ledger > div:hover {
-  padding-left: 1.6rem;
-  background: color-mix(in oklab, var(--primary) 7%, transparent);
+.operation-ledger .ledger-row:hover {
+  padding-left: 1.5rem;
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
 }
 
 .principles > div {
@@ -3504,28 +3266,7 @@ footer a:hover {
 }
 
 @media (max-width: 768px) {
-  .assembly-visual {
-    min-height: 38rem;
-  }
 
-  .assembly-plane {
-    width: 68%;
-    min-width: 0;
-    height: 21%;
-    min-height: 7.5rem;
-    padding: 1rem;
-  }
-
-  .assembly-plane:nth-of-type(4),
-  .assembly-plane:nth-of-type(5),
-  .assembly-plane:nth-of-type(6) {
-    width: 62%;
-  }
-
-  .assembly-core {
-    width: 7.5rem;
-    height: 7.5rem;
-  }
 
   .start-band-trace {
     overflow: hidden;
@@ -3543,8 +3284,10 @@ footer a:hover {
 @media (max-width: 767px) {
   html,
   body {
-    min-width: 320px;
-    overflow-x: hidden;
+    /* No hard min-width here: with a classic 15px scrollbar a 320px viewport
+       has only 305px of client width, so a 320px floor guarantees overflow.
+       The phone composition below is already designed to work from 320px. */
+    overflow-x: clip;
   }
 
   .site-container {
@@ -3610,90 +3353,14 @@ footer a:hover {
     font-size: 0.5rem;
   }
 
-  .assembly-visual {
-    min-height: 31rem;
-    margin: 0 -0.75rem;
-  }
-
-  .assembly-plane {
-    width: 45%;
-    height: 22%;
-    min-height: 6.5rem;
-    padding: 0.75rem;
-    border-radius: 0.65rem;
-  }
 
   /* The planes are absolute siblings after the ambient/orbit layers. */
-  .assembly-plane:nth-of-type(6) { left: 4% !important; top: 3% !important; }
-  .assembly-plane:nth-of-type(7) { left: 52% !important; top: 17% !important; }
-  .assembly-plane:nth-of-type(8) { left: 4% !important; top: 38% !important; }
-  .assembly-plane:nth-of-type(9) { left: 52% !important; top: 52% !important; }
-  .assembly-plane:nth-of-type(10) { left: 4% !important; top: 73% !important; }
-  .assembly-plane:nth-of-type(11) { left: 52% !important; top: 81% !important; }
 
-  .plane-label {
-    font-size: 0.48rem;
-    letter-spacing: 0.1em;
-  }
-
-  .plane-icon {
-    margin-top: 0.5rem;
-  }
-
-  .plane-icon svg {
-    width: 1.1rem;
-    height: 1.1rem;
-  }
-
-  .plane-title {
-    font-size: 1rem;
-  }
-
-  .assembly-core {
-    width: 7rem;
-    height: 7rem;
-  }
-
-  .assembly-core svg {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
 
   .core-label {
     font-size: 0.5rem;
   }
 
-  .orbit-one {
-    left: 18%;
-    top: 18%;
-    width: 16rem;
-    height: 16rem;
-  }
-
-  .orbit-two {
-    left: 24%;
-    top: 24%;
-    width: 12rem;
-    height: 12rem;
-  }
-
-  .assembly-status {
-    right: 0.75rem;
-    max-width: 11rem;
-    font-size: 0.48rem;
-    line-height: 1.5;
-    text-align: right;
-  }
-
-  .assembly-capability-preview {
-    padding-top: 9rem;
-  }
-
-  .capability-indicator {
-    max-width: calc(100% - 2rem);
-    padding: 0.42rem 0.7rem;
-    font-size: 0.54rem;
-  }
 
   .content-band {
     padding: 3.75rem 0;
@@ -3871,4 +3538,529 @@ footer a:hover {
   footer {
     padding-bottom: max(3rem, env(safe-area-inset-bottom)) !important;
   }
+}
+
+/* ============================================================
+   THE GSTPIXEL ASSEMBLY INSTRUMENT
+   A single legible progression: six stages on a luminous rail with the
+   Assembly core alongside. Stage emphasis is driven by --env-wN, so the
+   instrument advances continuously with the page rather than replaying an
+   intro animation.
+   ============================================================ */
+.asm {
+  position: relative;
+  isolation: isolate;
+  --asm-px: 0;
+  --asm-py: 0;
+  min-height: 30rem;
+  display: grid;
+  align-items: center;
+  /* The orbit rings and aura deliberately bleed past the instrument; clip them
+     here so the decorative layers never widen the page. */
+  overflow: clip;
+}
+
+.asm-depth {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: clip;
+  pointer-events: none;
+  transform: translate3d(
+    calc(var(--asm-px) * 14px),
+    calc(var(--asm-py) * 14px),
+    0
+  );
+  transition: transform 400ms var(--easing-decelerate);
+}
+
+.asm-aura {
+  position: absolute;
+  inset: 6% 2% 6% 6%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 62% 44%,
+    color-mix(in oklab, var(--env-current-glow) 34%, transparent),
+    transparent 66%
+  );
+  filter: blur(6px);
+}
+
+.asm-orbit {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--primary) 16%, transparent);
+}
+
+.asm-orbit-outer {
+  inset: -2% -6% -2% 12%;
+  animation: asm-orbit-drift 34s linear infinite;
+}
+
+.asm-orbit-inner {
+  inset: 16% 12% 16% 26%;
+  border-color: color-mix(in oklab, var(--primary) 22%, transparent);
+  animation: asm-orbit-drift 24s linear infinite reverse;
+}
+
+@keyframes asm-orbit-drift {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.03);
+  }
+  to {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+.asm-instrument {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+}
+
+@media (min-width: 640px) {
+  .asm-instrument {
+    grid-template-columns: 9.5rem minmax(0, 1fr);
+    gap: 1.25rem;
+  }
+  .asm-track {
+    display: none;
+  }
+}
+
+/* Core ------------------------------------------------------ */
+.asm-core {
+  display: grid;
+  justify-items: center;
+  gap: 0.6rem;
+  text-align: center;
+}
+
+.asm-core-ring {
+  display: grid;
+  place-items: center;
+  width: 6.5rem;
+  height: 6.5rem;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--primary) 34%, transparent);
+  background:
+    radial-gradient(
+      circle at 50% 34%,
+      color-mix(in oklab, var(--primary) 22%, transparent),
+      transparent 62%
+    ),
+    color-mix(in oklab, var(--env-current-glass-tint) 70%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, var(--primary) 30%, transparent),
+    0 18px 42px color-mix(in oklab, var(--ink) 42%, transparent),
+    0 0 34px color-mix(in oklab, var(--env-current-glow) 30%, transparent);
+}
+
+.asm-core-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--primary);
+}
+
+.asm-core-label {
+  margin: 0;
+  font: 500 0.55rem var(--font-mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-foreground);
+}
+
+.asm-core-meta {
+  margin: 0;
+  font: 500 0.5rem var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* Stages ---------------------------------------------------- */
+.asm-stages {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.asm-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 0.6rem;
+  border: 1px solid transparent;
+  background: color-mix(
+    in oklab,
+    var(--env-current-glass-tint) calc(20% + var(--stage-weight) * 46%),
+    transparent
+  );
+  /* Depth: stages sit slightly back and step forward as they activate. */
+  transform: translate3d(
+    calc(var(--stage-weight) * 10px - var(--asm-px) * 6px),
+    0,
+    0
+  );
+  opacity: calc(0.52 + var(--stage-weight) * 0.48);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 18%), transparent),
+    0 0 0 1px color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 34%), transparent);
+  transition:
+    background 600ms var(--easing-decelerate),
+    opacity 600ms var(--easing-decelerate),
+    transform 400ms var(--easing-standard),
+    border-color 600ms var(--easing-decelerate);
+}
+
+.asm-stage-node {
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  flex: none;
+  border-radius: 0.5rem;
+  color: color-mix(in oklab, var(--primary) calc(60% + var(--stage-weight) * 40%), var(--ink-muted));
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--primary) calc(var(--stage-weight) * 26%), transparent),
+    transparent
+  );
+  box-shadow: inset 0 0 0 1px
+    color-mix(in oklab, var(--primary) calc(18% + var(--stage-weight) * 30%), transparent);
+}
+
+.asm-stage-text {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.asm-stage-meta {
+  font: 500 0.5rem var(--font-mono);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.asm-stage-text strong {
+  font: 700 1.05rem var(--font-display);
+  color: var(--ink-foreground);
+  line-height: 1.1;
+}
+
+/* Track (mobile: vertical rail behind the stage list) ------------- */
+.asm-track {
+  position: absolute;
+  left: 0.5rem;
+  top: 1rem;
+  bottom: 1rem;
+  width: 2px;
+  display: none;
+}
+
+.asm-track-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.asm-track-base {
+  stroke: color-mix(in oklab, var(--ink-foreground) 12%, transparent);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.asm-track-fill {
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc(100 - var(--env-progress, 0) * 100);
+  transition: stroke-dashoffset 200ms linear;
+}
+
+@media (max-width: 639px) {
+  .asm {
+    min-height: 0;
+  }
+  .asm-instrument {
+    gap: 1.1rem;
+  }
+  .asm-stages {
+    margin-left: 1.4rem;
+  }
+  .asm-track {
+    display: block;
+  }
+  .asm-stage {
+    transform: none;
+    padding-inline: 0.7rem;
+  }
+  .asm-stage-text strong {
+    font-size: 0.98rem;
+  }
+  .asm-orbit-inner {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asm-depth,
+  .asm-stage {
+    transform: none;
+  }
+  .asm-orbit-outer,
+  .asm-orbit-inner {
+    animation: none;
+  }
+  .asm-stage {
+    opacity: 1;
+    background: color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent);
+  }
+  .asm-track-fill {
+    stroke-dashoffset: 40;
+  }
+}
+
+/* Home outcome cards: a stack of assembly panels rather than plain list rows.
+   StaggeredReveal wraps each item in a reveal div, so the card is targeted
+   through that wrapper. Scoped to keep the shared .outcome-list intact. */
+.outcome-list-cards {
+  margin-top: 2.5rem;
+  display: grid;
+  gap: 0.85rem;
+  border-top: none;
+}
+
+.outcome-list-cards > * {
+  min-width: 0;
+}
+
+.outcome-list-cards .assembly-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 1.15rem;
+  align-items: center;
+  padding: 1.35rem 1.5rem;
+  border-bottom: none;
+  border-radius: 0.75rem;
+  color: var(--ink-foreground);
+  transition:
+    transform 240ms var(--easing-standard),
+    box-shadow 240ms var(--easing-standard),
+    border-color 240ms var(--easing-standard);
+}
+
+.outcome-list-cards .assembly-panel:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--primary) 52%, transparent);
+}
+
+.outcome-card-body {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.outcome-list-cards .outcome-card-body > strong,
+.outcome-list-cards .outcome-card-body > p {
+  display: block;
+  margin: 0;
+}
+
+.outcome-list-cards .outcome-card-body > strong {
+  font: 600 clamp(1.1rem, 1.7vw, 1.45rem) var(--font-display);
+  color: var(--ink-foreground);
+}
+
+.outcome-list-cards .outcome-card-body > p {
+  max-width: 62ch;
+  color: var(--ink-muted);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.outcome-list-cards .assembly-panel > svg {
+  color: color-mix(in oklab, var(--primary) 70%, transparent);
+  transition:
+    transform 240ms var(--easing-standard),
+    color 240ms var(--easing-standard);
+}
+
+.outcome-list-cards .assembly-panel:hover > svg {
+  transform: translateX(3px);
+  color: var(--primary);
+}
+
+@media (max-width: 639px) {
+  .outcome-list-cards .assembly-panel {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.9rem;
+    padding: 1.15rem;
+  }
+  .outcome-list-cards .assembly-panel > svg {
+    display: none;
+  }
+}
+
+
+/* Intrinsic-sizing guard.
+   Grid and flex items default to min-width:auto, so any wide descendant (a
+   ch-based max-width, a nowrap label, a long token) becomes the track's
+   minimum and can push the page past the viewport. */
+.editorial-split > *,
+.service-family-grid > *,
+.outcome-list-cards > *,
+.tool-cards > *,
+.concept-row > *,
+.grid > * {
+  min-width: 0;
+}
+
+/* Capability links inside tool cards: keep the small caps look but give the
+   control a real vertical hit area (WCAG 2.2 target size). */
+.capability-link {
+  min-height: 1.75rem;
+  padding-block: 0.35rem;
+  color: color-mix(in oklab, var(--primary) 88%, white);
+  transition: color 180ms var(--easing-standard);
+}
+
+.capability-link:hover {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+/* The brand lockup is a link too; give it a comfortable target on touch. */
+@media (pointer: coarse) {
+  .brand-mark {
+    min-height: 2.5rem;
+    align-items: center;
+  }
+}
+
+/* Concept card artwork.
+   These were empty panels; they now carry a drafting-grid material with a
+   luminous key light and a directional sheen, varied per concept so the three
+   cards read as distinct surfaces rather than three identical blanks. */
+.concept-card-visual {
+  position: relative;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  background-color: color-mix(in oklab, var(--env-current-glass-tint) 52%, transparent);
+  background-image:
+    linear-gradient(color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--primary) 12%, transparent) 1px, transparent 1px),
+    repeating-linear-gradient(
+      115deg,
+      color-mix(in oklab, white 4%, transparent) 0 2px,
+      transparent 2px 9px
+    );
+  background-size: 30px 30px, 30px 30px, auto;
+  mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 62%, transparent 100%);
+  transition: background-color 600ms var(--easing-decelerate);
+}
+
+.concept-card-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 62% 58% at var(--concept-light-x, 30%) var(--concept-light-y, 26%),
+    color-mix(in oklab, var(--concept-light, var(--primary)) 42%, transparent),
+    transparent 68%
+  );
+  transition: transform 700ms var(--easing-decelerate);
+}
+
+.concept-card-visual::after {
+  content: "";
+  position: absolute;
+  inset: -20% -10%;
+  background: linear-gradient(
+    118deg,
+    transparent 34%,
+    color-mix(in oklab, white 8%, transparent) 50%,
+    transparent 64%
+  );
+  opacity: 0.75;
+  transition: transform 800ms var(--easing-decelerate);
+}
+
+.concept-1 {
+  --concept-light: var(--primary);
+  --concept-light-x: 26%;
+  --concept-light-y: 22%;
+}
+
+.concept-2 {
+  --concept-light: oklch(0.8 0.11 84);
+  --concept-light-x: 74%;
+  --concept-light-y: 28%;
+}
+
+.concept-3 {
+  --concept-light: oklch(0.78 0.12 150);
+  --concept-light-x: 48%;
+  --concept-light-y: 68%;
+}
+
+.concept-card:hover .concept-card-visual::after {
+  transform: translate3d(6%, -4%, 0);
+}
+
+.concept-card:hover .concept-card-visual::before {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .concept-card:hover .concept-card-visual::before,
+  .concept-card:hover .concept-card-visual::after {
+    transform: none;
+  }
+}
+
+/* Panels that sit in a two-column split should hug their content rather than
+   stretching to the height of the taller column and leaving dead space. */
+.editorial-split > .operation-ledger,
+.editorial-split > .principle-stack,
+.editorial-split > .sequence,
+.split-start {
+  align-self: start;
+}
+
+
+/* Need-choice icon chip: holds a real icon now that the name leak is fixed. */
+.need-choice-icon {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  color: color-mix(in oklab, var(--primary) 85%, white);
+  background: linear-gradient(
+    150deg,
+    color-mix(in oklab, var(--primary) 20%, transparent),
+    transparent
+  );
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 26%, transparent);
+}
+
+.need-choice.selected .need-choice-icon {
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--primary) 60%, transparent),
+    0 0 20px color-mix(in oklab, var(--primary) 22%, transparent);
 }

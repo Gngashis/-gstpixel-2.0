@@ -117,30 +117,24 @@ function Home() {
           <StaggeredReveal
             baseDelay={0.08}
             variant="fadeInUp"
-            className="outcome-list"
+            className="outcome-list outcome-list-cards"
           >
-            <span
-              className="assembly-node"
-              style={{
-                position: "absolute",
-                top: "-1rem",
-                left: "-1rem",
-                zIndex: "1",
-              }}
-            >
-              01
-            </span>
             {solutions.map((x, i) => (
               <Link
                 key={x.slug}
                 to="/solutions/$slug"
                 params={{ slug: x.slug }}
-                className="assembly-panel assembly-connector"
-                style={{ borderRadius: "0.75rem", padding: "1.5rem" }}
+                className="assembly-panel"
               >
-                <span className="label">0{i + 1}</span>
-                <strong>{x.title}</strong>
-                <p>{x.summary}</p>
+                {/* The node badge carries the stage number, so the card does
+                    not need a second overlapping counter. */}
+                <span className="assembly-node" aria-hidden="true">
+                  0{i + 1}
+                </span>
+                <span className="outcome-card-body">
+                  <strong>{x.title}</strong>
+                  <p>{x.summary}</p>
+                </span>
                 <ArrowRight aria-hidden="true" />
               </Link>
             ))}
@@ -310,14 +304,7 @@ function Home() {
                   key={x}
                   to="/services/$slug"
                   params={{ slug: "business-setup-compliance" }}
-                  className="assembly-panel assembly-connector"
-                  style={{
-                    borderRadius: "0.5rem",
-                    padding: "1.25rem",
-                    display: "grid",
-                    gridTemplateColumns: "2rem 1fr auto",
-                    alignItems: "center",
-                  }}
+                  className="assembly-panel ledger-row"
                 >
                   <span>0{i + 1}</span>
                   <strong>{x}</strong>
@@ -423,7 +410,7 @@ function Home() {
               <Link
                 key={tool.slug}
                 to={`/tools/${tool.slug}`}
-                className="assembly-panel assembly-connector"
+                className="assembly-panel ledger-row"
                 style={{
                   borderRadius: "0.5rem",
                   padding: "1.5rem",
@@ -484,21 +471,21 @@ function Home() {
             className="principles"
           >
             <div
-              className="assembly-panel assembly-connector"
+              className="assembly-panel"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <b>One integrated view.</b> Product, automation, operations, and
               strategy stay connected.
             </div>
             <div
-              className="assembly-panel assembly-connector"
+              className="assembly-panel"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <b>Clear before clever.</b> Every interaction must help someone
               understand or act.
             </div>
             <div
-              className="assembly-panel assembly-connector"
+              className="assembly-panel"
               style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
             >
               <b>Evidence over theatre.</b> No fabricated proof, hidden
@@ -557,31 +544,14 @@ function Home() {
                   <a
                     key={item.label}
                     href={item.href}
-                    className="assembly-panel assembly-connector"
-                    style={{
-                      borderRadius: "0.5rem",
-                      padding: "1.25rem",
-                      display: "grid",
-                      gridTemplateColumns: "2rem 1fr auto",
-                      alignItems: "center",
-                    }}
+                    className="assembly-panel ledger-row"
                   >
                     <span>0{i + 1}</span>
                     <strong>{item.label}</strong>
                     <ArrowRight size={18} />
                   </a>
                 ) : (
-                  <div
-                    key={item.label}
-                    className="assembly-panel assembly-connector"
-                    style={{
-                      borderRadius: "0.5rem",
-                      padding: "1.25rem",
-                      display: "grid",
-                      gridTemplateColumns: "2rem 1fr auto",
-                      alignItems: "center",
-                    }}
-                  >
+                  <div key={item.label} className="assembly-panel ledger-row">
                     <span>0{i + 1}</span>
                     <strong>{item.label}</strong>
                     <FileCheck2 size={18} />
@@ -612,7 +582,7 @@ function Home() {
               (x, i) => (
                 <li
                   key={x}
-                  className="assembly-panel assembly-connector"
+                  className="assembly-panel ledger-row"
                   style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
                 >
                   <span>0{i + 1}</span>

@@ -383,7 +383,7 @@ function Page() {
                         key={slug}
                         to="/services/$slug"
                         params={{ slug }}
-                        className="label text-primary"
+                        className="label text-primary capability-link"
                         style={{
                           display: "inline-flex",
                           alignItems: "center",

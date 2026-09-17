@@ -78,7 +78,7 @@ export function useElementScrollProgress(
 }
 
 export function useIntersection(
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   options?: IntersectionObserverInit,
 ): boolean {
   const [visible, setVisible] = useState(false);
@@ -89,6 +89,7 @@ export function useIntersection(
       setVisible(true);
       return;
     }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -98,8 +99,27 @@ export function useIntersection(
       },
       { threshold: 0.1, rootMargin: "0px 0px -10% 0px", ...options },
     );
+
     observer.observe(node);
-    return () => observer.disconnect();
+
+    /* Deterministic first pass: IntersectionObserver callbacks can lag a frame
+       after a route change or a jump scroll, which would leave above-the-fold
+       content briefly empty. Measure directly as a backstop. */
+    const measure = () => {
+      const rect = node.getBoundingClientRect();
+      const viewport =
+        window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < viewport * 0.92 && rect.bottom > 0) {
+        setVisible(true);
+        observer.disconnect();
+      }
+    };
+    const frame = requestAnimationFrame(measure);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [ref, reduced, options?.threshold, options?.rootMargin]);
   return visible;
 }

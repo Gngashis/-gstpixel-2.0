@@ -75,7 +75,9 @@ export function ScrollReveal({
     transition: isVisible
       ? `${transition.duration}s ${transition.easing} ${transition.delay}s`
       : "none",
-    willChange: "opacity, transform",
+    /* Only promote while the element is still waiting to animate: keeping every
+       reveal on its own compositor layer for the life of the page is wasteful. */
+    willChange: isVisible ? "auto" : "opacity, transform",
   };
 
   if (reduced) {
