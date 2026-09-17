@@ -129,6 +129,15 @@ const tools = [
     features: ["Fixed sequence", "Dependencies", "Copy summary"],
     category: "Planning",
   },
+  {
+    slug: "website-requirement-generator",
+    title: "Website requirement generator",
+    description:
+      "Turn a structured questionnaire into a polished website brief with transparent recommendations.",
+    icon: Globe,
+    features: ["Multi-step brief", "Transparent logic", "Client-side output"],
+    category: "Planning",
+  },
 ] as const;
 
 const techStack = [
