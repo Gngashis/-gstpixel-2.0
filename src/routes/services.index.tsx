@@ -15,6 +15,7 @@ import {
 } from "@/components/page";
 import { services } from "@/lib/content";
 import { ScrollReveal } from "@/components/page";
+import { buildCanonical } from "@/lib/seo";
 
 const familyIcons = {
   "Digital Development": Code,
@@ -39,8 +40,12 @@ export const Route = createFileRoute("/services/")({
           "One connected service system for digital products, automation, operations, and growth.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/services") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/services") }],
   }),
   component: Page,
 });

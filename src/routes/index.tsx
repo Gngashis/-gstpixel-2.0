@@ -21,6 +21,8 @@ import {
   businessFacts,
 } from "@/lib/content";
 import { AssemblyVisual } from "@/components/assembly-visual";
+import { buildCanonical, websiteJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,11 +40,15 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Business services, consultancy, digital development, and automation—assembled as one system.",
+          "GSTPIXEL combines business consulting and services with digital development and automation—based in Jaigaon, West Bengal.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/") }],
   }),
   component: Home,
 });
@@ -50,6 +56,7 @@ export const Route = createFileRoute("/")({
 function Home() {
   return (
     <>
+      <JsonLd data={websiteJsonLd()} />
       <section
         className="home-hero drafting-grid env-section"
         data-env-phase="0"

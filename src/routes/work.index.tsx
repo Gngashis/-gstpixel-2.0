@@ -8,6 +8,7 @@ import {
   ScrollReveal,
 } from "@/components/page";
 import { conceptProjects } from "@/lib/content";
+import { buildCanonical } from "@/lib/seo";
 
 export const Route = createFileRoute("/work/")({
   head: () => ({
@@ -24,8 +25,12 @@ export const Route = createFileRoute("/work/")({
         content: "GSTPIXEL concept projects and design explorations.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/work") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/work") }],
   }),
   component: Page,
 });

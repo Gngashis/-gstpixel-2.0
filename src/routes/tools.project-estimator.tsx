@@ -8,6 +8,7 @@ import {
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { ArrowRight, Target, X, Check } from "lucide-react";
+import { buildCanonical } from "@/lib/seo";
 
 const projectTypes = [
   { value: "website", label: "Website", baseComplexity: 1 },
@@ -69,7 +70,16 @@ export const Route = createFileRoute("/tools/project-estimator")({
         content: "A guided scope estimator without invented pricing.",
       },
       { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: buildCanonical("/tools/project-estimator"),
+      },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      { rel: "canonical", href: buildCanonical("/tools/project-estimator") },
     ],
   }),
   component: Page,

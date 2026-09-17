@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { buildCanonical } from "@/lib/seo";
 import {
   PageIntro,
   ScrollReveal,
@@ -112,7 +113,13 @@ export const Route = createFileRoute("/tools/service-finder")({
           "Choose an outcome and see transparent service recommendations.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/tools/service-finder") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      { rel: "canonical", href: buildCanonical("/tools/service-finder") },
     ],
   }),
   component: Page,

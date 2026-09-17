@@ -8,6 +8,9 @@ import {
 } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
+import { buildCanonical, organizationJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import { businessFacts } from "@/lib/content";
 import {
   ArrowRight,
   Target,
@@ -44,13 +47,32 @@ export const Route = createFileRoute("/about")({
         content: "The principles behind GSTPIXEL's integrated operating model.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/about") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/about") }],
   }),
   component: Page,
 });
 
 function Page() {
+  return (
+    <>
+      <JsonLd
+        data={organizationJsonLd({
+          founder: businessFacts.founder,
+          founderTitle: businessFacts.founderTitle,
+          tagline: businessFacts.tagline,
+        })}
+      />
+      <AboutContent />
+    </>
+  );
+}
+
+function AboutContent() {
   const principles = [
     {
       icon: Eye,

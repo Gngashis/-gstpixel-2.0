@@ -16,6 +16,7 @@ import {
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { conceptProjects } from "@/lib/content";
+import { buildCanonical } from "@/lib/seo";
 
 export const Route = createFileRoute("/work/$slug")({
   loader: ({ params }) => {
@@ -25,22 +26,32 @@ export const Route = createFileRoute("/work/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.title ?? "Concept"} — GSTPIXEL Concept Lab` },
+      { title: `${loaderData?.title} — GSTPIXEL Concept Lab` },
       {
         name: "description",
         content: loaderData?.summary ?? "GSTPIXEL concept exploration.",
       },
       {
         property: "og:title",
-        content: `${loaderData?.title ?? "Concept"} — GSTPIXEL Concept Lab`,
+        content: `${loaderData?.title} — GSTPIXEL Concept Lab`,
       },
       {
         property: "og:description",
         content:
+          loaderData?.summary ??
           "Clearly labeled design exploration; not commissioned client work.",
       },
       { property: "og:type", content: "article" },
+      {
+        property: "og:url",
+        content: buildCanonical(`/work/${loaderData?.slug}`),
+      },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      { rel: "canonical", href: buildCanonical(`/work/${loaderData?.slug}`) },
     ],
   }),
   component: Page,

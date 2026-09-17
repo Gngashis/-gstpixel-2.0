@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { buildCanonical } from "@/lib/seo";
 import {
   PageIntro,
   ScrollReveal,
@@ -93,7 +94,16 @@ export const Route = createFileRoute("/tools/business-checklist")({
         content: "A general planning aid with clear regulatory boundaries.",
       },
       { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: buildCanonical("/tools/business-checklist"),
+      },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      { rel: "canonical", href: buildCanonical("/tools/business-checklist") },
     ],
   }),
   component: Page,

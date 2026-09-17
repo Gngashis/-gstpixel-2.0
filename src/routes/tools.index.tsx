@@ -25,6 +25,7 @@ import {
   ScrollReveal,
 } from "@/components/page";
 import { services } from "@/lib/content";
+import { buildCanonical } from "@/lib/seo";
 
 const toolServicePairings = [
   {
@@ -192,8 +193,12 @@ export const Route = createFileRoute("/tools/")({
           "Transparent browser-based tools for planning digital and business needs.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/tools") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/tools") }],
   }),
   component: Page,
 });

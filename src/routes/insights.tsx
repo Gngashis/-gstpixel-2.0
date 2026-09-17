@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   ArrowRight,
 } from "lucide-react";
+import { buildCanonical } from "@/lib/seo";
 
 export const Route = createFileRoute("/insights")({
   head: () => ({
@@ -33,8 +34,12 @@ export const Route = createFileRoute("/insights")({
           "A forthcoming library of reviewed GSTPIXEL guides and resources.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/insights") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/insights") }],
   }),
   component: Page,
 });

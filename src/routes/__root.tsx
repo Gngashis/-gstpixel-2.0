@@ -13,6 +13,12 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { SiteShell } from "../components/site-shell";
 import { ScrollEnvironmentProvider } from "../lib/scroll-environment";
+import {
+  SITE_URL,
+  SITE_NAME,
+  DEFAULT_TITLE,
+  DEFAULT_DESCRIPTION,
+} from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
@@ -86,21 +92,24 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           name: "viewport",
           content: "width=device-width, initial-scale=1, viewport-fit=cover",
         },
-        { title: "GSTPIXEL" },
+        { title: DEFAULT_TITLE },
         {
           name: "description",
-          content:
-            "Technology, digital development, business services, and consultancy assembled as one system.",
+          content: DEFAULT_DESCRIPTION,
         },
-        { name: "author", content: "GSTPIXEL" },
+        { name: "author", content: SITE_NAME },
         { property: "og:type", content: "website" },
+        { property: "og:site_name", content: SITE_NAME },
+        { property: "og:url", content: SITE_URL },
+        { property: "og:locale", content: "en_IN" },
+        { property: "og:title", content: DEFAULT_TITLE },
+        { property: "og:description", content: DEFAULT_DESCRIPTION },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:site", content: "@gstpixel" },
+        { name: "theme-color", content: "#0a0a0a" },
       ],
       links: [
-        {
-          rel: "stylesheet",
-          href: appCss,
-        },
+        { rel: "stylesheet", href: appCss },
         { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         {

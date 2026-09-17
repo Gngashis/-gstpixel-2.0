@@ -18,6 +18,9 @@ import {
   ScrollReveal,
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { buildCanonical, localBusinessJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
+import { businessFacts } from "@/lib/content";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -35,13 +38,34 @@ export const Route = createFileRoute("/contact")({
           "Reach GSTPIXEL by phone, WhatsApp, or email, or start a guided project enquiry.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/contact") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/contact") }],
   }),
   component: Page,
 });
 
 function Page() {
+  return (
+    <>
+      <JsonLd
+        data={localBusinessJsonLd({
+          address: businessFacts.address,
+          phoneHref: businessFacts.phone.href,
+          emailHref: businessFacts.email.href,
+          gstin: businessFacts.gstin,
+          founder: businessFacts.founder,
+        })}
+      />
+      <ContactContent />
+    </>
+  );
+}
+
+function ContactContent() {
   const contactMethods = [
     {
       icon: Phone,

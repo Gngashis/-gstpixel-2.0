@@ -8,6 +8,7 @@ import {
 } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calculator, Info, AlertCircle } from "lucide-react";
+import { buildCanonical } from "@/lib/seo";
 
 const commonRates = [
   { rate: 0, label: "0% — Exempt / Nil rated" },
@@ -44,7 +45,13 @@ export const Route = createFileRoute("/tools/gst-calculator")({
           "An educational GST arithmetic calculator with explicit assumptions.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/tools/gst-calculator") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      { rel: "canonical", href: buildCanonical("/tools/gst-calculator") },
     ],
   }),
   component: Page,

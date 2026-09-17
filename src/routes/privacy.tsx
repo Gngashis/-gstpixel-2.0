@@ -14,6 +14,7 @@ import {
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
+import { buildCanonical } from "@/lib/seo";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -30,8 +31,12 @@ export const Route = createFileRoute("/privacy")({
         content: "How the current GSTPIXEL website handles information.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/privacy") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/privacy") }],
   }),
   component: Page,
 });

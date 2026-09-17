@@ -23,6 +23,7 @@ import {
 } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { businessFacts } from "@/lib/content";
+import { buildCanonical } from "@/lib/seo";
 
 export const Route = createFileRoute("/start-your-project")({
   validateSearch: (
@@ -39,7 +40,19 @@ export const Route = createFileRoute("/start-your-project")({
         content:
           "Create a clear project or business-services enquiry for GSTPIXEL.",
       },
+      { property: "og:title", content: "Start Your Project — GSTPIXEL" },
+      {
+        property: "og:description",
+        content:
+          "Create a clear project or business-services enquiry for GSTPIXEL.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/start-your-project") },
+      { property: "og:site_name", content: "GSTPIXEL" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/start-your-project") }],
   }),
   component: Page,
 });

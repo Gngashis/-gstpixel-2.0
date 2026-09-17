@@ -16,6 +16,7 @@ import {
   ScrollReveal,
 } from "@/components/page";
 import { solutions } from "@/lib/content";
+import { buildCanonical } from "@/lib/seo";
 
 const solutionIcons = {
   "Start a business": Target,
@@ -42,8 +43,12 @@ export const Route = createFileRoute("/solutions/")({
           "Start with your outcome and find the connected services and tools.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: buildCanonical("/solutions") },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
     ],
+    links: [{ rel: "canonical", href: buildCanonical("/solutions") }],
   }),
   component: Page,
 });

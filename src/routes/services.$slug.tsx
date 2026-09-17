@@ -9,6 +9,8 @@ import {
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { services, getTool, getSolution } from "@/lib/content";
+import { buildCanonical, serviceJsonLd, breadcrumbJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 
 export const Route = createFileRoute("/services/$slug")({
   loader: ({ params }) => {
@@ -18,21 +20,33 @@ export const Route = createFileRoute("/services/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.title ?? "Service"} — GSTPIXEL` },
+      { title: `${loaderData?.title} — GSTPIXEL` },
       {
         name: "description",
-        content: loaderData?.summary ?? "GSTPIXEL service details.",
+        content: loaderData?.summary,
       },
       {
         property: "og:title",
-        content: `${loaderData?.title ?? "Service"} — GSTPIXEL`,
+        content: `${loaderData?.title} — GSTPIXEL`,
       },
       {
         property: "og:description",
-        content: loaderData?.summary ?? "GSTPIXEL service details.",
+        content: loaderData?.summary,
       },
       { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: buildCanonical(`/services/${loaderData?.slug}`),
+      },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: buildCanonical(`/services/${loaderData?.slug}`),
+      },
     ],
   }),
   component: Page,
@@ -46,6 +60,20 @@ function Page() {
 
   return (
     <>
+      <JsonLd
+        data={serviceJsonLd({
+          title: s.title,
+          family: s.family,
+          summary: s.summary,
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { path: "/", label: "Home" },
+          { path: "/services", label: "Services" },
+          { path: `/services/${s.slug}`, label: s.title },
+        ])}
+      />
       <PageIntro label={s.family} title={s.title} description={s.summary} />
 
       <section className="content-band">

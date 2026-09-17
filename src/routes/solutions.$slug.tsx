@@ -9,6 +9,8 @@ import {
 } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { solutions, services, getTool } from "@/lib/content";
+import { buildCanonical, breadcrumbJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/json-ld";
 
 export const Route = createFileRoute("/solutions/$slug")({
   loader: ({ params }) => {
@@ -32,7 +34,19 @@ export const Route = createFileRoute("/solutions/$slug")({
         content: loaderData?.summary ?? "A guided GSTPIXEL solution.",
       },
       { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: buildCanonical(`/solutions/${loaderData?.slug}`),
+      },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: buildCanonical(`/solutions/${loaderData?.slug}`),
+      },
     ],
   }),
   component: Page,
@@ -50,6 +64,13 @@ function Page() {
 
   return (
     <>
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { path: "/", label: "Home" },
+          { path: "/solutions", label: "Solutions" },
+          { path: `/solutions/${x.slug}`, label: x.title },
+        ])}
+      />
       <PageIntro
         label="Guided solution"
         title={x.title}
