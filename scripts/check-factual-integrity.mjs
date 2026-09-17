@@ -34,17 +34,39 @@ const SRC_DIR = join(ROOT, "src");
 // contains an explicit safe/negated phrase (allowlist).
 const RISKY_CLAIMS = [
   { label: "absolute compliance claim", regex: /fully\s+compliant/i },
-  { label: "implied legal structure", regex: /registered\s+indian\s+business/i },
+  {
+    label: "implied legal structure",
+    regex: /registered\s+indian\s+business/i,
+  },
   { label: "implied availability (anytime)", regex: /\banytime\b/i },
-  { label: "unsupported 24/7 availability", regex: /\b24\s*\/?\s*7\b|\b24x7\b/i },
+  {
+    label: "unsupported 24/7 availability",
+    regex: /\b24\s*\/?\s*7\b|\b24x7\b/i,
+  },
   { label: "implied walk-in office", regex: /physical\s+office/i },
   { label: "implied walk-in office (visit us)", regex: /\bvisit\s+us\b/i },
-  { label: "unsupported HSTS/secure-header claim", regex: /hsts\s+and\s+secure\s+headers/i },
-  { label: "absolute first-party-only claim", regex: /only\s+first[- ]party\s+assets/i },
-  { label: "false no-third-party claim", regex: /no[-\s]?analytics,\s*tracking,\s*or\s*third[- ]party\s+scripts\s+without\s+consent/i },
-  { label: "unsupported guarantee (non-disclaimer)", regex: /\bguarantee(s|d)?\b/i },
+  {
+    label: "unsupported HSTS/secure-header claim",
+    regex: /hsts\s+and\s+secure\s+headers/i,
+  },
+  {
+    label: "absolute first-party-only claim",
+    regex: /only\s+first[- ]party\s+assets/i,
+  },
+  {
+    label: "false no-third-party claim",
+    regex:
+      /no[-\s]?analytics,\s*tracking,\s*or\s*third[- ]party\s+scripts\s+without\s+consent/i,
+  },
+  {
+    label: "unsupported guarantee (non-disclaimer)",
+    regex: /\bguarantee(s|d)?\b/i,
+  },
   { label: "unsupported certification claim", regex: /\bcertified\b/i },
-  { label: "unsupported approval claim", regex: /\bapproved\s+by\s+(the\s+)?government/i },
+  {
+    label: "unsupported approval claim",
+    regex: /\bapproved\s+by\s+(the\s+)?government/i,
+  },
 ];
 
 // Phrases that legitimately contain risky words but are factual disclaimers or
@@ -90,7 +112,10 @@ const HARDCODED_FACTS = [
   { label: "address (Anthony School)", regex: /Anthony\s+School/i },
   { label: "address (postcode)", regex: /736182/ },
   { label: "WhatsApp URL", regex: /wa\.me\/919046520548/ },
-  { label: "tagline", regex: /Start\s+Right\.\s+Stay\s+Compliant\.\s+Grow\s+Online\./ },
+  {
+    label: "tagline",
+    regex: /Start\s+Right\.\s+Stay\s+Compliant\.\s+Grow\s+Online\./,
+  },
 ];
 
 // Lines within src/lib/content.ts that are allowed to contain hardcoded facts.
@@ -162,18 +187,24 @@ const byKind = (k) => violations.filter((v) => v.kind === k);
 
 if (violations.length === 0) {
   console.log(`PASS — scanned ${fileCount.scanned} source files`);
-  console.log(`No risky/unsupported claims and no duplicated hardcoded facts found outside ${CANONICAL_FILE}.`);
+  console.log(
+    `No risky/unsupported claims and no duplicated hardcoded facts found outside ${CANONICAL_FILE}.`,
+  );
   process.exit(0);
 }
 
-console.log(`FAIL — ${violations.length} violation(s) across ${fileCount.scanned} source files`);
+console.log(
+  `FAIL — ${violations.length} violation(s) across ${fileCount.scanned} source files`,
+);
 console.log("");
 
 const risky = byKind("RISKY_CLAIM");
 if (risky.length) {
   console.log(`[1] RISKY / UNSUPPORTED CLAIMS (${risky.length}):`);
   for (const v of risky) {
-    console.log(`  ${v.file}:${v.line}:${v.col}  ${v.label}  — matched "${v.match}"`);
+    console.log(
+      `  ${v.file}:${v.line}:${v.col}  ${v.label}  — matched "${v.match}"`,
+    );
   }
   console.log("");
 }
@@ -182,7 +213,9 @@ const facts = byKind("HARDCODED_FACT");
 if (facts.length) {
   console.log(`[2] DUPLICATED HARDCODED BUSINESS FACTS (${facts.length}):`);
   for (const v of facts) {
-    console.log(`  ${v.file}:${v.line}:${v.col}  ${v.label}  — matched "${v.match}"`);
+    console.log(
+      `  ${v.file}:${v.line}:${v.col}  ${v.label}  — matched "${v.match}"`,
+    );
   }
   console.log("");
 }

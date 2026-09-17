@@ -413,9 +413,9 @@ describe("digital-readiness scoring engine", () => {
     it("buildHandoffFields returns expected keys", () => {
       const r = scoreReadiness(minAnswers());
       const fields = buildHandoffFields(r);
-      expect(fields.Tool).toBe("Digital readiness assessment");
+      expect(fields["Tool"]).toBe("Digital readiness assessment");
       expect(fields["Overall readiness"]).toBe(0);
-      expect(fields.Label).toBe("Foundation");
+      expect(fields["Label"]).toBe("Foundation");
       expect(fields["Top next step"]).toBeDefined();
     });
 
