@@ -139,7 +139,10 @@ export async function assertPageHealthy(
 ) {
   const { route, viewport } = options;
 
-  await page.waitForLoadState("networkidle");
+  // "networkidle" is unreliable against the Vite dev server (HMR/WebSocket
+  // keeps connections alive and can stall under load), so wait for load and
+  // rely on the auto-retrying content assertions below instead.
+  await page.waitForLoadState("load");
 
   // No root error boundary / fatal render failure.
   const bodyText = await page.locator("body").innerText();
@@ -212,7 +215,8 @@ export async function safeGoto(
     }
   };
   page.on("console", handler);
-  await page.goto(url, { waitUntil: "networkidle" });
+  // Avoid "networkidle" here as well — see assertPageHealthy for rationale.
+  await page.goto(url, { waitUntil: "load" });
   if (options?.waitFor) {
     await page.waitForSelector(options.waitFor, { state: "visible" });
   }
