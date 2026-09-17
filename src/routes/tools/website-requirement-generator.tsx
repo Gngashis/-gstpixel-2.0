@@ -108,7 +108,7 @@ const planningStages = [
   },
 ] as const;
 
-type FormState = {
+export type FormState = {
   businessName: string;
   industry: string;
   stage: string;
@@ -138,7 +138,7 @@ type FormState = {
   notes: string;
 };
 
-const initialForm: FormState = {
+export const initialForm: FormState = {
   businessName: "",
   industry: "",
   stage: "",
@@ -198,7 +198,7 @@ function toggleListItem<T extends string>(
   setter([...items, value]);
 }
 
-function buildRequirementBrief(form: FormState): Brief {
+export function buildRequirementBrief(form: FormState): Brief {
   const businessName = form.businessName.trim() || "This business";
   const industry = form.industry.trim() || "its market";
   const stage = form.stage.trim() || "early-stage";
@@ -340,7 +340,7 @@ function buildRequirementBrief(form: FormState): Brief {
   };
 }
 
-function buildRequirementText(brief: Brief): string {
+export function buildRequirementText(brief: Brief): string {
   const sections: Array<[string, string[] | string]> = [
     ["PROJECT OVERVIEW", [brief.projectOverview]],
     ["BUSINESS GOALS", brief.businessGoals],
