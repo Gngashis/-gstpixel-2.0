@@ -151,15 +151,15 @@ export function resolveHandoffNeed(
 }
 
 type SummaryParams = {
-  needLabel?: string;
-  stageLabel?: string;
+  needLabel?: string | undefined;
+  stageLabel?: string | undefined;
   details: string;
-  budgetLabel?: string;
-  timingLabel?: string;
+  budgetLabel?: string | undefined;
+  timingLabel?: string | undefined;
   name: string;
   email: string;
   reply: string;
-  phone?: string;
+  phone?: string | undefined;
 };
 
 /**
