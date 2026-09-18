@@ -188,6 +188,27 @@ export async function captureScreenshot(
   return file;
 }
 
+/**
+ * Wait until the app has hydrated so click handlers are actually attached.
+ *
+ * TanStack Start renders SSR markup before the client takes over. Until the
+ * router has hydrated, React's event delegation is not in place, so clicks on
+ * interactive elements (the mobile-nav toggle, the enquiry Continue button)
+ * are silently dropped and nothing happens. That makes interaction tests race
+ * the hydration step and flake.
+ *
+ * `window.__TSR_ROUTER__` is set by the TanStack Start client only after it has
+ * created the router and begun hydrating the SSR tree, so checking for it is a
+ * deterministic readiness condition (an actual DOM/state change) rather than an
+ * arbitrary sleep. It is empty/false before hydration and a router instance
+ * after, so it also snaps back only on a real navigation.
+ */
+export async function waitForHydration(page: Page) {
+  await page.waitForFunction(() => "__TSR_ROUTER__" in window, undefined, {
+    timeout: 10000,
+  });
+}
+
 /** Apply reduced-motion emulation and neutralize CSS animations/transitions. */
 export async function reduceMotion(page: Page) {
   await page.emulateMedia({ reducedMotion: "reduce" });

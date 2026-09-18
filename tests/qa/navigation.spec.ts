@@ -1,4 +1,11 @@
-import { test, expect, viewports, safeGoto, reduceMotion } from "./fixtures";
+import {
+  test,
+  expect,
+  viewports,
+  safeGoto,
+  reduceMotion,
+  waitForHydration,
+} from "./fixtures";
 
 test.describe("desktop navigation", () => {
   test("primary nav links are visible and reachable", async ({
@@ -49,7 +56,10 @@ test.describe("mobile navigation", () => {
     await reduceMotion(page);
     await safeGoto(page, "/");
 
-    const toggle = page.getByRole("button", { name: /Open menu/i });
+    // The toggle's accessible name alternates between "Open menu" and "Close
+    // menu" once opened, so match the stable "menu" part to keep the locator
+    // valid across both states.
+    const toggle = page.getByRole("button", { name: /menu/i });
     await expect(toggle).toBeVisible();
     expect(await toggle.getAttribute("aria-expanded")).toBe("false");
     expect(await toggle.getAttribute("aria-controls")).toBe("mobile-nav");
@@ -62,8 +72,12 @@ test.describe("mobile navigation", () => {
     await setViewport(viewports.mobile390);
     await reduceMotion(page);
     await safeGoto(page, "/");
+    await waitForHydration(page);
 
-    const toggle = page.getByRole("button", { name: /Open menu/i });
+    // The toggle's accessible name alternates between "Open menu" and "Close
+    // menu" once opened, so match the stable "menu" part to keep the locator
+    // valid across both states.
+    const toggle = page.getByRole("button", { name: /menu/i });
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
 
@@ -97,8 +111,12 @@ test.describe("mobile navigation", () => {
     await setViewport(viewports.mobile390);
     await reduceMotion(page);
     await safeGoto(page, "/");
+    await waitForHydration(page);
 
-    const toggle = page.getByRole("button", { name: /Open menu/i });
+    // The toggle's accessible name alternates between "Open menu" and "Close
+    // menu" once opened, so match the stable "menu" part to keep the locator
+    // valid across both states.
+    const toggle = page.getByRole("button", { name: /menu/i });
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
     const mobileNav = page.locator("#mobile-nav");
@@ -116,8 +134,12 @@ test.describe("mobile navigation", () => {
     await setViewport(viewports.mobile390);
     await reduceMotion(page);
     await safeGoto(page, "/");
+    await waitForHydration(page);
 
-    const toggle = page.getByRole("button", { name: /Open menu/i });
+    // The toggle's accessible name alternates between "Open menu" and "Close
+    // menu" once opened, so match the stable "menu" part to keep the locator
+    // valid across both states.
+    const toggle = page.getByRole("button", { name: /menu/i });
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
     const mobileNav = page.locator("#mobile-nav");

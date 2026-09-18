@@ -35,7 +35,7 @@ test.describe("visual regression baselines", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await reduceMotion(page);
     await safeGoto(page, "/");
-    await expect(page.locator(".assembly-visual")).toHaveScreenshot(
+    await expect(page.locator(".asm")).toHaveScreenshot(
       "assembly-section.png",
       { maxDiffPixelRatio: 0.03 },
     );
