@@ -39,7 +39,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India.",
+          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India, Phuentsholing, and Bhutan.",
       },
       {
         property: "og:title",
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India.",
+          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India, Phuentsholing, and Bhutan.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/") },
@@ -559,6 +559,16 @@ function Home() {
                 FSSAI-related services, business registration, website and
                 ecommerce development, and AI automation — all from one team, in
                 plain language.
+              </p>
+              <p className="section-copy">
+                Across the gate, we build websites, ecommerce, applications, and
+                automation for businesses in Phuentsholing and the wider
+                India–Bhutan border economy — with direct lines for both
+                countries. See our{" "}
+                <Link to="/locations/phuentsholing">
+                  Phuentsholing services
+                </Link>
+                .
               </p>
               <p className="section-copy">
                 Explore the <Link to="/services">full range of services</Link>,

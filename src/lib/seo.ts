@@ -114,15 +114,36 @@ export function localBusinessJsonLd(input: {
     identifier: input.gstin,
     areaServed: [
       { "@type": "City", name: "Jaigaon" },
+      { "@type": "City", name: "Phuentsholing" },
       { "@type": "City", name: "Alipurduar" },
       { "@type": "Town", name: "Kalchini" },
       { "@type": "Town", name: "Hasimara" },
+      { "@type": "Town", name: "Gedu" },
+      { "@type": "Town", name: "Pasakha" },
+      { "@type": "Town", name: "Rinchending" },
+      { "@type": "Town", name: "Samtse" },
       { "@type": "AdministrativeArea", name: "North Bengal" },
+      { "@type": "AdministrativeArea", name: "Chhukha" },
       { "@type": "State", name: "West Bengal" },
       { "@type": "Country", name: "India" },
+      { "@type": "Country", name: "Bhutan" },
     ],
     knowsAbout: KNOWS_ABOUT,
     sameAs: SAME_AS,
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        telephone: input.phoneHref.replace("tel:", ""),
+        contactType: "customer support",
+        areaServed: ["IN"],
+      },
+      {
+        "@type": "ContactPoint",
+        telephone: "+97577260538",
+        contactType: "customer support",
+        areaServed: ["BT"],
+      },
+    ],
   };
 }
 
@@ -150,11 +171,17 @@ export function serviceJsonLd(
     serviceType: service.family,
     areaServed: [
       "Jaigaon",
+      "Phuentsholing",
       "Alipurduar",
       "Kalchini",
       "Hasimara",
+      "Gedu",
+      "Pasakha",
+      "Rinchending",
+      "Samtse",
       "West Bengal",
       "India",
+      "Bhutan",
     ],
     provider: {
       "@type": "Organization",

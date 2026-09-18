@@ -20,6 +20,7 @@ import { Route as SolutionsRouteRouteImport } from './routes/solutions.route'
 import { Route as StartYourProjectRouteImport } from './routes/start-your-project'
 import { Route as ToolsRouteRouteImport } from './routes/tools.route'
 import { Route as WorkRouteRouteImport } from './routes/work.route'
+import { Route as LocationsPhuentsholingRouteImport } from './routes/locations.phuentsholing'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as SolutionsIndexRouteImport } from './routes/solutions.index'
@@ -91,6 +92,11 @@ const ToolsRouteRoute = ToolsRouteRouteImport.update({
 const WorkRouteRoute = WorkRouteRouteImport.update({
   id: '/work',
   path: '/work',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsPhuentsholingRoute = LocationsPhuentsholingRouteImport.update({
+  id: '/locations/phuentsholing',
+  path: '/locations/phuentsholing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
@@ -193,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
+  '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
@@ -219,6 +226,7 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
+  '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
@@ -250,6 +258,7 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
+  '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/tools/business-checklist': typeof ToolsBusinessChecklistRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/privacy'
     | '/start-your-project'
+    | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
@@ -308,6 +318,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/privacy'
     | '/start-your-project'
+    | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
@@ -338,6 +349,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/privacy'
     | '/start-your-project'
+    | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
     | '/tools/business-checklist'
@@ -369,6 +381,7 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   PrivacyRoute: typeof PrivacyRoute
   StartYourProjectRoute: typeof StartYourProjectRoute
+  LocationsPhuentsholingRoute: typeof LocationsPhuentsholingRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -448,6 +461,13 @@ declare module '@tanstack/react-router' {
       path: '/work'
       fullPath: '/work'
       preLoaderRoute: typeof WorkRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/phuentsholing': {
+      id: '/locations/phuentsholing'
+      path: '/locations/phuentsholing'
+      fullPath: '/locations/phuentsholing'
+      preLoaderRoute: typeof LocationsPhuentsholingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/': {
@@ -658,6 +678,7 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   PrivacyRoute: PrivacyRoute,
   StartYourProjectRoute: StartYourProjectRoute,
+  LocationsPhuentsholingRoute: LocationsPhuentsholingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
