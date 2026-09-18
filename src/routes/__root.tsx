@@ -20,6 +20,10 @@ import {
   DEFAULT_DESCRIPTION,
 } from "@/lib/seo";
 
+/** Canonical GSTPIXEL brand assets served from the site root. */
+const OG_IMAGE = `${SITE_URL}/og-image.png`;
+const OG_IMAGE_ALT = "GSTPIXEL — Start Right. Stay Compliant. Grow Online.";
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -104,13 +108,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { property: "og:locale", content: "en_IN" },
         { property: "og:title", content: DEFAULT_TITLE },
         { property: "og:description", content: DEFAULT_DESCRIPTION },
+        { property: "og:image", content: OG_IMAGE },
+        { property: "og:image:type", content: "image/png" },
+        { property: "og:image:width", content: "1200" },
+        { property: "og:image:height", content: "630" },
+        { property: "og:image:alt", content: OG_IMAGE_ALT },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:site", content: "@gstpixel" },
+        { name: "twitter:title", content: DEFAULT_TITLE },
+        { name: "twitter:description", content: DEFAULT_DESCRIPTION },
+        { name: "twitter:image", content: OG_IMAGE },
+        { name: "twitter:image:alt", content: OG_IMAGE_ALT },
         { name: "theme-color", content: "#0a0a0a" },
       ],
       links: [
         { rel: "stylesheet", href: appCss },
         { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        { rel: "icon", href: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+        { rel: "icon", href: "/favicon-16.png", type: "image/png", sizes: "16x16" },
+        { rel: "apple-touch-icon", href: "/apple-touch-icon.png", sizes: "180x180" },
+        { rel: "manifest", href: "/site.webmanifest" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         {
           rel: "preconnect",
