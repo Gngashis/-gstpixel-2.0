@@ -56,10 +56,11 @@ test.describe("mobile navigation", () => {
     await reduceMotion(page);
     await safeGoto(page, "/");
 
-    // The toggle's accessible name alternates between "Open menu" and "Close
-    // menu" once opened, so match the stable "menu" part to keep the locator
-    // valid across both states.
-    const toggle = page.getByRole("button", { name: /menu/i });
+    // The open-menu scrim and the toggle both expose an "Close menu"-style
+    // accessible name, so target the toggle by its aria-controls — the only
+    // element carrying aria-controls="mobile-nav" — to keep the locator
+    // unambiguous.
+    const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await expect(toggle).toBeVisible();
     expect(await toggle.getAttribute("aria-expanded")).toBe("false");
     expect(await toggle.getAttribute("aria-controls")).toBe("mobile-nav");
@@ -74,10 +75,11 @@ test.describe("mobile navigation", () => {
     await safeGoto(page, "/");
     await waitForHydration(page);
 
-    // The toggle's accessible name alternates between "Open menu" and "Close
-    // menu" once opened, so match the stable "menu" part to keep the locator
-    // valid across both states.
-    const toggle = page.getByRole("button", { name: /menu/i });
+    // The open-menu scrim and the toggle both expose an "Close menu"-style
+    // accessible name, so target the toggle by its aria-controls — the only
+    // element carrying aria-controls="mobile-nav" — to keep the locator
+    // unambiguous.
+    const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
 
@@ -113,10 +115,11 @@ test.describe("mobile navigation", () => {
     await safeGoto(page, "/");
     await waitForHydration(page);
 
-    // The toggle's accessible name alternates between "Open menu" and "Close
-    // menu" once opened, so match the stable "menu" part to keep the locator
-    // valid across both states.
-    const toggle = page.getByRole("button", { name: /menu/i });
+    // The open-menu scrim and the toggle both expose an "Close menu"-style
+    // accessible name, so target the toggle by its aria-controls — the only
+    // element carrying aria-controls="mobile-nav" — to keep the locator
+    // unambiguous.
+    const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
     const mobileNav = page.locator("#mobile-nav");
@@ -136,10 +139,11 @@ test.describe("mobile navigation", () => {
     await safeGoto(page, "/");
     await waitForHydration(page);
 
-    // The toggle's accessible name alternates between "Open menu" and "Close
-    // menu" once opened, so match the stable "menu" part to keep the locator
-    // valid across both states.
-    const toggle = page.getByRole("button", { name: /menu/i });
+    // The open-menu scrim and the toggle both expose an "Close menu"-style
+    // accessible name, so target the toggle by its aria-controls — the only
+    // element carrying aria-controls="mobile-nav" — to keep the locator
+    // unambiguous.
+    const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await toggle.scrollIntoViewIfNeeded();
     await toggle.click();
     const mobileNav = page.locator("#mobile-nav");
