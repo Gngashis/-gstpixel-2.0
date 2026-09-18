@@ -81,12 +81,17 @@ test.describe("mobile navigation", () => {
     // unambiguous.
     const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await toggle.scrollIntoViewIfNeeded();
-    await toggle.click();
+    // Retry the open so a click dropped during the hydration window (React's
+    // delegation attaches a beat after __TSR_ROUTER__ appears) is re-attempted.
+    // A success exits immediately; only a dropped click re-taps the toggle.
+    await expect(async () => {
+      await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    }).toPass({ timeout: 10000 });
 
     // The mobile nav panel should appear and expose the full link set.
     const mobileNav = page.locator("#mobile-nav");
     await expect(mobileNav).toBeVisible({ timeout: 10000 });
-    expect(await toggle.getAttribute("aria-expanded")).toBe("true");
 
     for (const label of [
       "Services",
@@ -101,9 +106,11 @@ test.describe("mobile navigation", () => {
     }
 
     // Close via the same toggle.
-    await toggle.click();
+    await expect(async () => {
+      await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    }).toPass({ timeout: 10000 });
     await expect(mobileNav).toBeHidden();
-    expect(await toggle.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("Escape closes mobile menu and returns focus", async ({
@@ -121,7 +128,10 @@ test.describe("mobile navigation", () => {
     // unambiguous.
     const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await toggle.scrollIntoViewIfNeeded();
-    await toggle.click();
+    await expect(async () => {
+      await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    }).toPass({ timeout: 10000 });
     const mobileNav = page.locator("#mobile-nav");
     await expect(mobileNav).toBeVisible({ timeout: 10000 });
 
@@ -145,7 +155,10 @@ test.describe("mobile navigation", () => {
     // unambiguous.
     const toggle = page.locator('button[aria-controls="mobile-nav"]');
     await toggle.scrollIntoViewIfNeeded();
-    await toggle.click();
+    await expect(async () => {
+      await toggle.click();
+      await expect(toggle).toHaveAttribute("aria-expanded", "true");
+    }).toPass({ timeout: 10000 });
     const mobileNav = page.locator("#mobile-nav");
     await expect(mobileNav).toBeVisible({ timeout: 10000 });
 

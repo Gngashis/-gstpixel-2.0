@@ -36,20 +36,29 @@ test.describe("Start Your Project enquiry", () => {
     // it stays enabled, but with no need selected it refuses to advance and
     // surfaces an inline validation error instead of moving to Step 2.
     await expect(continueBtn).toBeEnabled();
-    await continueBtn.click();
-    await expect(page.getByText("Step 1 of 6").first()).toBeVisible();
-    await expect(
-      page.getByText("Please select what you need help with"),
-    ).toBeVisible();
+    // Retry until the press registers: __TSR_ROUTER__ can appear a beat before
+    // React's event delegation attaches, so a click landing in that gap is
+    // dropped and the submit-time validation never runs.
+    await expect(async () => {
+      await continueBtn.click();
+      await expect(page.getByText("Step 1 of 6").first()).toBeVisible();
+      await expect(
+        page.getByText("Please select what you need help with"),
+      ).toBeVisible();
+    }).toPass({ timeout: 10000 });
 
     // Selecting a need clears the gate so Continue can advance. Wait for the
     // selection to commit to form state (the `.selected` class is derived from
     // `form.need`) before pressing Continue, or validation still blocks.
     const need = page.locator('label:has-text("Website or digital platform")');
-    await need.click();
-    await expect(need).toHaveClass(/selected/);
-    await continueBtn.click();
-    await expect(page.getByText("Step 2 of 6").first()).toBeVisible();
+    await expect(async () => {
+      await need.click();
+      await expect(need).toHaveClass(/selected/);
+    }).toPass({ timeout: 10000 });
+    await expect(async () => {
+      await continueBtn.click();
+      await expect(page.getByText("Step 2 of 6").first()).toBeVisible();
+    }).toPass({ timeout: 10000 });
   });
 
   test("advances to the stage step after selecting a need", async ({
@@ -57,13 +66,19 @@ test.describe("Start Your Project enquiry", () => {
   }) => {
     await waitForHydration(page);
     const need = page.locator('label:has-text("Website or digital platform")');
-    await need.click();
-    // Confirm the selection committed to form state before continuing.
-    await expect(need).toHaveClass(/selected/);
-    await page.getByRole("button", { name: /Continue/i }).click();
-
-    await expect(page.getByText("Step 2 of 6").first()).toBeVisible();
-    await expect(page.getByText("Where are you now?")).toBeVisible();
+    // Retry until the click commits: React's event delegation can attach a beat
+    // after __TSR_ROUTER__ appears, so a click landing in that gap is dropped.
+    // The `.selected` class is derived from `form.need`, so it only appears once
+    // the selection actually committed.
+    await expect(async () => {
+      await need.click();
+      await expect(need).toHaveClass(/selected/);
+    }).toPass({ timeout: 10000 });
+    await expect(async () => {
+      await page.getByRole("button", { name: /Continue/i }).click();
+      await expect(page.getByText("Step 2 of 6").first()).toBeVisible();
+      await expect(page.getByText("Where are you now?")).toBeVisible();
+    }).toPass({ timeout: 10000 });
   });
 
   test("pre-fills from interest search parameter", async ({ page }) => {
