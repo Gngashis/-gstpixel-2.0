@@ -120,7 +120,7 @@ function Page() {
       <PageIntro
         label="Privacy"
         title="Current data handling."
-        description="This page describes the current preview experience. It will be updated before public submission is enabled."
+        description="This page describes how the public GSTPIXEL website currently handles information. It will be updated before public submission is enabled."
       />
 
       <section className="content-band">

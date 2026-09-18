@@ -8,6 +8,7 @@ src/routeTree.gen.ts
 
 # AGENT9 — Playwright / browser QA artifacts
 playwright-report/
+playwright-results.json
 test-results/
 qa-screenshots/
 blob-report/
