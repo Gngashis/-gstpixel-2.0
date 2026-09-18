@@ -28,7 +28,7 @@ test.describe("Start Your Project enquiry", () => {
     }
   });
 
-test("continue is gated until a need is selected", async ({ page }) => {
+  test("continue is gated until a need is selected", async ({ page }) => {
     await waitForHydration(page);
     const continueBtn = page.getByRole("button", { name: /Continue/i });
 
@@ -42,8 +42,12 @@ test("continue is gated until a need is selected", async ({ page }) => {
       page.getByText("Please select what you need help with"),
     ).toBeVisible();
 
-    // Selecting a need clears the gate so Continue can advance.
-    await page.locator('label:has-text("Website or digital platform")').click();
+    // Selecting a need clears the gate so Continue can advance. Wait for the
+    // selection to commit to form state (the `.selected` class is derived from
+    // `form.need`) before pressing Continue, or validation still blocks.
+    const need = page.locator('label:has-text("Website or digital platform")');
+    await need.click();
+    await expect(need).toHaveClass(/selected/);
     await continueBtn.click();
     await expect(page.getByText("Step 2 of 6").first()).toBeVisible();
   });
@@ -52,7 +56,10 @@ test("continue is gated until a need is selected", async ({ page }) => {
     page,
   }) => {
     await waitForHydration(page);
-    await page.locator('label:has-text("Website or digital platform")').click();
+    const need = page.locator('label:has-text("Website or digital platform")');
+    await need.click();
+    // Confirm the selection committed to form state before continuing.
+    await expect(need).toHaveClass(/selected/);
     await page.getByRole("button", { name: /Continue/i }).click();
 
     await expect(page.getByText("Step 2 of 6").first()).toBeVisible();
