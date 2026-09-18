@@ -274,11 +274,106 @@ let engineApplied: InterpolatedEnvironment | null = null;
 /** Pauses the environment while the visitor prefers reduced motion. */
 let engineStatic = false;
 
+/* ---------------------------------------------------------------------------
+   Stage progress from authored sections.
+
+   Pages mark their bands with [data-env-phase]. Where that map exists, scroll
+   progress is measured in stage space rather than raw page fraction: while a
+   section is read, progress sweeps from its phase to the next one, so stage N
+   reaches full weight while section N is on screen. The map is rebuilt only
+   when the document height changes, so scrolling costs one height read.
+   --------------------------------------------------------------------------- */
+
+interface SectionMark {
+  top: number;
+  height: number;
+  phase: number;
+}
+
+interface SectionMap {
+  marks: SectionMark[];
+  maxPhase: number;
+}
+
+let sectionMap: SectionMap | null = null;
+/** Document height the map was collected at; -1 means never collected. */
+let sectionMapHeight = -1;
+
+function collectSectionMap(): void {
+  if (typeof window === "undefined") {
+    sectionMap = null;
+    return;
+  }
+  const nodes = document.querySelectorAll<HTMLElement>("[data-env-phase]");
+  if (nodes.length < 2) {
+    sectionMap = null;
+    return;
+  }
+  const marks: SectionMark[] = [];
+  let maxPhase = 0;
+  nodes.forEach((node) => {
+    const phase = Number(node.dataset["envPhase"]);
+    if (!Number.isFinite(phase)) return;
+    const rect = node.getBoundingClientRect();
+    if (rect.height <= 0) return;
+    marks.push({ top: rect.top + window.scrollY, height: rect.height, phase });
+    if (phase > maxPhase) maxPhase = phase;
+  });
+  if (marks.length < 2 || maxPhase <= 0) {
+    sectionMap = null;
+    return;
+  }
+  marks.sort((a, b) => a.top - b.top);
+  sectionMap = { marks, maxPhase };
+}
+
 function readScrollProgress(): number {
   if (typeof window === "undefined") return 0;
-  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const doc = document.documentElement;
+  const scrollable = doc.scrollHeight - window.innerHeight;
   if (scrollable <= 0) return 0;
-  return Math.max(0, Math.min(1, window.scrollY / scrollable));
+  const raw = Math.max(0, Math.min(1, window.scrollY / scrollable));
+
+  if (sectionMapHeight !== doc.scrollHeight) {
+    collectSectionMap();
+    sectionMapHeight = doc.scrollHeight;
+  }
+  const map = sectionMap;
+  if (!map) return raw;
+
+  const { marks, maxPhase } = map;
+  const line = window.scrollY + window.innerHeight * 0.5;
+  /* Fully scrolled: the centre line stops half a viewport short of the last
+     section's bottom, so pin the end explicitly to reach full growth. */
+  if (window.scrollY >= scrollable - 1) return 1;
+  if (line <= marks[0]!.top) return 0;
+
+  let activeIndex = 0;
+  for (let i = 0; i < marks.length; i++) {
+    if (marks[i]!.top <= line) activeIndex = i;
+    else break;
+  }
+  const active = marks[activeIndex]!;
+  const next = marks[activeIndex + 1];
+  /* Phases can repeat or dip in document order (closing bands are often
+     authored at an earlier phase); keep progress monotonic by flooring the
+     stage at the previous section's phase. */
+  const prevPhase = activeIndex > 0 ? marks[activeIndex - 1]!.phase : 0;
+  const basePhase = Math.max(active.phase, prevPhase);
+  const fraction = Math.max(
+    0,
+    Math.min(1, (line - active.top) / active.height),
+  );
+
+  /* Hold the stage while its section is being read; ease toward the next
+     phase across the section's second half. Sections that repeat a phase
+     (or end the page) hold throughout, so progress never runs backwards. */
+  if (!next || next.phase <= basePhase || fraction < 0.5) {
+    return Math.max(0, Math.min(1, basePhase / maxPhase));
+  }
+  const t = (fraction - 0.5) / 0.5;
+  const swept = basePhase + (next.phase - basePhase) * t;
+  return Math.max(0, Math.min(1, swept / maxPhase));
 }
 
 function engineApply(value: number) {

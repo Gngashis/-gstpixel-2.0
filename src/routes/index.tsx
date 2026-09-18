@@ -22,6 +22,7 @@ import {
 } from "@/lib/content";
 import { AssemblyVisual } from "@/components/assembly-visual";
 import { buildCanonical, websiteJsonLd } from "@/lib/seo";
+import { useMagnetic } from "@/lib/pointer-light";
 import { JsonLd } from "@/components/json-ld";
 
 export const Route = createFileRoute("/")({
@@ -54,6 +55,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
+  const heroCta = useMagnetic<HTMLSpanElement>();
+
   return (
     <>
       <JsonLd data={websiteJsonLd()} />
@@ -88,9 +91,11 @@ function Home() {
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
               <div className="mt-9 flex flex-wrap gap-3">
-                <ButtonLink to="/start-your-project">
-                  Start your project <ArrowRight size={16} />
-                </ButtonLink>
+                <span ref={heroCta.ref} className="magnetic">
+                  <ButtonLink to="/start-your-project">
+                    Start your project <ArrowRight size={16} />
+                  </ButtonLink>
+                </span>
                 <ButtonLink to="/services" variant="secondary">
                   Explore services
                 </ButtonLink>

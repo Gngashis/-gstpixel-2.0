@@ -3,6 +3,8 @@ import { Menu, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useElementEnvironment } from "@/lib/scroll-environment";
+import { initPointerLight, useMagnetic } from "@/lib/pointer-light";
+import { useReducedMotion } from "@/lib/motion";
 import { businessFacts } from "@/lib/content";
 
 const nav = [
@@ -24,11 +26,35 @@ const assemblyStages = [
   "Grow",
 ] as const;
 
-export function Brand() {
+export function Brand({ entrance = false }: { entrance?: boolean }) {
+  /* The one-shot entrance (cell assembles → characters stagger in → underscore
+     finishes the sequence) is pure CSS and only runs on the header instance;
+     the footer keeps the plain static lockup. Screen readers always get the
+     plain word, never the per-character spans. */
+  if (!entrance) {
+    return (
+      <span className="brand-mark">
+        <span aria-hidden="true" className="brand-cell" />
+        GSTPIXEL<span className="text-primary">_</span>
+      </span>
+    );
+  }
   return (
-    <span className="brand-mark">
+    <span className="brand-mark brand-entrance">
       <span aria-hidden="true" className="brand-cell" />
-      GSTPIXEL<span className="text-primary">_</span>
+      <span className="sr-only">GSTPIXEL</span>
+      <span aria-hidden="true" className="brand-word">
+        {"GSTPIXEL".split("").map((char, index) => (
+          <span
+            key={index}
+            className="brand-char"
+            style={{ ["--brand-i" as string]: index }}
+          >
+            {char}
+          </span>
+        ))}
+        <span className="text-primary brand-underscore">_</span>
+      </span>
     </span>
   );
 }
@@ -88,6 +114,16 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const headerRef = useRef<HTMLElement>(null);
   const headerEnv = useElementEnvironment(headerRef);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const reduced = useReducedMotion();
+  const headerCta = useMagnetic<HTMLSpanElement>();
+
+  /* Cursor-lit glass: one delegated listener for the whole site, parked when
+     the pointer rests, and never attached for coarse pointers or reduced
+     motion (the CSS side is media-gated too). */
+  useEffect(() => {
+    if (reduced) return;
+    return initPointerLight();
+  }, [reduced]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12);
@@ -154,7 +190,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             className="luminous-edge"
             style={{ borderRadius: "0.5rem", padding: "0.25rem 0.5rem" }}
           >
-            <Brand />
+            <Brand entrance />
           </Link>
           <nav
             aria-label="Primary"
@@ -180,13 +216,18 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <ButtonLink
-              to="/start-your-project"
-              className="hidden sm:inline-flex luminous-edge tactile"
-              style={{ borderRadius: "0.5rem", padding: "0.6rem 1.25rem" }}
+            <span
+              ref={headerCta.ref}
+              className="magnetic hidden sm:inline-flex"
             >
-              Start your project
-            </ButtonLink>
+              <ButtonLink
+                to="/start-your-project"
+                className="luminous-edge tactile"
+                style={{ borderRadius: "0.5rem", padding: "0.6rem 1.25rem" }}
+              >
+                Start your project
+              </ButtonLink>
+            </span>
             <Button
               ref={menuTriggerRef}
               variant="quiet"

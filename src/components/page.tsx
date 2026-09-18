@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { useMagnetic } from "@/lib/pointer-light";
 import { Children, useEffect, useRef, useState } from "react";
 import {
   useReducedMotion,
@@ -176,6 +177,8 @@ export function StartBand({
 }: {
   title?: string;
 }) {
+  const cta = useMagnetic<HTMLSpanElement>();
+
   return (
     <section className="start-band env-section" data-env-phase="5">
       <div className="site-container">
@@ -199,9 +202,11 @@ export function StartBand({
           <h2>{title}</h2>
         </ScrollReveal>
         <ScrollReveal variant="scaleIn" delay={0.2}>
-          <ButtonLink to="/start-your-project">
-            Start your project <ArrowRight size={16} />
-          </ButtonLink>
+          <span ref={cta.ref} className="magnetic">
+            <ButtonLink to="/start-your-project">
+              Start your project <ArrowRight size={16} />
+            </ButtonLink>
+          </span>
         </ScrollReveal>
       </div>
     </section>

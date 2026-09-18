@@ -5119,3 +5119,218 @@ a {
     flex: 1 1 0;
   }
 }
+
+/* ============================================================
+   PREMIUM POLISH PASS
+   Cursor-lit glass specular, one-shot brand entrance, magnetic
+   CTAs, navigation microinteraction, tactile touch feedback,
+   footer finishing. Everything is transform/opacity/CSS-variable
+   only, gated to the right input modality, and parked when idle.
+   ============================================================ */
+
+/* Cursor-lit glass specular (fine pointer, hover-capable only).
+   The delegated pointer-light engine writes --lit-x/--lit-y on the surface
+   under the cursor and toggles data-lit-active while it is there; the sheen
+   is a small local radial, not a glow. */
+@media (hover: hover) and (pointer: fine) {
+  .assembly-panel::after,
+  .concept-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      16rem circle at var(--lit-x, 50%) var(--lit-y, 50%),
+      color-mix(in oklab, var(--env-current-glow) 22%, transparent),
+      transparent 62%
+    );
+    mix-blend-mode: screen;
+    opacity: 0;
+    transition: opacity 320ms var(--easing-standard);
+  }
+
+  .assembly-panel[data-lit-active]::after,
+  .concept-card[data-lit-active]::after {
+    opacity: 1;
+  }
+
+  .concept-card {
+    isolation: isolate;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assembly-panel::after,
+  .concept-card::after {
+    display: none;
+  }
+}
+
+/* One-shot brand entrance: cell assembles, characters stagger in, the
+   underscore finishes the sequence like a terminal cursor. ~0.9s total, runs
+   once on the header instance only. */
+.brand-entrance .brand-cell {
+  animation: brand-cell-in 480ms var(--easing-decelerate) both;
+}
+.brand-entrance .brand-char {
+  display: inline-block;
+  animation: brand-char-in 280ms var(--easing-decelerate) both;
+  animation-delay: calc(110ms + var(--brand-i, 0) * 32ms);
+}
+.brand-entrance .brand-underscore {
+  display: inline-block;
+  animation: brand-underscore-in 400ms steps(1, end) 560ms both;
+}
+.brand-entrance .brand-word {
+  white-space: nowrap;
+}
+
+@keyframes brand-cell-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes brand-char-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes brand-underscore-in {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  75%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-entrance .brand-cell,
+  .brand-entrance .brand-char,
+  .brand-entrance .brand-underscore {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Magnetic CTA wrapper: the span carries the few-pixel shift so the control's
+   own hover/press transform stays untouched. The gentle transition turns the
+   per-frame writes into a damped follow. */
+.magnetic {
+  display: inline-flex;
+  transition: transform 200ms var(--easing-decelerate);
+}
+
+/* Unlayered rules beat Tailwind's layered utilities, so restore the hidden
+   utility explicitly for magnetic wrappers that carry it. */
+.magnetic:is(.hidden) {
+  display: none;
+}
+
+/* Navigation microinteraction: a hairline underline draws in on hover and
+   stays for the active route. */
+.nav-link::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0.55rem;
+  bottom: 0.2rem;
+  height: 1px;
+  background: color-mix(in oklab, var(--primary) 80%, transparent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 220ms var(--easing-standard);
+}
+
+.nav-link:hover::after,
+.nav-link-active::after {
+  transform: scaleX(1);
+}
+
+/* Assembly stage emphasis: the active node gains a weight-scaled glow halo on
+   top of its existing ring, so the lit stage reads on both pointer and touch. */
+.asm-stage-node {
+  box-shadow:
+    inset 0 0 0 1px
+      color-mix(
+        in oklab,
+        var(--primary) calc(18% + var(--stage-weight) * 30%),
+        transparent
+      ),
+    0 0 calc(var(--stage-weight) * 16px)
+      color-mix(
+        in oklab,
+        var(--env-current-glow) calc(var(--stage-weight) * 42%),
+        transparent
+      );
+}
+
+/* Tactile press feedback on touch: panels and menu rows compress slightly on
+   press, giving the thumb the same acknowledgement the pointer gets. */
+@media (pointer: coarse) {
+  .assembly-panel:active,
+  .concept-card:active,
+  .mobile-nav > a:active {
+    transform: scale(0.985);
+  }
+
+  .assembly-panel:active {
+    border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+  }
+}
+
+/* Final CTA/footer finishing: a faint environment-lit hairline on the footer's
+   top edge, aligned with the start band above it. */
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  width: min(46rem, 86%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--env-current-glow) 60%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Form step polish: each enquiry step settles in as it mounts; the reduced
+   motion blanket collapses this to an instant swap. */
+.enquiry-step {
+  animation: enquiry-step-in 300ms var(--easing-decelerate) both;
+}
+
+@keyframes enquiry-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
