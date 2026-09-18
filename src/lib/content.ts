@@ -3,6 +3,10 @@ export type Service = {
   title: string;
   family: string;
   summary: string;
+  /** Optional search-tuned title tag. Falls back to `${title} — GSTPIXEL`. */
+  metaTitle?: string;
+  /** Optional search-tuned meta description. Falls back to `summary`. */
+  metaDescription?: string;
   helps: string[];
   whoFor: string;
   needs: string[];
@@ -87,6 +91,9 @@ export const services: Service[] = [
     family: "Digital Development",
     summary:
       "Purposeful public websites, ecommerce experiences, and digital platforms built around real business goals.",
+    metaTitle: "Website & Ecommerce Development in Jaigaon — GSTPIXEL",
+    metaDescription:
+      "Website development and ecommerce platforms for businesses in Jaigaon and across West Bengal — designed around real goals, built to be maintained.",
     helps: [
       "Website design and development",
       "Ecommerce and digital platforms",
@@ -115,6 +122,9 @@ export const services: Service[] = [
     family: "Digital Development",
     summary:
       "Usable, maintainable applications for customers, teams, and new digital products.",
+    metaTitle: "Web & Mobile App Development — GSTPIXEL Jaigaon",
+    metaDescription:
+      "Web and mobile application development for businesses in Jaigaon and nearby North Bengal — usable first versions, built and maintained in clear stages.",
     helps: [
       "Web applications",
       "Mobile applications",
@@ -143,6 +153,9 @@ export const services: Service[] = [
     family: "AI and Automation",
     summary:
       "Clear workflows that connect inputs, decisions, and useful outputs without hiding the logic.",
+    metaTitle: "AI & Business Automation in Jaigaon — GSTPIXEL",
+    metaDescription:
+      "AI integrations and workflow automation for businesses in Jaigaon and across West Bengal — automation that is understandable, inspectable, and trusted.",
     helps: [
       "AI integrations",
       "Workflow automation",
@@ -172,6 +185,9 @@ export const services: Service[] = [
     family: "Business Services",
     summary:
       "Structured support for starting and operating a business with clarity around requirements and next steps.",
+    metaTitle: "GST & Business Setup Services in Jaigaon — GSTPIXEL",
+    metaDescription:
+      "GST registration and compliance assistance, FSSAI-related services, and business setup support for businesses in Jaigaon, Alipurduar, and across West Bengal.",
     helps: [
       "GST-related services",
       "FSSAI-related services",
@@ -202,6 +218,9 @@ export const services: Service[] = [
     family: "Consulting",
     summary:
       "Practical guidance connecting business decisions, digital transformation, technology strategy, and growth.",
+    metaTitle: "Business & Technology Consulting — GSTPIXEL Jaigaon",
+    metaDescription:
+      "Practical business and technology consulting for owners in Jaigaon and across India — digital strategy, transformation planning, and clear next steps.",
     helps: [
       "Business consultancy",
       "Digital transformation",

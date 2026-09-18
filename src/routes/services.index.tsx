@@ -27,17 +27,20 @@ const familyIcons = {
 export const Route = createFileRoute("/services/")({
   head: () => ({
     meta: [
-      { title: "Services — GSTPIXEL" },
+      { title: "Digital & Business Services — GSTPIXEL Jaigaon" },
       {
         name: "description",
         content:
-          "Explore GSTPIXEL digital development, AI automation, business services, and consultancy.",
+          "GST and FSSAI-related assistance, business setup, website and app development, AI automation, and consulting — from GSTPIXEL in Jaigaon, West Bengal.",
       },
-      { property: "og:title", content: "Services — GSTPIXEL" },
+      {
+        property: "og:title",
+        content: "Digital & Business Services — GSTPIXEL Jaigaon",
+      },
       {
         property: "og:description",
         content:
-          "One connected service system for digital products, automation, operations, and growth.",
+          "GST and FSSAI-related assistance, business setup, website and app development, AI automation, and consulting — from GSTPIXEL in Jaigaon, West Bengal.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/services") },

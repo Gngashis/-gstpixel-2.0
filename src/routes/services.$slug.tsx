@@ -20,18 +20,20 @@ export const Route = createFileRoute("/services/$slug")({
   },
   head: ({ loaderData }) => ({
     meta: [
-      { title: `${loaderData?.title} — GSTPIXEL` },
+      {
+        title: loaderData?.metaTitle ?? `${loaderData?.title} — GSTPIXEL`,
+      },
       {
         name: "description",
-        content: loaderData?.summary,
+        content: loaderData?.metaDescription ?? loaderData?.summary,
       },
       {
         property: "og:title",
-        content: `${loaderData?.title} — GSTPIXEL`,
+        content: loaderData?.metaTitle ?? `${loaderData?.title} — GSTPIXEL`,
       },
       {
         property: "og:description",
-        content: loaderData?.summary,
+        content: loaderData?.metaDescription ?? loaderData?.summary,
       },
       { property: "og:type", content: "website" },
       {

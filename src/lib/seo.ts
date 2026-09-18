@@ -20,6 +20,28 @@ export type ServiceJsonLdInput = {
   summary: string;
 };
 
+/** Canonical brand assets served from the site root. */
+export const LOGO_URL = `${SITE_URL}/gstpixel-logo.png`;
+export const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
+
+/** Verified public profiles/sameAs references. Do not add unverified profiles. */
+const SAME_AS = ["https://wa.me/919046520548"];
+
+/** Verified service topics for knowsAbout. No invented certifications. */
+const KNOWS_ABOUT = [
+  "GST registration",
+  "GST compliance",
+  "FSSAI-related services",
+  "Business registration",
+  "Website development",
+  "Ecommerce development",
+  "Web application development",
+  "Mobile application development",
+  "AI automation",
+  "Workflow automation",
+  "Digital business consulting",
+];
+
 export type BreadcrumbItem = {
   path: string;
   label: string;
@@ -30,14 +52,33 @@ export function organizationJsonLd(input: {
   founder: string;
   founderTitle: string;
   tagline: string;
+  phone?: string;
+  email?: string;
 }): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": `${SITE_URL}/#organization`,
     name: SITE_NAME,
     url: SITE_URL,
-    founder: input.founder,
+    logo: LOGO_URL,
+    image: OG_IMAGE_URL,
     description: input.tagline,
+    founder: {
+      "@type": "Person",
+      name: input.founder,
+      jobTitle: input.founderTitle,
+    },
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Jaigaon",
+      addressRegion: "West Bengal",
+      postalCode: "736182",
+      addressCountry: "IN",
+    },
+    ...(input.phone ? { telephone: input.phone } : {}),
+    ...(input.email ? { email: input.email } : {}),
+    sameAs: SAME_AS,
   };
 }
 
@@ -52,9 +93,14 @@ export function localBusinessJsonLd(input: {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
+    "@id": `${SITE_URL}/#localbusiness`,
     name: SITE_NAME,
     url: SITE_URL,
+    logo: LOGO_URL,
+    image: OG_IMAGE_URL,
     founder: input.founder,
+    description:
+      "Digital and business services studio: GST and FSSAI-related assistance, business setup, website and application development, and AI automation.",
     address: {
       "@type": "PostalAddress",
       streetAddress: input.address,
@@ -66,6 +112,17 @@ export function localBusinessJsonLd(input: {
     telephone: input.phoneHref.replace("tel:", ""),
     email: input.emailHref.replace("mailto:", ""),
     identifier: input.gstin,
+    areaServed: [
+      { "@type": "City", name: "Jaigaon" },
+      { "@type": "City", name: "Alipurduar" },
+      { "@type": "Town", name: "Kalchini" },
+      { "@type": "Town", name: "Hasimara" },
+      { "@type": "AdministrativeArea", name: "North Bengal" },
+      { "@type": "State", name: "West Bengal" },
+      { "@type": "Country", name: "India" },
+    ],
+    knowsAbout: KNOWS_ABOUT,
+    sameAs: SAME_AS,
   };
 }
 
@@ -91,8 +148,17 @@ export function serviceJsonLd(
     name: service.title,
     description: service.summary,
     serviceType: service.family,
+    areaServed: [
+      "Jaigaon",
+      "Alipurduar",
+      "Kalchini",
+      "Hasimara",
+      "West Bengal",
+      "India",
+    ],
     provider: {
       "@type": "Organization",
+      "@id": `${SITE_URL}/#organization`,
       name: SITE_NAME,
       url: SITE_URL,
     },

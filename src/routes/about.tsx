@@ -35,16 +35,20 @@ import {
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About GSTPIXEL" },
+      { title: "About GSTPIXEL — Based in Jaigaon, West Bengal" },
       {
         name: "description",
         content:
-          "GSTPIXEL connects technology, digital development, business services, and consultancy.",
+          "GSTPIXEL is a Jaigaon-based digital and business services studio founded by Ashis Gurung — business services, digital development, AI automation, and consulting.",
       },
-      { property: "og:title", content: "About GSTPIXEL" },
+      {
+        property: "og:title",
+        content: "About GSTPIXEL — Based in Jaigaon, West Bengal",
+      },
       {
         property: "og:description",
-        content: "The principles behind GSTPIXEL's integrated operating model.",
+        content:
+          "The Jaigaon-based team behind GSTPIXEL and the principles behind its integrated operating model.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/about") },
@@ -65,6 +69,8 @@ function Page() {
           founder: businessFacts.founder,
           founderTitle: businessFacts.founderTitle,
           tagline: businessFacts.tagline,
+          phone: businessFacts.phone.href.replace("tel:", ""),
+          email: businessFacts.email.href.replace("mailto:", ""),
         })}
       />
       <AboutContent />

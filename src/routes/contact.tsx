@@ -25,17 +25,20 @@ import { businessFacts } from "@/lib/content";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact GSTPIXEL" },
+      { title: "Contact GSTPIXEL — Jaigaon, West Bengal" },
       {
         name: "description",
         content:
-          "Contact GSTPIXEL by phone, WhatsApp, or email, or start a guided project enquiry.",
+          "Contact GSTPIXEL in Jaigaon, West Bengal by phone, WhatsApp, or email, or start a guided project enquiry.",
       },
-      { property: "og:title", content: "Contact GSTPIXEL" },
+      {
+        property: "og:title",
+        content: "Contact GSTPIXEL — Jaigaon, West Bengal",
+      },
       {
         property: "og:description",
         content:
-          "Reach GSTPIXEL by phone, WhatsApp, or email, or start a guided project enquiry.",
+          "Reach GSTPIXEL in Jaigaon, West Bengal by phone, WhatsApp, or email, or start a guided project enquiry.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/contact") },

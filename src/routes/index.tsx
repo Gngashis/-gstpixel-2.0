@@ -21,27 +21,34 @@ import {
   businessFacts,
 } from "@/lib/content";
 import { AssemblyVisual } from "@/components/assembly-visual";
-import { buildCanonical, websiteJsonLd } from "@/lib/seo";
+import {
+  buildCanonical,
+  websiteJsonLd,
+  organizationJsonLd,
+  localBusinessJsonLd,
+} from "@/lib/seo";
 import { useMagnetic } from "@/lib/pointer-light";
 import { JsonLd } from "@/components/json-ld";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: `${businessFacts.name} — ${businessFacts.tagline}` },
+      {
+        title: "GSTPIXEL — Websites, AI Automation & GST Services in Jaigaon",
+      },
       {
         name: "description",
         content:
-          "GSTPIXEL combines business consulting and services with digital development and automation — from starting a business and staying compliant to building its digital presence and growing online. Based in Jaigaon, West Bengal.",
+          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India.",
       },
       {
         property: "og:title",
-        content: `${businessFacts.name} — ${businessFacts.tagline}`,
+        content: "GSTPIXEL — Websites, AI Automation & GST Services in Jaigaon",
       },
       {
         property: "og:description",
         content:
-          "GSTPIXEL combines business consulting and services with digital development and automation—based in Jaigaon, West Bengal.",
+          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/") },
@@ -60,6 +67,24 @@ function Home() {
   return (
     <>
       <JsonLd data={websiteJsonLd()} />
+      <JsonLd
+        data={organizationJsonLd({
+          founder: businessFacts.founder,
+          founderTitle: businessFacts.founderTitle,
+          tagline: businessFacts.tagline,
+          phone: businessFacts.phone.href.replace("tel:", ""),
+          email: businessFacts.email.href.replace("mailto:", ""),
+        })}
+      />
+      <JsonLd
+        data={localBusinessJsonLd({
+          address: businessFacts.address,
+          phoneHref: businessFacts.phone.href,
+          emailHref: businessFacts.email.href,
+          gstin: businessFacts.gstin,
+          founder: businessFacts.founder,
+        })}
+      />
       <section
         className="home-hero drafting-grid env-section"
         data-env-phase="0"
@@ -527,6 +552,19 @@ function Home() {
                 get a team they can actually sit down with; businesses across
                 India get the same direct access by phone, WhatsApp, or email —
                 no call centres, no gatekeepers.
+              </p>
+              <p className="section-copy">
+                For businesses in Jaigaon, Alipurduar, Kalchini, Hasimara, and
+                across North Bengal, that means practical help with GST and
+                FSSAI-related services, business registration, website and
+                ecommerce development, and AI automation — all from one team, in
+                plain language.
+              </p>
+              <p className="section-copy">
+                Explore the <Link to="/services">full range of services</Link>,
+                try the free <Link to="/tools">business tools</Link>, or{" "}
+                <Link to="/start-your-project">start your project</Link> with a
+                short enquiry.
               </p>
               <ButtonLink
                 to="/contact"
