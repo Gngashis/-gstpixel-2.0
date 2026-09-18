@@ -520,6 +520,23 @@ a {
 .outcome-list a:hover strong {
   color: var(--primary);
 }
+/* Cross-link cards (service → tool / solution / related service) share a
+   two-child layout: a text block plus a trailing arrow. They must not fall
+   through to the generic .outcome-list > a template above, whose fixed icon
+   column assumes a four-child row and collapses the text block into ~2.5rem
+   with the arrow parked beside it. The higher-specificity override keeps the
+   shared row padding, border and hover language intact while giving the text
+   block the flexible column; minmax(0, 1fr) stops long content from pushing
+   the row wider than the viewport. */
+.outcome-list > .related-service-card {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.outcome-list > .related-service-card > div {
+  min-width: 0;
+}
+.outcome-list > .related-service-card p {
+  max-width: 62ch;
+}
 .editorial-split {
   display: grid;
   gap: 3rem;
