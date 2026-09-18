@@ -209,15 +209,24 @@ a {
 .brand-mark {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
-  font: 800 1.05rem var(--font-display);
 }
-.brand-cell {
-  width: 1rem;
-  height: 1rem;
-  border: 1px solid color-mix(in oklab, var(--primary) 60%, transparent);
-  border-radius: 2px;
-  box-shadow: 0 0 18px color-mix(in oklab, var(--primary) 18%, transparent);
+/* Official graphical lockup: fixed height with auto width preserves the
+   artwork's exact proportions, and the PNG's own transparency lets the glass
+   navbar and footer backgrounds show through. The height sits comfortably
+   inside the 4rem navbar bar. */
+.brand-logo {
+  display: block;
+  height: 2.25rem;
+  width: auto;
+  object-fit: contain;
+  object-position: left center;
+}
+/* Below 640px the <picture> source swaps to the symbol-only crop of the same
+   official PNG; a slightly shorter height keeps the bar compact on phones. */
+@media (max-width: 639px) {
+  .brand-logo {
+    height: 2rem;
+  }
 }
 .nav-link {
   font: 500 0.68rem var(--font-mono);
@@ -5184,67 +5193,25 @@ a {
   }
 }
 
-/* One-shot brand entrance: cell assembles, characters stagger in, the
-   underscore finishes the sequence like a terminal cursor. ~0.9s total, runs
-   once on the header instance only. */
-.brand-entrance .brand-cell {
-  animation: brand-cell-in 480ms var(--easing-decelerate) both;
-}
-.brand-entrance .brand-char {
-  display: inline-block;
-  animation: brand-char-in 280ms var(--easing-decelerate) both;
-  animation-delay: calc(110ms + var(--brand-i, 0) * 32ms);
-}
-.brand-entrance .brand-underscore {
-  display: inline-block;
-  animation: brand-underscore-in 400ms steps(1, end) 560ms both;
-}
-.brand-entrance .brand-word {
-  white-space: nowrap;
+/* One-shot brand entrance: the official logo fades softly into place, once,
+   on the header instance only. */
+.brand-entrance .brand-logo {
+  animation: brand-logo-in 480ms var(--easing-decelerate) both;
 }
 
-@keyframes brand-cell-in {
+@keyframes brand-logo-in {
   from {
     opacity: 0;
-    transform: scale(0.5);
+    transform: translateY(0.25rem);
   }
   to {
     opacity: 1;
     transform: none;
-  }
-}
-
-@keyframes brand-char-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.4rem);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
-@keyframes brand-underscore-in {
-  0% {
-    opacity: 0;
-  }
-  25% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0;
-  }
-  75%,
-  100% {
-    opacity: 1;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .brand-entrance .brand-cell,
-  .brand-entrance .brand-char,
-  .brand-entrance .brand-underscore {
+  .brand-entrance .brand-logo {
     animation: none;
     opacity: 1;
     transform: none;

@@ -26,35 +26,39 @@ const assemblyStages = [
   "Grow",
 ] as const;
 
+/**
+ * Official GSTPIXEL graphical brand lockup.
+ *
+ * Both renderings are the untouched official artwork shipped from /public:
+ *  - /gstpixel-logo.png          full wordmark (≥640px)
+ *  - /gstpixel-logo-symbol.png   symbol-only crop of that same official PNG,
+ *                                used below 640px where the full wordmark
+ *                                would render too small to read
+ * The image keeps its intrinsic aspect ratio (fixed height, auto width), so
+ * nothing is stretched, recoloured, or redrawn, and the PNG transparency lets
+ * the glass navbar and footer show through. `entrance` runs the one-shot fade
+ * on the header instance only; the footer stays static.
+ */
 export function Brand({ entrance = false }: { entrance?: boolean }) {
-  /* The one-shot entrance (cell assembles → characters stagger in → underscore
-     finishes the sequence) is pure CSS and only runs on the header instance;
-     the footer keeps the plain static lockup. Screen readers always get the
-     plain word, never the per-character spans. */
-  if (!entrance) {
-    return (
-      <span className="brand-mark">
-        <span aria-hidden="true" className="brand-cell" />
-        GSTPIXEL<span className="text-primary">_</span>
-      </span>
-    );
-  }
   return (
-    <span className="brand-mark brand-entrance">
-      <span aria-hidden="true" className="brand-cell" />
-      <span className="sr-only">GSTPIXEL</span>
-      <span aria-hidden="true" className="brand-word">
-        {"GSTPIXEL".split("").map((char, index) => (
-          <span
-            key={index}
-            className="brand-char"
-            style={{ ["--brand-i" as string]: index }}
-          >
-            {char}
-          </span>
-        ))}
-        <span className="text-primary brand-underscore">_</span>
-      </span>
+    <span className={`brand-mark${entrance ? " brand-entrance" : ""}`}>
+      <picture>
+        <source
+          media="(max-width: 639px)"
+          srcSet="/gstpixel-logo-symbol.png"
+          width={693}
+          height={439}
+        />
+        <img
+          src="/gstpixel-logo.png"
+          alt="GSTPIXEL"
+          width={2162}
+          height={727}
+          className="brand-logo"
+          loading="eager"
+          decoding="async"
+        />
+      </picture>
     </span>
   );
 }
