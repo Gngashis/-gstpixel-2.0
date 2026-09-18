@@ -155,7 +155,7 @@ export function PageIntro({
   description: string;
 }) {
   return (
-    <header className="page-intro">
+    <header className="page-intro env-section" data-env-phase="0">
       <div className="site-container">
         <ScrollReveal variant="fadeInUp" delay={0}>
           <p className="label text-primary">{label}</p>
@@ -177,7 +177,7 @@ export function StartBand({
   title?: string;
 }) {
   return (
-    <section className="start-band env-section" data-env-phase="6">
+    <section className="start-band env-section" data-env-phase="5">
       <div className="site-container">
         <div className="start-band-trace" aria-hidden="true">
           <span>IDEA</span>

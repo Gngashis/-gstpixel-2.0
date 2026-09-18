@@ -3196,6 +3196,341 @@ a {
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--destructive) 15%, transparent);
 }
 
+/* ============================================================
+   PASS 2 PRODUCT CONVERGENCE
+   Shared environment, material, interaction, and responsive rules.
+   ============================================================ */
+
+/* Secondary routes now enter through the same environmental field as home.
+   A restrained local key light gives the intro depth without creating a new
+   page theme or painting an opaque slab over the fixed atmosphere. */
+.page-intro {
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  padding: clamp(4.75rem, 9vw, 8rem) 0 clamp(3.75rem, 7vw, 5.5rem);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent),
+      color-mix(in oklab, var(--ink) 42%, transparent) 72%,
+      transparent
+    );
+}
+
+.page-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, color-mix(in oklab, var(--primary) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in oklab, var(--primary) 4%, transparent) 1px, transparent 1px);
+  background-size: 5rem 5rem;
+  mask-image: linear-gradient(90deg, #000, transparent 72%);
+  opacity: 0.55;
+}
+
+.page-intro .site-container {
+  position: relative;
+}
+
+.page-intro h1 {
+  overflow-wrap: anywhere;
+}
+
+.content-band {
+  position: relative;
+  border-bottom: 1px solid color-mix(in oklab, var(--ink-line) 72%, transparent);
+}
+
+.content-band.bg-secondary {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--env-current-glass-tint) 18%, transparent),
+      color-mix(in oklab, var(--ink) 46%, transparent)
+    );
+}
+
+/* Material roles: structures contain, interactive surfaces respond, results
+   carry the strongest edge and depth. This replaces the former one-surface-
+   fits-all appearance while preserving the existing palette. */
+.service-family,
+.contact-guided {
+  background:
+    linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 34%),
+    color-mix(in oklab, var(--material-polymer) 88%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    var(--depth-shadow-sm);
+}
+
+.service-card,
+.solution-card,
+.tool-card,
+.process-step,
+.how-step,
+.work-step,
+.principle-card,
+.focus-card,
+.contact-method,
+.expectation-step,
+.sequence-step,
+.segmented-option,
+.capability-chip,
+.need-choice,
+.stage-choice,
+.dr-option {
+  background:
+    linear-gradient(150deg, color-mix(in oklab, white 3.5%, transparent), transparent 35%),
+    color-mix(in oklab, var(--material-clear) 92%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 5%, transparent);
+}
+
+.service-card:hover,
+.solution-card:hover,
+.tool-card:hover,
+.contact-method:hover,
+.segmented-option:hover,
+.capability-chip:hover,
+.need-choice:hover,
+.stage-choice:hover,
+.dr-option:hover {
+  border-color: color-mix(in oklab, var(--primary) 44%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
+    0 14px 36px color-mix(in oklab, black 22%, transparent);
+}
+
+.result-panel,
+.tool-result-panel {
+  position: relative;
+  min-width: 0;
+  align-self: start;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--primary) 34%, transparent);
+  border-top: 2px solid var(--primary);
+  border-radius: 0.875rem;
+  background:
+    radial-gradient(ellipse at 85% 0%, color-mix(in oklab, var(--env-current-glow) 16%, transparent), transparent 45%),
+    linear-gradient(155deg, color-mix(in oklab, white 5%, transparent), transparent 28%),
+    color-mix(in oklab, var(--material-polymer) 96%, transparent);
+  color: var(--ink-foreground);
+  padding: clamp(1.25rem, 3vw, 2rem);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 10%, transparent),
+    var(--depth-shadow-md);
+}
+
+.tool-result-panel:focus-visible,
+.requirement-result:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+}
+
+.form-label {
+  color: color-mix(in oklab, var(--ink-foreground) 92%, transparent);
+  letter-spacing: 0.01em;
+}
+
+.form-control {
+  min-height: 3.25rem;
+  border-color: color-mix(in oklab, var(--primary) 14%, var(--input));
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--material-polymer) 94%, transparent);
+  transition:
+    border-color 180ms var(--easing-standard),
+    background 180ms var(--easing-standard),
+    box-shadow 180ms var(--easing-standard);
+}
+
+.form-control:hover {
+  border-color: color-mix(in oklab, var(--primary) 32%, var(--input));
+}
+
+.form-control:focus {
+  background: color-mix(in oklab, var(--material-crystal) 78%, transparent);
+}
+
+.tool-step-nav {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.tool-step-button {
+  min-height: 3rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: color-mix(in oklab, var(--material-clear) 88%, transparent);
+  color: var(--muted-foreground);
+  text-align: left;
+  font: 600 0.82rem var(--font-body);
+  cursor: pointer;
+  transition:
+    color 180ms var(--easing-standard),
+    border-color 180ms var(--easing-standard),
+    background 180ms var(--easing-standard),
+    transform 180ms var(--easing-standard);
+}
+
+.tool-step-button:hover {
+  color: var(--ink-foreground);
+  border-color: color-mix(in oklab, var(--primary) 38%, transparent);
+  transform: translateX(2px);
+}
+
+.tool-step-button.active {
+  border-color: var(--primary);
+  background: color-mix(in oklab, var(--primary) 10%, var(--material-clear));
+  color: var(--ink-foreground);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+
+.tool-step-button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+.dr-category-toggle {
+  min-height: 2.75rem;
+  gap: 0.75rem;
+}
+
+.dr-chevron {
+  flex: none;
+  transition: transform 220ms var(--easing-standard);
+}
+
+.dr-chevron.collapsed {
+  transform: rotate(-90deg);
+}
+
+/* CTA and footer converge into one designed page ending instead of two stacked
+   dark slabs. */
+.start-band {
+  border-top: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+  border-bottom: 1px solid color-mix(in oklab, var(--primary) 12%, transparent);
+  background:
+    linear-gradient(180deg, transparent, color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent) 42%, color-mix(in oklab, var(--ink) 82%, transparent));
+}
+
+.start-band .site-container {
+  padding: clamp(1.25rem, 3vw, 2rem);
+  border: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--material-clear) 68%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 7%, transparent);
+}
+
+.site-footer {
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--env-current-glass-tint) 24%, transparent), transparent 32%),
+    color-mix(in oklab, var(--ink) 94%, transparent);
+}
+
+.footer-column .label {
+  color: color-mix(in oklab, var(--primary) 80%, white);
+}
+
+.footer-column a:hover,
+.footer-contact a:hover {
+  transform: translateX(2px);
+}
+
+@media (max-width: 767px) {
+  .tool-step-button {
+    overflow-wrap: anywhere;
+  }
+
+  .enquiry-actions {
+    gap: 0.5rem;
+  }
+
+  .enquiry-actions > * {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .start-band .site-container {
+    width: min(100% - 2rem, 76rem);
+    padding: 1.25rem;
+  }
+
+  .site-footer .grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-container {
+    width: min(100% - 1.5rem, 76rem);
+  }
+
+  .page-intro h1 {
+    font-size: clamp(2.05rem, 11.8vw, 2.7rem);
+  }
+
+  .content-band {
+    padding: 3.25rem 0;
+  }
+
+  .enquiry-actions {
+    margin-inline: -0.75rem;
+    padding-inline: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tool-step-button:hover,
+  .footer-column a:hover,
+  .footer-contact a:hover {
+    transform: none;
+  }
+}
+
+@media print {
+  .site-header,
+  .assembly-rail,
+  .env-atmosphere,
+  .site-footer,
+  .requirement-generator-page .page-intro,
+  .requirement-generator-page .tool-input-panel,
+  .requirement-generator-page .content-band.bg-secondary,
+  .requirement-result-actions {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .requirement-generator-page .content-band,
+  .requirement-generator-layout,
+  .requirement-result {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: white !important;
+    color: black !important;
+    position: static !important;
+    top: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overscroll-behavior: auto !important;
+  }
+
+  .requirement-result * {
+    color: black !important;
+  }
+}
+
 /* Final cascade for the premium assembly pass. */
 
 .interface-spec > div {
@@ -4492,5 +4827,295 @@ a {
   .tactile:hover,
   .tactile:active {
     transform: none;
+  }
+}
+
+/* Pass 2 final cascade authority. The stylesheet contains older route-specific
+   blocks below the shared system; these compact overrides ensure the converged
+   product rules remain authoritative without rewriting those stable sections. */
+.tool-input-panel {
+  min-width: 0;
+  display: grid;
+  gap: 1.5rem;
+  align-self: start;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid color-mix(in oklab, var(--primary) 16%, var(--border));
+  border-radius: 0.875rem;
+  background:
+    linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 34%),
+    color-mix(in oklab, var(--material-polymer) 88%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    var(--depth-shadow-sm);
+}
+
+.questionnaire-surface {
+  min-width: 0;
+  padding-top: 0.25rem;
+}
+
+.tool-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.tool-validation-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid color-mix(in oklab, var(--trust) 42%, transparent);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--trust) 9%, transparent);
+  color: color-mix(in oklab, var(--trust) 68%, white);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.tool-validation-message svg {
+  flex: none;
+  margin-top: 0.1rem;
+}
+
+.dr-category {
+  background:
+    linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 34%),
+    color-mix(in oklab, var(--material-polymer) 88%, transparent);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
+    var(--depth-shadow-sm);
+}
+
+.dr-option {
+  min-height: 3.25rem;
+  background:
+    linear-gradient(150deg, color-mix(in oklab, white 3.5%, transparent), transparent 35%),
+    color-mix(in oklab, var(--material-clear) 92%, transparent);
+  color: var(--ink-foreground);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, white 5%, transparent);
+}
+
+.dr-result-header {
+  display: grid;
+  justify-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.dr-ring {
+  color: var(--ink-line);
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.dr-ring-progress {
+  color: var(--primary);
+  transition: stroke-dashoffset 420ms var(--easing-decelerate);
+}
+
+.dr-score-value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font: 700 2rem/1 var(--font-display);
+  color: var(--ink-foreground);
+}
+
+.dr-bar-row {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.8fr) minmax(6rem, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.dr-bar-label {
+  min-width: 0;
+  font: 500 0.8rem var(--font-body);
+  color: var(--ink-foreground);
+}
+
+.dr-bar-track {
+  height: 0.4rem;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--ink-line);
+}
+
+.dr-insights {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.dr-insight-section {
+  padding: 1rem;
+  border: 1px solid var(--ink-line);
+  border-radius: 0.625rem;
+  background: color-mix(in oklab, var(--ink-foreground) 3.5%, transparent);
+}
+
+.dr-insight-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font: 650 0.9rem var(--font-display);
+  color: var(--ink-foreground);
+}
+
+.dr-strength-icon {
+  color: var(--primary);
+}
+
+.dr-gap-icon {
+  color: var(--trust);
+}
+
+.dr-insight-list {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: var(--ink-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.dr-result-actions {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--ink-line);
+}
+
+.dr-result-actions > * {
+  width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .tool-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(21rem, 0.78fr);
+  }
+
+  .requirement-generator-layout {
+    grid-template-columns: minmax(0, 1.06fr) minmax(22rem, 0.74fr);
+    gap: 2rem;
+  }
+
+  .requirement-result {
+    position: sticky;
+    top: 7rem;
+    max-height: calc(100vh - 8.5rem);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .tool-layout {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 48rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-intro {
+    padding: 5.25rem 0 3rem;
+  }
+
+  .page-intro h1 {
+    max-width: 100%;
+    font-size: clamp(2.35rem, 11.5vw, 3.4rem);
+    line-height: 0.98;
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+  }
+
+  .page-intro p:last-child {
+    max-width: 100%;
+    font-size: 1rem;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+
+  .tool-input-panel,
+  .result-panel,
+  .tool-result-panel {
+    min-width: 0;
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .need-choice-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .need-choice {
+    min-height: 4rem;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0.9rem;
+    text-align: left;
+  }
+
+  .need-choice-content {
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .need-choice-content strong {
+    text-align: left;
+  }
+
+  .need-choice .choice-check {
+    margin-left: auto;
+    flex: none;
+  }
+
+  .dr-category {
+    padding: 1rem;
+  }
+
+  .dr-category-toggle {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.35rem 0.75rem;
+  }
+
+  .dr-category-meta {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .dr-chevron {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .dr-option {
+    align-items: flex-start;
+    padding: 0.85rem;
+  }
+
+  .dr-bar-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .dr-bar-track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .enquiry-actions > * {
+    min-width: 0;
+    flex: 1 1 0;
   }
 }

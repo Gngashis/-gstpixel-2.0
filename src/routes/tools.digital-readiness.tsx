@@ -57,6 +57,8 @@ function Page() {
   const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(
     () => new Set(),
   );
+  const [validationMessage, setValidationMessage] = useState("");
+  const [completionMessage, setCompletionMessage] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
 
   const answeredCount = Object.keys(answers).length;
@@ -65,6 +67,8 @@ function Page() {
   const progressPercent = Math.round(progress * 100);
 
   const setAnswer = useCallback((questionId: string, value: string) => {
+    setValidationMessage("");
+    setCompletionMessage("");
     setAnswers((prev) => {
       if (value === "") {
         const next = { ...prev };
@@ -78,21 +82,61 @@ function Page() {
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
       e.preventDefault();
+      if (answeredCount < totalQuestionCount) {
+        const firstUnanswered = readinessCategories
+          .flatMap((category) =>
+            category.questions.map((question) => ({
+              categoryId: category.id,
+              questionId: question.id,
+            })),
+          )
+          .find(({ questionId }) => !answers[questionId]);
+
+        setValidationMessage(
+          `Answer ${totalQuestionCount - answeredCount} remaining question${totalQuestionCount - answeredCount === 1 ? "" : "s"} to generate a complete assessment.`,
+        );
+
+        if (firstUnanswered) {
+          setCollapsedCategories((previous) => {
+            const next = new Set(previous);
+            next.delete(firstUnanswered.categoryId);
+            return next;
+          });
+          setTimeout(() => {
+            const input = document.querySelector<HTMLInputElement>(
+              `input[name="${firstUnanswered.questionId}"]`,
+            );
+            const scrollTarget = input?.closest("label") ?? input;
+            scrollTarget?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+            input?.focus({ preventScroll: true });
+          }, 80);
+        }
+        return;
+      }
+
+      setValidationMessage("");
       const r = scoreReadiness(answers);
       setResult(r);
+      setCompletionMessage(
+        `Digital readiness result ready: ${r.overallPercent ?? 0}% ${r.label ?? ""}.`,
+      );
       setTimeout(() => {
-        resultRef.current?.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
+        const resultNode = resultRef.current;
+        resultNode?.scrollIntoView({ behavior: "smooth", block: "start" });
+        resultNode?.focus({ preventScroll: true });
       }, 80);
     },
-    [answers],
+    [answeredCount, answers],
   );
 
   const handleReset = useCallback(() => {
     setAnswers({});
     setResult(null);
+    setValidationMessage("");
+    setCompletionMessage("");
     setCollapsedCategories(new Set());
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -112,10 +156,13 @@ function Page() {
   return (
     <>
       <PageIntro
-        label="Tool 05"
+        label="Tool 07"
         title="Digital readiness"
         description="Answer a few self-assessment questions across 13 areas of your business. You will get a readiness score, category breakdown, strengths, gaps, and suggested next steps."
       />
+      <p className="sr-only" role="status" aria-live="polite">
+        {completionMessage}
+      </p>
 
       <section className="content-band">
         <div className="site-container tool-layout">
@@ -208,7 +255,7 @@ function Page() {
                           {q.options.map((opt) => (
                             <label
                               key={opt.value}
-                              className={`dr-option ${answers[q.id] === opt.value ? "selected" : ""} ${opt.value === "na" ? "dr-option--na" : ""}`}
+                              className={`dr-option ${opt.na ? "dr-option--na" : ""} ${answers[q.id] === opt.value ? "selected" : ""}`}
                             >
                               <input
                                 type="radio"
@@ -229,29 +276,6 @@ function Page() {
                               </span>
                             </label>
                           ))}
-                          {q.options.some((opt) => opt.value === "na") && (
-                            <label
-                              className={`dr-option dr-option--na ${answers[q.id] === "na" ? "selected" : ""}`}
-                            >
-                              <input
-                                type="radio"
-                                name={q.id}
-                                value="na"
-                                checked={answers[q.id] === "na"}
-                                onChange={() => setAnswer(q.id, "na")}
-                                className="sr-only"
-                              />
-                              <span
-                                className="dr-option-check"
-                                aria-hidden="true"
-                              >
-                                <AlertCircle size={14} />
-                              </span>
-                              <span className="dr-option-text">
-                                Not applicable
-                              </span>
-                            </label>
-                          )}
                         </div>
                       </div>
                     ))}
@@ -265,11 +289,7 @@ function Page() {
               delay={readinessCategories.length * 0.08}
             >
               <div className="tool-actions">
-                <Button
-                  type="submit"
-                  disabled={answeredCount < totalQuestionCount}
-                  className="dr-submit"
-                >
+                <Button type="submit" className="dr-submit">
                   <Check size={16} aria-hidden="true" />
                   Get my readiness score
                 </Button>
@@ -283,6 +303,12 @@ function Page() {
                   Start over
                 </Button>
               </div>
+              {validationMessage && (
+                <p className="tool-validation-message" role="alert">
+                  <AlertCircle size={16} aria-hidden="true" />
+                  {validationMessage}
+                </p>
+              )}
             </ScrollReveal>
           </form>
 
@@ -292,6 +318,7 @@ function Page() {
                 className="tool-result-panel"
                 ref={resultRef}
                 role="region"
+                tabIndex={-1}
                 aria-labelledby="dr-result-title"
               >
                 <h2 id="dr-result-title" className="dr-result-header">
@@ -348,7 +375,7 @@ function Page() {
                     );
                     const score = catResult?.percent ?? 0;
                     return (
-                      <div key={cat.id} className="dr-bar" role="listitem">
+                      <div key={cat.id} className="dr-bar-row" role="listitem">
                         <div className="dr-bar-label">{cat.title}</div>
                         <div
                           className="dr-bar-track"
@@ -432,7 +459,7 @@ function Page() {
                   )}
                 </div>
 
-                <div className="dr-actions">
+                <div className="dr-result-actions">
                   <CopyButton text={copyText} label="Copy summary" />
                   <ToolHandoff
                     interest="consultancy"

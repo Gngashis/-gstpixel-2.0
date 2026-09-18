@@ -346,6 +346,8 @@ function Page() {
     const element =
       document.getElementById(firstErrorKey) ??
       document.querySelector<HTMLElement>(`input[name="${firstErrorKey}"]`);
+    const scrollTarget = element?.closest("label") ?? element;
+    scrollTarget?.scrollIntoView({ behavior: "smooth", block: "center" });
     element?.focus({ preventScroll: true });
   };
 
@@ -837,10 +839,7 @@ function Page() {
                 </Button>
               )}
               {step < 5 ? (
-                <Button
-                  onClick={step === 4 ? handleSubmit : next}
-                  disabled={Object.keys(deriveErrors(step, form)).length > 0}
-                >
+                <Button onClick={step === 4 ? handleSubmit : next}>
                   {step === 4 ? "Review" : "Continue"} <ArrowRight size={16} />
                 </Button>
               ) : (

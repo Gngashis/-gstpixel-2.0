@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -425,6 +425,7 @@ export const Route = createFileRoute("/tools/website-requirement-generator")({
 function Page() {
   const [form, setForm] = useState<FormState>(initialForm);
   const [currentStep, setCurrentStep] = useState(0);
+  const resultRef = useRef<HTMLElement>(null);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(
     "idle",
   );
@@ -491,6 +492,13 @@ function Page() {
       setCopyState("error");
       window.setTimeout(() => setCopyState("idle"), 2000);
     }
+  };
+
+  const reviewBrief = () => {
+    const resultNode = resultRef.current;
+    if (resultNode) resultNode.scrollTop = 0;
+    resultNode?.scrollIntoView({ behavior: "smooth", block: "start" });
+    resultNode?.focus({ preventScroll: true });
   };
 
   const canGoBack = currentStep > 0;
@@ -1060,19 +1068,16 @@ function Page() {
   };
 
   return (
-    <>
+    <div className="requirement-generator-page">
       <PageIntro
-        label="Tool 05"
+        label="Tool 10"
         title="Website requirement generator"
         description="Turn a structured questionnaire into a clear, free website brief. This tool documents the logic behind its recommendations and keeps the result local to your browser."
       />
 
       <section className="content-band">
-        <div className="site-container tool-layout" style={{ gap: "2rem" }}>
-          <div
-            className="tool-input-panel"
-            style={{ display: "grid", gap: "1.5rem" }}
-          >
+        <div className="site-container tool-layout requirement-generator-layout">
+          <div className="tool-input-panel">
             <ScrollReveal variant="fadeInUp" delay={0}>
               <div style={{ display: "grid", gap: "0.75rem" }}>
                 <p className="label text-primary">Build the brief</p>
@@ -1117,31 +1122,17 @@ function Page() {
             </ScrollReveal>
 
             <ScrollReveal variant="fadeInUp" delay={0.1}>
-              <div style={{ display: "grid", gap: "0.5rem" }}>
+              <div
+                className="tool-step-nav"
+                aria-label="Questionnaire sections"
+              >
                 {planningStages.map((step, index) => (
                   <button
                     key={step.title}
                     type="button"
                     onClick={() => setCurrentStep(index)}
-                    style={{
-                      border:
-                        index === currentStep
-                          ? "1px solid var(--primary)"
-                          : "1px solid var(--border)",
-                      background:
-                        index === currentStep
-                          ? "color-mix(in oklab, var(--primary) 8%, transparent)"
-                          : "var(--surface)",
-                      color:
-                        index === currentStep
-                          ? "var(--foreground)"
-                          : "var(--muted-foreground)",
-                      borderRadius: "0.5rem",
-                      padding: "0.75rem 1rem",
-                      textAlign: "left",
-                      font: "600 0.82rem var(--font-body)",
-                      cursor: "pointer",
-                    }}
+                    className={`tool-step-button ${index === currentStep ? "active" : ""}`}
+                    aria-current={index === currentStep ? "step" : undefined}
                     aria-label={`Go to ${step.title}`}
                   >
                     {index + 1}. {step.title}
@@ -1204,10 +1195,7 @@ function Page() {
                     Continue <ArrowRight size={14} />
                   </Button>
                 ) : (
-                  <Button
-                    onClick={() => setCurrentStep(planningStages.length - 1)}
-                    type="button"
-                  >
+                  <Button onClick={reviewBrief} type="button">
                     Review brief
                   </Button>
                 )}
@@ -1216,7 +1204,9 @@ function Page() {
           </div>
 
           <aside
-            className="result-panel"
+            className="result-panel requirement-result"
+            ref={resultRef}
+            tabIndex={-1}
             aria-live="polite"
             aria-label="Website requirement brief"
           >
@@ -1252,6 +1242,7 @@ function Page() {
             </StaggeredReveal>
 
             <div
+              className="requirement-result-actions"
               style={{ display: "grid", gap: "0.75rem", marginTop: "1.5rem" }}
             >
               {renderSection("Business goals", brief.businessGoals)}
@@ -1394,6 +1385,6 @@ function Page() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

@@ -110,7 +110,7 @@ const tools = [
     title: "Digital readiness",
     description: "Score the foundations behind your next digital move.",
     icon: Gauge,
-    features: ["0–15 signal", "Five dimensions", "Next steps"],
+    features: ["0–100 readiness", "13 business areas", "Next steps"],
     category: "Assessment",
   },
   {
