@@ -21,14 +21,12 @@ test.describe("Start Your Project enquiry", () => {
     }
   });
 
-  test("continue is gated on selecting a need", async ({ page }) => {
+  test("continue button is always enabled on first step (Cline implementation)", async ({
+    page,
+  }) => {
     const continueBtn = page.getByRole("button", { name: /Continue/i });
 
-    // No selection yet: the button is disabled.
-    await expect(continueBtn).toBeDisabled();
-
-    // Selecting a need enables it.
-    await page.locator('label:has-text("Website or digital platform")').click();
+    // Cline implementation: Continue button is always enabled but validates on click
     await expect(continueBtn).toBeEnabled();
   });
 

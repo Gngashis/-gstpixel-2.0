@@ -1,52 +1,57 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * GSTPIXEL browser QA and visual regression configuration.
- *
- * Goals:
- * - Lightweight, zero recurring cost, local-only.
- * - Durable structural smoke checks rather than brittle pixel assertions.
- * - Screenshot capture for human/visual comparison without failing on animated backgrounds.
+ * Read environment variables from file.
+ * https://github.com/motdotla/dotenv
  */
+// import dotenv from 'dotenv';
+// dotenv.config({ path: path.resolve(__dirname, '.env') });
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL || "http://localhost:8080";
-
+/**
+ * See https://playwright.dev/docs/test-configuration.
+ */
 export default defineConfig({
-  testDir: "./tests/qa",
+  testDir: "./tests",
+  /* Run tests in files in parallel */
   fullyParallel: true,
+  /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
+  /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
-  // The TanStack Start dev server used here is single-threaded and can become unstable
-  // under multiple concurrent browser workers, so keep one worker for reliable local runs.
-  workers: 1,
-  reporter: [["list"], ["html", { open: "never" }]],
+  /* Opt out of parallel tests on CI. */
+  workers: process.env.CI ? 1 : undefined,
+  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+  reporter: [
+    ["html", { outputFolder: "playwright-report" }],
+    ["list"],
+    ["json", { outputFile: "playwright-results.json" }],
+  ],
+  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
-    baseURL,
+    /* Base URL to use in actions like `await page.goto('/')`. */
+    baseURL: "http://localhost:5173",
+
+    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-ui */
     trace: "on-first-retry",
+
+    /* Accept screenshot failures and record them for review if UI testing */
     screenshot: "only-on-failure",
-    video: "off",
-    actionTimeout: 10000,
-    navigationTimeout: 15000,
   },
 
+  /* Configure projects for major browsers */
   projects: [
     {
       name: "chromium",
-      use: {
-        ...devices["Desktop Chrome"],
-        launchOptions: {
-          args: ["--disable-dev-shm-usage"],
-        },
-      },
+      use: { ...devices["Desktop Mac"] },
     },
+    // Add more projects as needed (e.g., Firefox, Webkit)
   ],
 
+  /* Run your local dev server before starting the tests */
   webServer: {
-    // TanStack Start's cloudflare preset preview is incompatible with this environment,
-    // so the test server runs the Vite dev server locally. Build validation is run separately.
     command: "npm run dev",
-    url: baseURL,
+    url: "http://localhost:5173",
     reuseExistingServer: !process.env.CI,
-    timeout: 120000,
+    timeout: 60 * 1000,
   },
 });
