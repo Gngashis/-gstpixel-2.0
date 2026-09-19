@@ -29,6 +29,10 @@ import {
 } from "@/lib/seo";
 import { useMagnetic } from "@/lib/pointer-light";
 import { JsonLd } from "@/components/json-ld";
+import {
+  FounderHeroSignal,
+  FounderSection,
+} from "@/components/founder-experience";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -115,15 +119,18 @@ function Home() {
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <span ref={heroCta.ref} className="magnetic">
-                  <ButtonLink to="/start-your-project">
-                    Start your project <ArrowRight size={16} />
+              <div className="hero-actions">
+                <div className="mt-9 flex flex-wrap gap-3">
+                  <span ref={heroCta.ref} className="magnetic">
+                    <ButtonLink to="/start-your-project">
+                      Start your project <ArrowRight size={16} />
+                    </ButtonLink>
+                  </span>
+                  <ButtonLink to="/services" variant="secondary">
+                    Explore services
                   </ButtonLink>
-                </span>
-                <ButtonLink to="/services" variant="secondary">
-                  Explore services
-                </ButtonLink>
+                </div>
+                <FounderHeroSignal />
               </div>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.4}>
@@ -492,6 +499,8 @@ function Home() {
           </ScrollReveal>
         </div>
       </section>
+
+      <FounderSection />
 
       <section
         className="content-band env-section"

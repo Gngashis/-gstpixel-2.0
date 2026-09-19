@@ -11,7 +11,7 @@ import { useEffect, useRef } from "react";
  * lighting, and reduced-motion users get none of it.
  */
 
-const LIT_SELECTOR = ".assembly-panel, .concept-card";
+const LIT_SELECTOR = ".assembly-panel, .concept-card, .founder-signal";
 
 export function initPointerLight(): () => void {
   if (typeof window === "undefined") return () => {};
