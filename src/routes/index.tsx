@@ -27,7 +27,7 @@ import {
   organizationJsonLd,
   localBusinessJsonLd,
 } from "@/lib/seo";
-import { useMagnetic } from "@/lib/pointer-light";
+import { useAmbientPointer, useMagnetic } from "@/lib/pointer-light";
 import { JsonLd } from "@/components/json-ld";
 import {
   FounderHeroSignal,
@@ -67,6 +67,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const heroCta = useMagnetic<HTMLSpanElement>();
+  const heroAmbient = useAmbientPointer<HTMLElement>();
 
   return (
     <>
@@ -90,6 +91,7 @@ function Home() {
         })}
       />
       <section
+        ref={heroAmbient.ref}
         className="home-hero drafting-grid env-section"
         data-env-phase="0"
         style={{ "--env-glow-x": "20%", "--env-glow-y": "10%" }}
@@ -101,7 +103,7 @@ function Home() {
                 <span className="signal-dot" /> The GSTPIXEL Assembly
               </p>
             </ScrollReveal>
-            <ScrollReveal variant="fadeInUp" delay={0.1}>
+            <ScrollReveal variant="maskIn" delay={0.1}>
               <h1>
                 One system for how a business is built, automated, and run.
               </h1>
@@ -140,7 +142,7 @@ function Home() {
               </div>
             </ScrollReveal>
           </div>
-          <div className="lg:col-span-6">
+          <div className="hero-assembly lg:col-span-6">
             <ScrollReveal variant="scaleIn" delay={0.15}>
               <AssemblyVisual />
             </ScrollReveal>

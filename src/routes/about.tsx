@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { buildCanonical, organizationJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
+import { FounderPicture } from "@/components/founder-experience";
 import { businessFacts } from "@/lib/content";
 import {
   ArrowRight,
@@ -249,7 +250,7 @@ function AboutContent() {
         <div className="site-container">
           <SectionHeader
             label="Founder & Leadership"
-            title={`${businessFacts.founder} — ${businessFacts.founderTitle}`}
+            title={`${businessFacts.founder} — ${businessFacts.founderTitleExtended}`}
           />
           <StaggeredReveal
             baseDelay={0.08}
@@ -263,26 +264,13 @@ function AboutContent() {
                 padding: "2rem",
                 display: "grid",
                 gap: "2rem",
-                gridTemplateColumns: "auto 1fr",
+                gridTemplateColumns: "minmax(8rem, 11rem) 1fr",
                 alignItems: "start",
               }}
             >
-              <div
-                className="founder-avatar"
-                style={{
-                  width: "6rem",
-                  height: "6rem",
-                  borderRadius: "50%",
-                  background: "var(--env-current-gradient)",
-                  display: "grid",
-                  placeItems: "center",
-                  font: "800 2.5rem var(--font-display)",
-                  color: "var(--ink-foreground)",
-                  boxShadow:
-                    "var(--depth-shadow-lg), var(--depth-glow-primary)",
-                }}
-              >
-                AG
+              <div className="about-founder-portrait">
+                <FounderPicture />
+                <span aria-hidden="true" />
               </div>
               <div>
                 <div
@@ -307,19 +295,7 @@ function AboutContent() {
                       textTransform: "uppercase",
                     }}
                   >
-                    {businessFacts.founderTitle}
-                  </span>
-                  <span
-                    className="glass-light"
-                    style={{
-                      borderRadius: "9999px",
-                      padding: "0.25rem 0.75rem",
-                      font: "500 0.7rem var(--font-mono)",
-                      textTransform: "uppercase",
-                      color: "var(--color-brand-trust)",
-                    }}
-                  >
-                    Digital Solutions
+                    {businessFacts.founderTitleExtended}
                   </span>
                 </div>
                 <p
@@ -330,10 +306,11 @@ function AboutContent() {
                     maxWidth: "50ch",
                   }}
                 >
-                  Building {businessFacts.name} from {businessFacts.location} —
-                  assembling digital products, AI automation, business services,
-                  and consultancy into one coherent system for businesses across
-                  India and beyond.
+                  From {businessFacts.location}, Ashis directly leads GSTPIXEL’s
+                  digital development, automation, and business technology work.
+                  Each project combines human judgment, practical business
+                  understanding, technical implementation, and clear local
+                  accountability for businesses across India and beyond.
                 </p>
                 <div
                   className="founder-contact"

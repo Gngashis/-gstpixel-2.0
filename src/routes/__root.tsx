@@ -115,8 +115,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { property: "og:image:alt", content: OG_IMAGE_ALT },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:site", content: "@gstpixel" },
-        { name: "twitter:title", content: DEFAULT_TITLE },
-        { name: "twitter:description", content: DEFAULT_DESCRIPTION },
+        /* twitter:title/description intentionally omitted: Twitter falls back to
+           og:title/og:description, which every page sets per-route. Static
+           defaults here would override page titles on card renders. */
         { name: "twitter:image", content: OG_IMAGE },
         { name: "twitter:image:alt", content: OG_IMAGE_ALT },
         { name: "theme-color", content: "#0a0a0a" },

@@ -111,7 +111,11 @@ export function localBusinessJsonLd(input: {
     },
     telephone: input.phoneHref.replace("tel:", ""),
     email: input.emailHref.replace("mailto:", ""),
-    identifier: input.gstin,
+    identifier: {
+      "@type": "PropertyValue",
+      propertyID: "GSTIN",
+      value: input.gstin,
+    },
     areaServed: [
       { "@type": "City", name: "Jaigaon" },
       { "@type": "City", name: "Phuentsholing" },

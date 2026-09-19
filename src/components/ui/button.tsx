@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 import { Loader2, Check, X, ArrowRight } from "lucide-react";
 
 export const buttonVariants = cva(
-  "inline-flex min-h-11 items-center justify-center gap-2 rounded-sm text-sm font-semibold transition-[background-color,color,border-color,transform,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-45",
+  "premium-control relative isolate inline-flex min-h-11 items-center justify-center gap-2 overflow-hidden rounded-sm text-sm font-semibold transition-[background-color,color,border-color,transform,box-shadow] duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-45",
   {
     variants: {
       variant: {

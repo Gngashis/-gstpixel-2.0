@@ -11,7 +11,8 @@ import { useEffect, useRef } from "react";
  * lighting, and reduced-motion users get none of it.
  */
 
-const LIT_SELECTOR = ".assembly-panel, .concept-card, .founder-signal";
+const LIT_SELECTOR =
+  ".assembly-panel, .concept-card, .founder-signal, .glass-below-fold, .service-card, .solution-card, .tool-card";
 
 export function initPointerLight(): () => void {
   if (typeof window === "undefined") return () => {};
@@ -36,6 +37,14 @@ export function initPointerLight(): () => void {
     active.style.setProperty(
       "--lit-y",
       `${(((pointerY - rect.top) / rect.height) * 100).toFixed(2)}%`,
+    );
+    active.style.setProperty(
+      "--lit-nx",
+      (((pointerX - rect.left) / rect.width - 0.5) * 2).toFixed(3),
+    );
+    active.style.setProperty(
+      "--lit-ny",
+      (((pointerY - rect.top) / rect.height - 0.5) * 2).toFixed(3),
     );
   };
 
@@ -73,6 +82,66 @@ export function initPointerLight(): () => void {
     if (frame !== undefined) cancelAnimationFrame(frame);
     clearActive();
   };
+}
+
+/**
+ * Local ambient light and restrained depth for large editorial regions.
+ * The element receives normalized pointer coordinates as CSS variables; CSS
+ * owns all rendering so React never re-renders while the pointer moves.
+ */
+export function useAmbientPointer<T extends HTMLElement>(): {
+  ref: React.RefObject<T | null>;
+} {
+  const ref = useRef<T>(null);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+      return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame: number | undefined;
+    let x = 0.5;
+    let y = 0.4;
+
+    const apply = () => {
+      frame = undefined;
+      node.style.setProperty("--ambient-x", `${(x * 100).toFixed(2)}%`);
+      node.style.setProperty("--ambient-y", `${(y * 100).toFixed(2)}%`);
+      node.style.setProperty("--ambient-nx", ((x - 0.5) * 2).toFixed(3));
+      node.style.setProperty("--ambient-ny", ((y - 0.5) * 2).toFixed(3));
+    };
+
+    const schedule = () => {
+      if (frame === undefined) frame = requestAnimationFrame(apply);
+    };
+
+    const onMove = (event: PointerEvent) => {
+      const rect = node.getBoundingClientRect();
+      x = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width));
+      y = Math.max(0, Math.min(1, (event.clientY - rect.top) / rect.height));
+      node.setAttribute("data-ambient-active", "");
+      schedule();
+    };
+
+    const onLeave = () => {
+      x = 0.5;
+      y = 0.4;
+      node.removeAttribute("data-ambient-active");
+      schedule();
+    };
+
+    node.addEventListener("pointermove", onMove, { passive: true });
+    node.addEventListener("pointerleave", onLeave);
+    return () => {
+      node.removeEventListener("pointermove", onMove);
+      node.removeEventListener("pointerleave", onLeave);
+      if (frame !== undefined) cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  return { ref };
 }
 
 /**

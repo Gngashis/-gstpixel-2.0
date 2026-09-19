@@ -1,6 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Button, ButtonLink } from "@/components/ui/button";
 export const Route = createFileRoute("/$")({
+  // Any path that matches nothing else lands here. Throwing notFound() marks
+  // the match so the server responds with a real HTTP 404 (not a soft-404 200)
+  // while the route's notFoundComponent keeps the custom recovery design.
+  loader: () => {
+    throw notFound();
+  },
   head: () => ({
     meta: [
       { title: "Page Not Found — GSTPIXEL" },
@@ -19,6 +25,7 @@ export const Route = createFileRoute("/$")({
     ],
   }),
   component: Page,
+  notFoundComponent: Page,
 });
 function Page() {
   return (

@@ -3235,13 +3235,12 @@ a {
   isolation: isolate;
   overflow: clip;
   padding: clamp(4.75rem, 9vw, 8rem) 0 clamp(3.75rem, 7vw, 5.5rem);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent),
-      color-mix(in oklab, var(--ink) 42%, transparent) 72%,
-      transparent
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent),
+    color-mix(in oklab, var(--ink) 42%, transparent) 72%,
+    transparent
+  );
 }
 
 .page-intro::before {
@@ -3251,8 +3250,15 @@ a {
   z-index: -1;
   pointer-events: none;
   background:
-    linear-gradient(90deg, color-mix(in oklab, var(--primary) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(color-mix(in oklab, var(--primary) 4%, transparent) 1px, transparent 1px);
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--primary) 5%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      color-mix(in oklab, var(--primary) 4%, transparent) 1px,
+      transparent 1px
+    );
   background-size: 5rem 5rem;
   mask-image: linear-gradient(90deg, #000, transparent 72%);
   opacity: 0.55;
@@ -3272,12 +3278,11 @@ a {
 }
 
 .content-band.bg-secondary {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in oklab, var(--env-current-glass-tint) 18%, transparent),
-      color-mix(in oklab, var(--ink) 46%, transparent)
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--env-current-glass-tint) 18%, transparent),
+    color-mix(in oklab, var(--ink) 46%, transparent)
+  );
 }
 
 /* Material roles: structures contain, interactive surfaces respond, results
@@ -3286,7 +3291,11 @@ a {
 .service-family,
 .contact-guided {
   background:
-    linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 34%),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, white 4%, transparent),
+      transparent 34%
+    ),
     color-mix(in oklab, var(--material-polymer) 88%, transparent);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
@@ -3310,7 +3319,11 @@ a {
 .stage-choice,
 .dr-option {
   background:
-    linear-gradient(150deg, color-mix(in oklab, white 3.5%, transparent), transparent 35%),
+    linear-gradient(
+      150deg,
+      color-mix(in oklab, white 3.5%, transparent),
+      transparent 35%
+    ),
     color-mix(in oklab, var(--material-clear) 92%, transparent);
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 5%, transparent);
 }
@@ -3340,8 +3353,16 @@ a {
   border-top: 2px solid var(--primary);
   border-radius: 0.875rem;
   background:
-    radial-gradient(ellipse at 85% 0%, color-mix(in oklab, var(--env-current-glow) 16%, transparent), transparent 45%),
-    linear-gradient(155deg, color-mix(in oklab, white 5%, transparent), transparent 28%),
+    radial-gradient(
+      ellipse at 85% 0%,
+      color-mix(in oklab, var(--env-current-glow) 16%, transparent),
+      transparent 45%
+    ),
+    linear-gradient(
+      155deg,
+      color-mix(in oklab, white 5%, transparent),
+      transparent 28%
+    ),
     color-mix(in oklab, var(--material-polymer) 96%, transparent);
   color: var(--ink-foreground);
   padding: clamp(1.25rem, 3vw, 2rem);
@@ -3439,8 +3460,12 @@ a {
 .start-band {
   border-top: 1px solid color-mix(in oklab, var(--primary) 18%, transparent);
   border-bottom: 1px solid color-mix(in oklab, var(--primary) 12%, transparent);
-  background:
-    linear-gradient(180deg, transparent, color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent) 42%, color-mix(in oklab, var(--ink) 82%, transparent));
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in oklab, var(--env-current-glass-tint) 42%, transparent) 42%,
+    color-mix(in oklab, var(--ink) 82%, transparent)
+  );
 }
 
 .start-band .site-container {
@@ -3453,7 +3478,11 @@ a {
 
 .site-footer {
   background:
-    linear-gradient(180deg, color-mix(in oklab, var(--env-current-glass-tint) 24%, transparent), transparent 32%),
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--env-current-glass-tint) 24%, transparent),
+      transparent 32%
+    ),
     color-mix(in oklab, var(--ink) 94%, transparent);
 }
 
@@ -4868,7 +4897,11 @@ a {
   border: 1px solid color-mix(in oklab, var(--primary) 16%, var(--border));
   border-radius: 0.875rem;
   background:
-    linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 34%),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, white 4%, transparent),
+      transparent 34%
+    ),
     color-mix(in oklab, var(--material-polymer) 88%, transparent);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
@@ -4908,7 +4941,11 @@ a {
 
 .dr-category {
   background:
-    linear-gradient(145deg, color-mix(in oklab, white 4%, transparent), transparent 34%),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, white 4%, transparent),
+      transparent 34%
+    ),
     color-mix(in oklab, var(--material-polymer) 88%, transparent);
   box-shadow:
     inset 0 1px 0 color-mix(in oklab, white 7%, transparent),
@@ -4918,7 +4955,11 @@ a {
 .dr-option {
   min-height: 3.25rem;
   background:
-    linear-gradient(150deg, color-mix(in oklab, white 3.5%, transparent), transparent 35%),
+    linear-gradient(
+      150deg,
+      color-mix(in oklab, white 3.5%, transparent),
+      transparent 35%
+    ),
     color-mix(in oklab, var(--material-clear) 92%, transparent);
   color: var(--ink-foreground);
   box-shadow: inset 0 1px 0 color-mix(in oklab, white 5%, transparent);
@@ -5321,11 +5362,569 @@ a {
 }
 
 /* ============================================================
+   PREMIUM PRODUCTION FINISH
+   A restrained final cascade for depth, light, editorial motion and tactile
+   response. All continuous work is compositor-friendly and disabled for touch,
+   reduced motion, or small screens where it would not improve comprehension.
+   ============================================================ */
+
+.reveal-mask {
+  overflow: clip;
+  padding-bottom: 0.08em;
+}
+
+.home-hero {
+  --ambient-x: 50%;
+  --ambient-y: 38%;
+  --ambient-nx: 0;
+  --ambient-ny: 0;
+  min-height: min(52rem, calc(100svh - 4rem));
+  display: grid;
+  align-items: center;
+  perspective: 1200px;
+}
+
+.home-hero::before {
+  content: "";
+  position: absolute;
+  inset: -18%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      34rem circle at var(--ambient-x) var(--ambient-y),
+      color-mix(in oklab, var(--primary) 19%, transparent),
+      transparent 66%
+    ),
+    radial-gradient(
+      40rem circle at 77% 48%,
+      color-mix(in oklab, var(--env-current-glow) 18%, transparent),
+      transparent 70%
+    );
+  opacity: 0.72;
+  transform: translate3d(
+    calc(var(--ambient-nx) * -10px),
+    calc(var(--ambient-ny) * -7px),
+    0
+  );
+  transition:
+    opacity 360ms var(--easing-standard),
+    transform 500ms var(--easing-decelerate);
+}
+
+.home-hero[data-ambient-active]::before {
+  opacity: 1;
+}
+
+.home-hero > .site-container {
+  position: relative;
+  z-index: 1;
+}
+
+.home-hero > .site-container > div:first-child {
+  transform: translate3d(
+    calc(var(--ambient-nx) * -3px),
+    calc(var(--ambient-ny) * -2px),
+    18px
+  );
+  transition: transform 600ms var(--easing-decelerate);
+}
+
+.hero-assembly {
+  position: relative;
+  transform: translate3d(
+      calc(var(--ambient-nx) * 5px),
+      calc(var(--ambient-ny) * 4px),
+      34px
+    )
+    rotateX(calc(var(--ambient-ny) * -0.55deg))
+    rotateY(calc(var(--ambient-nx) * 0.75deg));
+  transform-style: preserve-3d;
+  transition: transform 700ms var(--easing-decelerate);
+}
+
+.hero-assembly::before {
+  content: "";
+  position: absolute;
+  inset: 10% 2%;
+  z-index: -1;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--env-current-glow) 30%, transparent),
+    transparent 68%
+  );
+  filter: blur(24px);
+  opacity: 0.66;
+  animation: hero-bloom-breathe 8s ease-in-out infinite alternate;
+}
+
+.home-hero h1 {
+  letter-spacing: -0.045em;
+  text-shadow: 0 1px 0 color-mix(in oklab, white 10%, transparent);
+}
+
+.home-hero h1::selection {
+  color: var(--ink);
+}
+
+.hero-copy {
+  text-wrap: pretty;
+}
+
+.premium-control::after {
+  content: "";
+  position: absolute;
+  inset: -40% auto -40% -55%;
+  z-index: -1;
+  width: 38%;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent,
+    color-mix(in oklab, white 36%, transparent),
+    transparent
+  );
+  transform: translateX(-180%) skewX(-16deg);
+  transition: transform 650ms var(--easing-decelerate);
+}
+
+.premium-control:hover::after,
+.premium-control:focus-visible::after {
+  transform: translateX(520%) skewX(-16deg);
+}
+
+.premium-control > svg,
+.premium-control > span > svg {
+  transition: transform 220ms var(--easing-decelerate);
+}
+
+.premium-control:hover > svg,
+.premium-control:hover > span > svg {
+  transform: translateX(2px);
+}
+
+.asm-instrument {
+  transform: translate3d(
+      calc(var(--asm-px) * 5px),
+      calc(var(--asm-py) * 4px),
+      0
+    )
+    rotateX(calc(var(--asm-py) * -1.2deg)) rotateY(calc(var(--asm-px) * 1.6deg));
+  transform-style: preserve-3d;
+  transition: transform 520ms var(--easing-decelerate);
+}
+
+.asm-core-ring {
+  position: relative;
+  overflow: hidden;
+  animation: asm-core-breathe 5.5s ease-in-out infinite;
+}
+
+.asm-core-ring::before,
+.asm-core-ring::after {
+  content: "";
+  position: absolute;
+  inset: 0.45rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 20%, transparent);
+  border-radius: 50%;
+}
+
+.asm-core-ring::after {
+  inset: 1rem;
+  border-style: dashed;
+  animation: asm-core-rotate 18s linear infinite;
+}
+
+.asm-core-scan {
+  position: absolute;
+  inset: 47% 8% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  box-shadow: 0 0 14px color-mix(in oklab, var(--primary) 55%, transparent);
+  opacity: 0.65;
+  animation: asm-core-scan 4.8s var(--easing-standard) infinite;
+}
+
+.asm-core-icon {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(
+    0 0 8px color-mix(in oklab, var(--primary) 38%, transparent)
+  );
+}
+
+.asm-stage {
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.asm-stage-flow {
+  position: absolute;
+  inset: 0 auto 0 -22%;
+  z-index: -1;
+  width: 24%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 14%, transparent),
+    transparent
+  );
+  opacity: calc(0.18 + var(--stage-weight) * 0.48);
+  transform: skewX(-16deg);
+  animation: asm-energy-flow 7.2s var(--easing-standard) infinite;
+  animation-delay: calc(var(--stage-order, 0) * -0.7s);
+}
+
+.asm-stage:nth-child(1) {
+  --stage-order: 0;
+}
+.asm-stage:nth-child(2) {
+  --stage-order: 1;
+}
+.asm-stage:nth-child(3) {
+  --stage-order: 2;
+}
+.asm-stage:nth-child(4) {
+  --stage-order: 3;
+}
+.asm-stage:nth-child(5) {
+  --stage-order: 4;
+}
+.asm-stage:nth-child(6) {
+  --stage-order: 5;
+}
+
+.asm-stage-node svg {
+  transition:
+    transform 300ms var(--easing-decelerate),
+    filter 300ms var(--easing-standard);
+  transform: scale(calc(0.94 + var(--stage-weight) * 0.12));
+  filter: drop-shadow(
+    0 0 calc(var(--stage-weight) * 7px)
+      color-mix(in oklab, var(--primary) 55%, transparent)
+  );
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .asm-stage:hover {
+    transform: translate3d(8px, -1px, 18px);
+    opacity: 1;
+    border-color: color-mix(in oklab, var(--primary) 38%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 9%, transparent),
+      0 14px 36px color-mix(in oklab, var(--ink) 38%, transparent),
+      0 0 24px color-mix(in oklab, var(--env-current-glow) 16%, transparent);
+  }
+
+  .asm-stage:hover .asm-stage-node svg {
+    transform: scale(1.08) rotate(-3deg);
+  }
+
+  .assembly-panel,
+  .concept-card,
+  .glass-below-fold,
+  .service-card,
+  .solution-card,
+  .tool-card {
+    transform-style: preserve-3d;
+  }
+
+  .assembly-panel[data-lit-active],
+  .concept-card[data-lit-active],
+  .glass-below-fold[data-lit-active],
+  .service-card[data-lit-active],
+  .solution-card[data-lit-active],
+  .tool-card[data-lit-active] {
+    transform: perspective(900px) rotateX(calc(var(--lit-ny, 0) * -0.65deg))
+      rotateY(calc(var(--lit-nx, 0) * 0.8deg)) translate3d(0, -3px, 8px);
+    border-color: color-mix(in oklab, var(--primary) 42%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 9%, transparent),
+      0 18px 44px color-mix(in oklab, var(--ink) 42%, transparent),
+      0 0 28px color-mix(in oklab, var(--env-current-glow) 12%, transparent);
+  }
+
+  .glass-below-fold::after,
+  .service-card::after,
+  .solution-card::after,
+  .tool-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: radial-gradient(
+      14rem circle at var(--lit-x, 50%) var(--lit-y, 50%),
+      color-mix(in oklab, var(--env-current-glow) 18%, transparent),
+      transparent 64%
+    );
+    opacity: 0;
+    transition: opacity 300ms var(--easing-standard);
+  }
+
+  .glass-below-fold[data-lit-active]::after,
+  .service-card[data-lit-active]::after,
+  .solution-card[data-lit-active]::after,
+  .tool-card[data-lit-active]::after {
+    opacity: 1;
+  }
+}
+
+.env-atmosphere::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  background:
+    radial-gradient(
+      circle at 28% 34%,
+      color-mix(in oklab, var(--primary) 8%, transparent),
+      transparent 36%
+    ),
+    radial-gradient(
+      circle at 72% 68%,
+      color-mix(in oklab, var(--env-current-glow) 8%, transparent),
+      transparent 38%
+    );
+  opacity: 0.65;
+  animation: atmosphere-drift 18s ease-in-out infinite alternate;
+}
+
+.content-band {
+  border-top: 1px solid
+    color-mix(in oklab, var(--env-current-glow) 5%, transparent);
+}
+
+.content-band > .site-container {
+  position: relative;
+}
+
+.section-title {
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.site-header {
+  transform: translateZ(0);
+  will-change: background, backdrop-filter, box-shadow;
+}
+
+.site-header-scrolled .brand-logo {
+  filter: drop-shadow(
+    0 0 12px color-mix(in oklab, var(--env-current-glow) 18%, transparent)
+  );
+}
+
+.nav-link:hover {
+  transform: translateY(-1px);
+}
+
+.start-band::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    34rem circle at 72% 56%,
+    color-mix(in oklab, var(--env-current-glow) 18%, transparent),
+    transparent 72%
+  );
+  animation: final-light-release 11s ease-in-out infinite alternate;
+}
+
+.start-band .site-container {
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
+    0 30px 80px color-mix(in oklab, var(--ink) 45%, transparent),
+    0 0 50px color-mix(in oklab, var(--env-current-glow) 8%, transparent);
+}
+
+.footer-column a,
+.footer-contact a,
+.section-copy a {
+  position: relative;
+}
+
+.footer-column a::after,
+.footer-contact a::after,
+.section-copy a::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0.45rem;
+  left: 0;
+  height: 1px;
+  background: color-mix(in oklab, var(--primary) 62%, transparent);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 220ms var(--easing-decelerate);
+}
+
+.footer-column a:hover::after,
+.footer-contact a:hover::after,
+.section-copy a:hover::after,
+.footer-column a:focus-visible::after,
+.footer-contact a:focus-visible::after,
+.section-copy a:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+@keyframes hero-bloom-breathe {
+  from {
+    opacity: 0.48;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 0.78;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes asm-core-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.018);
+  }
+}
+
+@keyframes asm-core-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes asm-core-scan {
+  0%,
+  18% {
+    transform: translateY(-2.25rem);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  72% {
+    opacity: 0.55;
+  }
+  84%,
+  100% {
+    transform: translateY(2.25rem);
+    opacity: 0;
+  }
+}
+
+@keyframes asm-energy-flow {
+  0%,
+  20% {
+    transform: translateX(0) skewX(-16deg);
+    opacity: 0;
+  }
+  34% {
+    opacity: 0.45;
+  }
+  70%,
+  100% {
+    transform: translateX(520%) skewX(-16deg);
+    opacity: 0;
+  }
+}
+
+@keyframes atmosphere-drift {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(1.5%, 1%, 0) scale(1.035);
+  }
+}
+
+@keyframes final-light-release {
+  from {
+    opacity: 0.48;
+    transform: translate3d(-2%, 1%, 0);
+  }
+  to {
+    opacity: 0.8;
+    transform: translate3d(2%, -1%, 0);
+  }
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .home-hero {
+    min-height: auto;
+    perspective: none;
+  }
+
+  .home-hero::before {
+    inset: -8%;
+    opacity: 0.58;
+    transform: none;
+  }
+
+  .home-hero > .site-container > div:first-child,
+  .hero-assembly,
+  .asm-instrument {
+    transform: none;
+  }
+
+  .hero-assembly::before {
+    inset: 18% 5%;
+    filter: blur(18px);
+    animation-duration: 12s;
+  }
+
+  .asm-stage-flow {
+    animation-duration: 10s;
+    opacity: calc(0.1 + var(--stage-weight) * 0.26);
+  }
+
+  .env-atmosphere::before {
+    animation: none;
+    opacity: 0.42;
+  }
+
+  .premium-control::after {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-hero::before,
+  .home-hero > .site-container > div:first-child,
+  .hero-assembly,
+  .asm-instrument,
+  .asm-core-ring,
+  .asm-core-ring::after,
+  .asm-core-scan,
+  .asm-stage-flow,
+  .env-atmosphere::before,
+  .start-band::after {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  .premium-control::after {
+    display: none;
+  }
+
+  .reveal-mask {
+    overflow: visible;
+  }
+}
+
+/* ============================================================
    FOUNDER EXPERIENCE — the human inside the GSTPIXEL system.
    The photograph remains still and authentic; only its architectural
    presentation assembles and responds to a fine pointer.
    ============================================================ */
 .founder-signal {
+  --lit-nx: 0;
+  --lit-ny: 0;
   position: relative;
   isolation: isolate;
   display: inline-grid;
@@ -5351,10 +5950,15 @@ a {
     inset 0 1px 0 color-mix(in oklab, white 8%, transparent),
     0 0.8rem 2rem oklch(0 0 0 / 18%);
   backdrop-filter: blur(var(--glass-blur-sm));
+  touch-action: manipulation;
+  transform: perspective(700px) rotateX(calc(var(--lit-ny) * -2.4deg))
+    rotateY(calc(var(--lit-nx) * 2.4deg));
+  transform-style: preserve-3d;
   transition:
     border-color 220ms var(--easing-standard),
     background 220ms var(--easing-standard),
-    transform 220ms var(--easing-standard);
+    box-shadow 220ms var(--easing-standard),
+    transform 320ms var(--easing-spring);
 }
 
 .hero-actions {
@@ -5372,12 +5976,21 @@ a {
 }
 
 .founder-signal-portrait {
+  position: relative;
+  z-index: 2;
   width: 2.65rem;
   height: 2.65rem;
   overflow: hidden;
   border: 1px solid color-mix(in oklab, var(--primary) 32%, transparent);
   border-radius: 0.35rem 0.35rem 0.85rem 0.35rem;
   background: var(--core-dark-elevated);
+  box-shadow: 0 0.35rem 0.9rem oklch(0 0 0 / 28%);
+  transform: translate3d(
+    calc(var(--lit-nx) * 5px),
+    calc(var(--lit-ny) * 4px),
+    18px
+  );
+  transition: transform 320ms var(--easing-spring);
 }
 
 .founder-signal-portrait picture,
@@ -5392,9 +6005,17 @@ a {
 }
 
 .founder-signal-copy {
+  position: relative;
+  z-index: 2;
   display: grid;
   gap: 0.18rem;
   min-width: 0;
+  transform: translate3d(
+    calc(var(--lit-nx) * 2px),
+    calc(var(--lit-ny) * 1.5px),
+    8px
+  );
+  transition: transform 320ms var(--easing-spring);
 }
 
 .founder-signal-copy strong {
@@ -5412,8 +6033,15 @@ a {
 }
 
 .founder-signal-arrow {
+  position: relative;
+  z-index: 2;
   color: var(--primary);
-  transition: transform 220ms var(--easing-standard);
+  transform: translate3d(
+    calc(var(--lit-nx) * 2px),
+    calc(var(--lit-ny) * 1.5px),
+    12px
+  );
+  transition: transform 260ms var(--easing-spring);
 }
 
 .founder-signal:hover {
@@ -5425,14 +6053,22 @@ a {
       transparent 42%
     ),
     color-mix(in oklab, var(--material-polymer) 82%, transparent);
-  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 11%, transparent),
+    0 0 0 1px color-mix(in oklab, var(--primary) 8%, transparent),
+    0 0.9rem 2.2rem oklch(0 0 0 / 22%);
 }
 
 .founder-signal:hover .founder-signal-arrow {
-  transform: translateY(2px);
+  transform: translate3d(
+    calc(var(--lit-nx) * 2px),
+    calc(2px + var(--lit-ny) * 1.5px),
+    12px
+  );
 }
 
 .founder-section {
+  scroll-margin-top: 5.5rem;
   --founder-px: 0;
   --founder-py: 0;
   position: relative;
@@ -5485,7 +6121,7 @@ a {
       transparent 42%
     );
   filter: blur(0.25rem);
-  opacity: 0.7;
+  opacity: 0;
   transform: translate3d(
     calc(var(--founder-px) * -5px),
     calc(var(--founder-py) * -4px),
@@ -5499,11 +6135,17 @@ a {
 .founder-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.02fr) minmax(19rem, 0.82fr);
+  grid-template-areas:
+    "visual label"
+    "visual copy";
+  grid-template-rows: auto auto;
   align-items: center;
-  gap: clamp(3rem, 8vw, 7rem);
+  column-gap: clamp(3rem, 8vw, 7rem);
+  row-gap: 0;
 }
 
 .founder-visual {
+  grid-area: visual;
   position: relative;
   min-width: 0;
   min-height: clamp(32rem, 49vw, 42rem);
@@ -5515,20 +6157,58 @@ a {
   inset: 3.5% 9% 4% 5%;
   overflow: hidden;
   clip-path: polygon(7% 0, 100% 0, 100% 85%, 88% 100%, 0 100%, 0 9%);
-  background: oklch(0.11 0.014 250);
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, white 7%);
+  background:
+    linear-gradient(
+      135deg,
+      oklch(0.19 0.018 250 / 82%),
+      oklch(0.08 0.012 255 / 96%)
+    ),
+    oklch(0.11 0.014 250);
   box-shadow:
     0 2.5rem 5rem oklch(0 0 0 / 45%),
-    inset 0 0 0 1px color-mix(in oklab, white 10%, transparent);
+    0 0 2.5rem color-mix(in oklab, var(--primary) 7%, transparent),
+    inset 0 0 0 1px color-mix(in oklab, white 10%, transparent),
+    inset 0 -2rem 3rem oklch(0 0 0 / 24%);
   opacity: 0;
   transform: translate3d(
       calc(1rem + var(--founder-px) * 4px),
       calc(1.2rem + var(--founder-py) * 3px),
       0
     )
-    scale(0.985);
+    rotateX(calc(var(--founder-py) * -2.2deg))
+    rotateY(calc(var(--founder-px) * 2.5deg)) scale(0.985);
+  transform-style: preserve-3d;
   transition:
     opacity 720ms var(--easing-decelerate) 180ms,
     transform 980ms var(--easing-decelerate) 120ms;
+}
+
+.founder-frame-edge {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 18%, transparent),
+    inset 1px 0 0 color-mix(in oklab, var(--primary) 32%, transparent),
+    inset -1px 0 0 color-mix(in oklab, white 7%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, var(--primary) 16%, transparent);
+}
+
+.founder-portrait {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translate3d(
+      calc(var(--founder-px) * -6px),
+      calc(var(--founder-py) * -5px),
+      16px
+    )
+    scale(1.035);
+  transition:
+    opacity 780ms var(--easing-decelerate) 300ms,
+    transform 460ms var(--easing-decelerate);
 }
 
 .founder-portrait,
@@ -5541,8 +6221,8 @@ a {
 
 .founder-portrait img {
   object-fit: cover;
-  object-position: center 34%;
-  filter: saturate(0.9) contrast(1.04) brightness(0.82);
+  object-position: center 31%;
+  filter: saturate(0.92) contrast(1.035) brightness(0.86);
 }
 
 .founder-vignette {
@@ -5556,7 +6236,80 @@ a {
       oklch(0.08 0.015 250 / 12%)
     ),
     linear-gradient(0deg, oklch(0.06 0.012 250 / 62%), transparent 36%);
+  z-index: 2;
   pointer-events: none;
+}
+
+.founder-frame-reflection {
+  position: absolute;
+  inset: -22% -28%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(
+    112deg,
+    transparent 30%,
+    color-mix(in oklab, white 8%, transparent) 43%,
+    color-mix(in oklab, var(--primary) 5%, transparent) 49%,
+    transparent 62%
+  );
+  opacity: 0;
+  transform: translate3d(
+      calc(-10% + var(--founder-px) * 12%),
+      calc(var(--founder-py) * 6%),
+      24px
+    )
+    rotate(-3deg);
+  transition:
+    opacity 700ms var(--easing-standard) 420ms,
+    transform 480ms var(--easing-decelerate);
+}
+
+.founder-frame-corner {
+  position: absolute;
+  z-index: 5;
+  width: 1.5rem;
+  height: 1.5rem;
+  pointer-events: none;
+}
+
+.founder-frame-corner::before,
+.founder-frame-corner::after {
+  content: "";
+  position: absolute;
+  background: color-mix(in oklab, var(--primary) 58%, white 10%);
+  box-shadow: 0 0 0.55rem color-mix(in oklab, var(--primary) 24%, transparent);
+}
+
+.founder-frame-corner::before {
+  width: 100%;
+  height: 1px;
+}
+
+.founder-frame-corner::after {
+  width: 1px;
+  height: 100%;
+}
+
+.founder-frame-corner-top {
+  top: 0.75rem;
+  right: 0.75rem;
+}
+
+.founder-frame-corner-top::before,
+.founder-frame-corner-top::after {
+  top: 0;
+  right: 0;
+}
+
+.founder-frame-corner-bottom {
+  bottom: 0.75rem;
+  left: 0.75rem;
+}
+
+.founder-frame-corner-bottom::before,
+.founder-frame-corner-bottom::after {
+  bottom: 0;
+  left: 0;
 }
 
 .founder-trace {
@@ -5698,13 +6451,13 @@ a {
 }
 
 .founder-copy {
+  grid-area: copy;
   position: relative;
   z-index: 6;
   max-width: 34rem;
 }
 
 .founder-label,
-.founder-heading,
 .founder-identity,
 .founder-copy > p:not(.founder-label),
 .founder-cta {
@@ -5715,24 +6468,78 @@ a {
     transform 720ms var(--easing-decelerate);
 }
 
+.founder-label {
+  grid-area: label;
+  align-self: end;
+  margin-bottom: 1rem;
+}
+
 .founder-heading {
   display: grid;
   gap: 0.08em;
   max-width: 12ch;
-  margin-top: 1rem;
+  margin-top: 2rem;
   font: 720 clamp(2.55rem, 5.25vw, 5rem)/0.94 var(--font-display);
   letter-spacing: -0.035em;
   text-wrap: balance;
+}
+
+.founder-heading span {
+  opacity: 0;
+  transform: translateY(1.1rem);
+  transition:
+    opacity 620ms var(--easing-decelerate),
+    transform 720ms var(--easing-decelerate);
 }
 
 .founder-heading span:last-child {
   color: color-mix(in oklab, var(--primary) 72%, white);
 }
 
+.about-founder-portrait {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--primary) 28%, white 8%);
+  border-radius: 0.45rem 0.45rem 1.35rem 0.45rem;
+  background: var(--core-dark-elevated);
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
+    0 1.2rem 2.8rem oklch(0 0 0 / 28%),
+    0 0 1.8rem color-mix(in oklab, var(--primary) 7%, transparent);
+}
+
+.about-founder-portrait picture,
+.about-founder-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.about-founder-portrait img {
+  object-fit: cover;
+  object-position: center 28%;
+  filter: saturate(0.94) contrast(1.025) brightness(0.9);
+}
+
+.about-founder-portrait > span {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      120deg,
+      color-mix(in oklab, white 8%, transparent),
+      transparent 34%
+    ),
+    linear-gradient(0deg, oklch(0.06 0.012 250 / 48%), transparent 42%);
+  box-shadow: inset 1px 0 0 color-mix(in oklab, var(--primary) 24%, transparent);
+}
+
 .founder-identity {
   display: grid;
   gap: 0.25rem;
-  margin-top: 2rem;
+  margin-top: 0;
   padding-left: 1rem;
   border-left: 1px solid color-mix(in oklab, var(--primary) 52%, transparent);
 }
@@ -5767,7 +6574,20 @@ a {
       calc(var(--founder-py) * 3px),
       0
     )
-    scale(1);
+    rotateX(calc(var(--founder-py) * -2.2deg))
+    rotateY(calc(var(--founder-px) * 2.5deg)) scale(1);
+}
+
+.founder-section.is-visible .founder-environment {
+  opacity: 0.78;
+}
+
+.founder-section.is-visible .founder-portrait {
+  opacity: 1;
+}
+
+.founder-section.is-visible .founder-frame-reflection {
+  opacity: 1;
 }
 
 .founder-section.is-visible .founder-trace i:nth-child(1),
@@ -5799,7 +6619,6 @@ a {
 }
 
 .founder-section.is-visible .founder-label,
-.founder-section.is-visible .founder-heading,
 .founder-section.is-visible .founder-identity,
 .founder-section.is-visible .founder-copy > p:not(.founder-label),
 .founder-section.is-visible .founder-cta {
@@ -5811,24 +6630,26 @@ a {
   transition-delay: 360ms;
 }
 
-.founder-section.is-visible .founder-heading {
-  transition-delay: 430ms;
+.founder-section.is-visible .founder-identity {
+  transition-delay: 500ms;
+}
+
+.founder-section.is-visible .founder-heading span {
+  opacity: 1;
+  transform: none;
+  transition-delay: 570ms;
 }
 
 .founder-section.is-visible .founder-heading span:last-child {
-  transition-delay: 520ms;
-}
-
-.founder-section.is-visible .founder-identity {
-  transition-delay: 560ms;
+  transition-delay: 650ms;
 }
 
 .founder-section.is-visible .founder-copy > p:not(.founder-label) {
-  transition-delay: 620ms;
+  transition-delay: 740ms;
 }
 
 .founder-section.is-visible .founder-cta {
-  transition-delay: 690ms;
+  transition-delay: 830ms;
 }
 
 @keyframes founder-glass-sweep {
@@ -5845,11 +6666,12 @@ a {
     content: "";
     position: absolute;
     inset: 0;
-    z-index: -1;
+    z-index: 1;
     pointer-events: none;
     background: radial-gradient(
       10rem circle at var(--lit-x, 50%) var(--lit-y, 50%),
-      color-mix(in oklab, var(--primary) 16%, transparent),
+      color-mix(in oklab, var(--primary) 18%, transparent) 0,
+      color-mix(in oklab, var(--primary) 7%, transparent) 38%,
       transparent 68%
     );
     opacity: 0;
@@ -5879,7 +6701,15 @@ a {
 @media (max-width: 900px) {
   .founder-layout {
     grid-template-columns: 1fr;
-    gap: 3.25rem;
+    grid-template-areas:
+      "label"
+      "visual"
+      "copy";
+    gap: 0;
+  }
+
+  .founder-label {
+    margin-bottom: 1.5rem;
   }
 
   .founder-visual {
@@ -5890,6 +6720,11 @@ a {
 
   .founder-copy {
     max-width: 39rem;
+    margin-top: 2.75rem;
+  }
+
+  .founder-card {
+    grid-template-columns: minmax(7.5rem, 10rem) 1fr !important;
   }
 }
 
@@ -5900,6 +6735,7 @@ a {
     min-height: 3.1rem;
     margin-top: 1rem;
     padding: 0.34rem 0.58rem 0.34rem 0.35rem;
+    transform: none;
   }
 
   .founder-signal-portrait {
@@ -5921,11 +6757,15 @@ a {
   }
 
   .founder-layout {
-    gap: 2.6rem;
+    grid-template-areas:
+      "label"
+      "visual"
+      "copy";
   }
 
   .founder-visual {
-    min-height: clamp(25rem, 122vw, 33rem);
+    width: 100%;
+    min-height: clamp(22rem, 105vw, 30rem);
   }
 
   .founder-portrait-shell {
@@ -5934,7 +6774,7 @@ a {
   }
 
   .founder-portrait img {
-    object-position: center 31%;
+    object-position: center 27%;
   }
 
   .founder-glass {
@@ -5955,11 +6795,29 @@ a {
 
   .founder-heading {
     max-width: 11ch;
+    margin-top: 1.65rem;
     font-size: clamp(2.45rem, 12.5vw, 3.6rem);
+  }
+
+  .founder-identity {
+    padding-left: 0.85rem;
   }
 
   .founder-copy > p:not(.founder-label) {
     font-size: 0.98rem;
+  }
+
+  .founder-card {
+    grid-template-columns: 1fr !important;
+    padding: 1.25rem !important;
+  }
+
+  .about-founder-portrait {
+    width: min(72vw, 15rem);
+  }
+
+  .about-founder-portrait img {
+    object-position: center 25%;
   }
 }
 
@@ -5969,7 +6827,7 @@ a {
   }
 
   .founder-visual {
-    min-height: 24rem;
+    min-height: 21rem;
   }
 
   .founder-registration {
@@ -5984,18 +6842,29 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .founder-signal,
+  .founder-signal-portrait,
+  .founder-signal-copy,
+  .founder-signal-arrow,
   .founder-environment,
   .founder-portrait-shell,
+  .founder-portrait,
+  .founder-frame-reflection,
   .founder-glass,
   .founder-registration,
   .founder-label,
-  .founder-heading,
+  .founder-heading span,
   .founder-identity,
   .founder-copy > p:not(.founder-label),
   .founder-cta {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+  }
+
+  .founder-signal::after,
+  .founder-frame-reflection {
+    display: none;
   }
 
   .founder-trace i:nth-child(1),
@@ -6094,6 +6963,19 @@ a {
 /* Tactile press feedback on touch: panels and menu rows compress slightly on
    press, giving the thumb the same acknowledgement the pointer gets. */
 @media (pointer: coarse) {
+  .founder-signal:active {
+    border-color: color-mix(in oklab, var(--primary) 58%, transparent);
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
+      0 0 1.2rem color-mix(in oklab, var(--primary) 12%, transparent),
+      0 0.55rem 1.4rem oklch(0 0 0 / 22%);
+    transform: scale(0.99);
+  }
+
+  .founder-signal:active .founder-signal-portrait {
+    transform: scale(1.035);
+  }
+
   .assembly-panel:active,
   .concept-card:active,
   .mobile-nav > a:active {
@@ -6103,6 +6985,12 @@ a {
   .assembly-panel:active {
     border-color: color-mix(in oklab, var(--primary) 55%, transparent);
   }
+}
+
+.founder-signal:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 4px;
+  border-color: color-mix(in oklab, var(--primary) 58%, transparent);
 }
 
 /* Final CTA/footer finishing: a faint environment-lit hairline on the footer's
@@ -6139,4 +7027,384 @@ a {
     opacity: 1;
     transform: none;
   }
+}
+
+/* ================================================================
+   MOBILE MENU — PREMIUM INTERACTION LAYER
+   ================================================================ */
+
+/* Closing animation: smooth opacity fade + upward shift + blur reduction. */
+@keyframes mobile-menu-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+    backdrop-filter: blur(22px) saturate(1.2);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.75rem) scaleY(0.97);
+    backdrop-filter: blur(4px) saturate(1);
+  }
+}
+
+.mobile-nav-closing {
+  animation: mobile-menu-out 280ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Scrim fade for closing. */
+@keyframes mobile-scrim-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.mobile-nav-scrim-closing {
+  animation: mobile-scrim-out 260ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* Menu row interaction: subtle press scale + cyan edge + luminance. */
+.mobile-nav > a,
+.mobile-nav > .mobile-nav-cta {
+  transition:
+    transform 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+/* Touch press response for menu rows. */
+@media (pointer: coarse) {
+  .mobile-nav > a:active {
+    transform: scale(0.988);
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+    border-color: color-mix(in oklab, var(--primary) 30%, transparent);
+    box-shadow: inset 0 0 12px color-mix(in oklab, var(--primary) 12%, transparent);
+  }
+
+  .mobile-nav-cta:active {
+    transform: scale(0.985);
+    box-shadow:
+      inset 0 1px 2px color-mix(in oklab, var(--ink) 25%, transparent),
+      0 0 18px color-mix(in oklab, var(--primary) 35%, transparent);
+  }
+}
+
+/* Desktop hover state for menu rows. */
+@media (hover: hover) and (pointer: fine) {
+  .mobile-nav > a:hover {
+    background: color-mix(in oklab, var(--primary) 5%, transparent);
+    border-color: color-mix(in oklab, var(--primary) 20%, transparent);
+    box-shadow: inset 0 0 16px color-mix(in oklab, var(--primary) 8%, transparent);
+  }
+
+  .mobile-nav > a:hover > span:last-child {
+    transform: translateX(2px);
+  }
+}
+
+/* Arrow micro-motion on press/hover. */
+.mobile-nav > a > span:last-child {
+  transition: transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-nav > a:active > span:last-child {
+  transform: translateX(3px) !important;
+}
+
+/* Active navigation indicator: thin cyan luminous line + subtle glow. */
+.mobile-nav-active {
+  position: relative;
+  color: var(--primary) !important;
+  text-shadow: 0 0 12px color-mix(in oklab, var(--primary) 40%, transparent);
+}
+
+.mobile-nav-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 15%;
+  bottom: 15%;
+  width: 2px;
+  background: var(--primary);
+  border-radius: 1px;
+  box-shadow: 0 0 8px color-mix(in oklab, var(--primary) 60%, transparent);
+}
+
+/* CTA button premium touch states. */
+.mobile-nav-cta {
+  position: relative;
+  overflow: hidden;
+}
+
+.mobile-nav-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--primary) 14%, transparent),
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.mobile-nav-cta:active::before {
+  opacity: 1;
+}
+
+.mobile-nav-cta:active {
+  transform: scale(0.985) !important;
+  box-shadow:
+    inset 0 1px 2px color-mix(in oklab, var(--ink) 30%, transparent),
+    0 0 24px color-mix(in oklab, var(--primary) 40%, transparent);
+}
+
+/* ================================================================
+   ASSEMBLY — INTERACTIVE NAVIGATION
+   ================================================================ */
+
+/* Stage button: invisible wrapper making each stage keyboard/touch accessible. */
+.asm-stage-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+  position: relative;
+}
+
+/* Visible focus ring for keyboard navigation. */
+.asm-stage-btn:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+/* Hover state (desktop only). */
+@media (hover: hover) and (pointer: fine) {
+  .asm-stage-active {
+    transform: translate3d(3px, -1px, 14px) !important;
+    opacity: 1 !important;
+    border-color: color-mix(in oklab, var(--primary) 42%, transparent) !important;
+    box-shadow:
+      inset 0 1px 0 color-mix(in oklab, white 10%, transparent),
+      0 12px 32px color-mix(in oklab, var(--ink) 40%, transparent),
+      0 0 28px color-mix(in oklab, var(--env-current-glow) 18%, transparent) !important;
+  }
+
+  .asm-stage-active .asm-stage-node svg {
+    transform: scale(1.1) rotate(-3deg);
+    filter: drop-shadow(0 0 10px color-mix(in oklab, var(--primary) 60%, transparent));
+  }
+
+  .asm-stage-active .asm-stage-hint {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .asm-stage-active .asm-stage-arrow {
+    opacity: 1;
+    transform: translateX(2px);
+  }
+}
+
+/* Press state (all devices). */
+.asm-stage-pressed {
+  transform: scale(0.988) !important;
+  border-color: color-mix(in oklab, var(--primary) 55%, transparent) !important;
+  box-shadow:
+    inset 0 1px 2px color-mix(in oklab, var(--ink) 20%, transparent),
+    0 0 18px color-mix(in oklab, var(--primary) 25%, transparent) !important;
+}
+
+/* Touch press on coarse devices. */
+@media (pointer: coarse) {
+  .asm-stage-pressed {
+    transform: scale(0.988) !important;
+    transition: transform 140ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+/* Selected state: brief transition glow before navigation fires. */
+.asm-stage-selected {
+  border-color: color-mix(in oklab, var(--primary) 65%, transparent) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in oklab, white 12%, transparent),
+    0 0 30px color-mix(in oklab, var(--primary) 35%, transparent) !important;
+}
+
+.asm-stage-selected .asm-stage-node svg {
+  transform: scale(1.12);
+  filter: drop-shadow(0 0 12px color-mix(in oklab, var(--primary) 70%, transparent));
+}
+
+/* Dimmed state: other stages recede during selection. */
+.asm-stage-dimmed {
+  opacity: 0.45 !important;
+  filter: grayscale(0.2);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Contextual hint text (desktop hover/focus). */
+.asm-stage-hint {
+  display: none;
+  font: 400 0.6rem var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: none;
+  color: var(--ink-muted);
+  opacity: 0;
+  transform: translateY(3px);
+  transition:
+    opacity 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .asm-stage-hint {
+    display: block;
+  }
+}
+
+/* Arrow indicator. */
+.asm-stage-arrow {
+  flex-shrink: 0;
+  opacity: 0;
+  margin-left: auto;
+  color: var(--primary);
+  transition:
+    opacity 200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Core pulse when a stage is selected. */
+@keyframes asm-core-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.asm-core-pulse {
+  animation: asm-core-pulse 360ms cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+/* ================================================================
+   ASSEMBLY MOBILE RESPONSIVE
+   ================================================================ */
+@media (max-width: 639px) {
+  .asm-stage-btn {
+    gap: 0.6rem;
+    padding: 0.1rem 0;
+  }
+
+  .asm-stage-hint {
+    display: none !important;
+  }
+
+  .asm-stage-arrow {
+    display: none;
+  }
+
+  .asm-stage {
+    min-height: 3rem;
+    display: flex;
+    align-items: center;
+  }
+}
+
+/* Tablet: intermediate sizing. */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .asm-stage-hint {
+    display: block;
+  }
+}
+
+/* ================================================================
+   ASSEMBLY — CONNECTOR ENERGY RESPONSE
+   ================================================================ */
+
+/* When a stage is active, the flow glow on that stage brightens. */
+.asm-stage-active .asm-stage-flow {
+  opacity: calc(0.35 + var(--stage-weight) * 0.55) !important;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--primary) 28%, transparent),
+    transparent
+  );
+}
+
+/* ================================================================
+   SCROLL-MARGIN-TOP FOR ALL SECTIONS
+   ================================================================ */
+section[id] {
+  scroll-margin-top: 5rem;
+}
+
+/* ================================================================
+   REDUCED MOTION — OVERRIDE NEW ANIMATIONS
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+  .mobile-nav {
+    animation: none !important;
+  }
+
+  .mobile-nav-closing {
+    animation: none !important;
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+
+  .mobile-nav-scrim-closing {
+    animation: none !important;
+    opacity: 0;
+    transition: opacity 180ms ease;
+  }
+
+  .asm-core-pulse {
+    animation: none !important;
+    transform: scale(1);
+  }
+
+  .asm-stage-active {
+    transform: none !important;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .asm-stage-pressed {
+    transform: scale(0.99) !important;
+  }
+
+  .asm-stage-hint {
+    transition: opacity 180ms ease;
+    transform: none;
+  }
+}
+
+/* ================================================================
+   FOCUS-VISIBLE FOR ACCESSIBILITY
+   ================================================================ */
+.mobile-nav > a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: -2px;
+}
+
+.mobile-nav-cta:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
 }

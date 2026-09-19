@@ -1,6 +1,6 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useMatches } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { useElementEnvironment } from "@/lib/scroll-environment";
 import { initPointerLight, useMagnetic } from "@/lib/pointer-light";
@@ -25,6 +25,9 @@ const assemblyStages = [
   "Operate",
   "Grow",
 ] as const;
+
+/** Auto-close inactivity timeout for the mobile menu (ms). */
+const MOBILE_AUTO_CLOSE_MS = 6000;
 
 /**
  * Official GSTPIXEL graphical brand lockup.
@@ -114,12 +117,56 @@ function AssemblyRail() {
 
 export function SiteShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const headerEnv = useElementEnvironment(headerRef);
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
+  const menuNavRef = useRef<HTMLElement>(null);
+  const autoCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reduced = useReducedMotion();
   const headerCta = useMagnetic<HTMLSpanElement>();
+  const matches = useMatches();
+
+  /** Extract the current pathname for active-route detection. */
+  const currentPath = (() => {
+    try {
+      const loc = window.location.pathname;
+      return loc.endsWith("/") && loc.length > 1 ? loc.slice(0, -1) : loc;
+    } catch {
+      return "";
+    }
+  })();
+
+  /** Close with smooth exit animation, then unmount. */
+  const requestClose = useCallback(() => {
+    if (!open || closing) return;
+    setClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+      menuTriggerRef.current?.focus();
+    }, reduced ? 0 : 280);
+  }, [open, closing, reduced]);
+
+  /** Reset the auto-close inactivity timer. */
+  const resetAutoClose = useCallback(() => {
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    if (!open || closing) return;
+    autoCloseTimer.current = setTimeout(() => {
+      requestClose();
+    }, MOBILE_AUTO_CLOSE_MS);
+  }, [open, closing, requestClose]);
+
+  /** Handle menu item selection: close immediately and navigate. */
+  const handleNavClick = useCallback(() => {
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    setClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+    }, 0);
+  }, []);
 
   /* Cursor-lit glass: one delegated listener for the whole site, parked when
      the pointer rests, and never attached for coarse pointers or reduced
@@ -136,17 +183,42 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  /* Escape key and outside-tap to close. */
   useEffect(() => {
     if (!open) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setOpen(false);
-        menuTriggerRef.current?.focus();
+        requestClose();
+      }
+    };
+    const handleOutside = (e: PointerEvent) => {
+      if (!menuNavRef.current || !menuTriggerRef.current) return;
+      const navEl = menuNavRef.current;
+      const triggerEl = menuTriggerRef.current;
+      const target = e.target as Node;
+      if (!navEl.contains(target) && !triggerEl.contains(target)) {
+        requestClose();
       }
     };
     document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [open]);
+    document.addEventListener("pointerdown", handleOutside);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("pointerdown", handleOutside);
+    };
+  }, [open, requestClose]);
+
+  /* Auto-close inactivity timer: starts on open, resets on any interaction. */
+  useEffect(() => {
+    if (!open) {
+      if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+      return;
+    }
+    resetAutoClose();
+    return () => {
+      if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    };
+  }, [open, resetAutoClose]);
 
   /* Hold the page still behind the open menu, and restore the previous value
      rather than assuming it was scrollable. */
@@ -163,6 +235,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
     const handleResize = () => {
       if (window.innerWidth >= 1024 && open) {
         setOpen(false);
+        setClosing(false);
       }
     };
     window.addEventListener("resize", handleResize);
@@ -181,10 +254,12 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         ref={headerRef}
         className={`site-header${scrolled ? " site-header-scrolled" : ""} ${isDarkPhase ? " site-header-dark" : ""}`}
         style={{
-          background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-current-glass-tint)"} 82%, transparent)`,
-          backdropFilter: "blur(20px) saturate(1.25)",
-          borderBottom: `1px solid color-mix(in oklab, var(--color-brand-primary) 18%, transparent)`,
-          boxShadow: scrolled ? "var(--depth-shadow-md)" : "none",
+          background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-current-glass-tint)"} ${scrolled ? "90%" : "68%"}, transparent)`,
+          backdropFilter: `blur(${scrolled ? "22px" : "16px"}) saturate(${scrolled ? "1.3" : "1.12"})`,
+          borderBottom: `1px solid color-mix(in oklab, var(--color-brand-primary) ${scrolled ? "24%" : "12%"}, transparent)`,
+          boxShadow: scrolled
+            ? "var(--depth-shadow-md), 0 1px 28px color-mix(in oklab, var(--env-current-glow) 12%, transparent)"
+            : "none",
         }}
       >
         <div className="site-container flex h-16 items-center justify-between">
@@ -257,35 +332,61 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <>
             <button
               type="button"
-              className="mobile-nav-scrim"
+              className={`mobile-nav-scrim${closing ? " mobile-nav-scrim-closing" : ""}`}
               aria-label="Close menu"
               tabIndex={-1}
-              onClick={() => setOpen(false)}
+              onClick={requestClose}
             />
             <nav
+              ref={menuNavRef}
               id="mobile-nav"
               aria-label="Mobile"
-              className="mobile-nav"
+              className={`mobile-nav${closing ? " mobile-nav-closing" : ""}`}
               data-open
               style={{
                 background: `color-mix(in oklab, ${headerEnv?.glassTint ?? "var(--env-current-glass-tint)"} 92%, transparent)`,
                 backdropFilter: "blur(22px) saturate(1.2)",
                 borderTop: `1px solid color-mix(in oklab, var(--color-brand-primary) 20%, transparent)`,
               }}
+              onPointerMove={resetAutoClose}
+              onPointerEnter={resetAutoClose}
+              onPointerDown={resetAutoClose}
+              onFocus={resetAutoClose}
+              onScroll={resetAutoClose}
             >
-              {nav.map(([label, to]) => (
-                <Link key={to} to={to} onClick={() => setOpen(false)}>
-                  {label}
-                  <span aria-hidden="true">↗</span>
-                </Link>
-              ))}
-              <Link to="/contact" onClick={() => setOpen(false)}>
+              {nav.map(([label, to]) => {
+                const isActive =
+                  currentPath === to || currentPath.startsWith(to + "/");
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    onClick={handleNavClick}
+                    onPointerDown={resetAutoClose}
+                    className={isActive ? "mobile-nav-active" : undefined}
+                    aria-current={isActive ? "page" : undefined}
+                  >
+                    {label}
+                    <span aria-hidden="true">↗</span>
+                  </Link>
+                );
+              })}
+              <Link
+                to="/contact"
+                onClick={handleNavClick}
+                onPointerDown={resetAutoClose}
+                className={
+                  currentPath === "/contact" ? "mobile-nav-active" : undefined
+                }
+                aria-current={currentPath === "/contact" ? "page" : undefined}
+              >
                 Contact<span aria-hidden="true">↗</span>
               </Link>
               <ButtonLink
                 to="/start-your-project"
-                onClick={() => setOpen(false)}
-                className="tactile mt-4 w-full luminous-edge"
+                onClick={handleNavClick}
+                onPointerDown={resetAutoClose}
+                className="tactile mt-4 w-full luminous-edge mobile-nav-cta"
                 style={{ borderRadius: "0.5rem" }}
               >
                 Start your project

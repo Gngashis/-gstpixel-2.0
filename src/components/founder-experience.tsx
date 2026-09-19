@@ -6,9 +6,9 @@ import { ButtonLink } from "@/components/ui/button";
 import { businessFacts } from "@/lib/content";
 import { useIntersection, useReducedMotion } from "@/lib/motion";
 
-const founderAlt = "Ashis Gurung, founder of GSTPIXEL in Jaigaon";
+export const founderAlt = "Ashis Gurung, founder of GSTPIXEL in Jaigaon";
 
-function FounderPicture({ chip = false }: { chip?: boolean }) {
+export function FounderPicture({ chip = false }: { chip?: boolean }) {
   if (chip) {
     return (
       <picture>
@@ -47,11 +47,26 @@ function FounderPicture({ chip = false }: { chip?: boolean }) {
 }
 
 export function FounderHeroSignal() {
+  const handleFounderJump = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    const founder = document.getElementById("founder");
+    if (!founder) return;
+
+    event.preventDefault();
+    window.history.pushState(null, "", "#founder");
+    founder.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "start",
+    });
+  };
+
   return (
     <a
       className="founder-signal"
       href="#founder"
       aria-label="Meet Ashis Gurung, founder of GSTPIXEL"
+      onClick={handleFounderJump}
     >
       <span className="founder-signal-portrait" aria-hidden="true">
         <FounderPicture chip />
@@ -130,9 +145,11 @@ export function FounderSection() {
       className={`founder-section content-band env-section${visible || reduced ? " is-visible" : ""}`}
       data-env-phase="5"
       aria-labelledby="founder-heading"
+      tabIndex={-1}
     >
       <div className="founder-environment" aria-hidden="true" />
       <div className="site-container founder-layout">
+        <p className="label text-primary founder-label">FOUNDER / 01</p>
         <div className="founder-visual">
           <div className="founder-trace" aria-hidden="true">
             <i />
@@ -140,14 +157,24 @@ export function FounderSection() {
             <i />
           </div>
           <div className="founder-portrait-shell">
+            <div className="founder-frame-edge" aria-hidden="true" />
             <div className="founder-portrait">
               <FounderPicture />
             </div>
             <div className="founder-vignette" aria-hidden="true" />
+            <div className="founder-frame-reflection" aria-hidden="true" />
+            <span
+              className="founder-frame-corner founder-frame-corner-top"
+              aria-hidden="true"
+            />
+            <span
+              className="founder-frame-corner founder-frame-corner-bottom"
+              aria-hidden="true"
+            />
           </div>
           <div className="founder-glass" aria-hidden="true">
             <span>HUMAN DIRECTION</span>
-            <span>AI-ASSISTED DELIVERY</span>
+            <span>ENGINEERED DELIVERY</span>
           </div>
           <div
             className="founder-registration founder-registration-top"
@@ -166,20 +193,20 @@ export function FounderSection() {
         </div>
 
         <div className="founder-copy">
-          <p className="label text-primary founder-label">FOUNDER / 01</p>
-          <h2 id="founder-heading" className="founder-heading">
-            <span>Built with technology.</span>
-            <span>Directed by a person.</span>
-          </h2>
           <div className="founder-identity">
             <strong>{businessFacts.founder}</strong>
             <span>{businessFacts.founderTitleExtended}</span>
           </div>
+          <h2 id="founder-heading" className="founder-heading">
+            <span>Built with engineering.</span>
+            <span>Directed with purpose.</span>
+          </h2>
           <p>
             A real person in Jaigaon directs GSTPIXEL’s digital development,
-            automation, and business technology work. AI assists the delivery;
-            human judgment sets the direction for businesses locally, across
-            India, and through the India–Bhutan gateway.
+            automation, and business technology work. Every project is shaped
+            through human judgment, practical business understanding, technical
+            implementation, and direct accountability—for businesses locally,
+            across India, and through the India–Bhutan gateway.
           </p>
           <ButtonLink to="/start-your-project" className="founder-cta">
             Start a conversation <ArrowRight size={16} aria-hidden="true" />

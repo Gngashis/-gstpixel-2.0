@@ -33,7 +33,7 @@ export function ScrollReveal({
   children: React.ReactNode;
   className?: string;
   delay?: number;
-  variant?: "fadeInUp" | "fadeIn" | "scaleIn";
+  variant?: "fadeInUp" | "fadeIn" | "scaleIn" | "maskIn";
   style?: React.CSSProperties;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -51,6 +51,10 @@ export function ScrollReveal({
       opacity: 1,
       transform: "scale(1)",
     },
+    maskIn: {
+      opacity: 1,
+      transform: "translateY(0)",
+    },
   };
 
   const initialVariants = {
@@ -62,6 +66,10 @@ export function ScrollReveal({
     scaleIn: {
       opacity: 0,
       transform: "scale(0.96)",
+    },
+    maskIn: {
+      opacity: 0,
+      transform: "translateY(105%)",
     },
   };
 
@@ -86,14 +94,21 @@ export function ScrollReveal({
 
   if (reduced) {
     return (
-      <div ref={ref} className={className}>
+      <div
+        ref={ref}
+        className={`${className}${variant === "maskIn" ? " reveal-mask" : ""}`}
+      >
         {children}
       </div>
     );
   }
 
   return (
-    <div ref={ref} className={className} style={style}>
+    <div
+      ref={ref}
+      className={`${className}${variant === "maskIn" ? " reveal-mask" : ""}`}
+      style={style}
+    >
       {children}
     </div>
   );
@@ -108,7 +123,7 @@ export function StaggeredReveal({
   children: React.ReactNode;
   className?: string;
   baseDelay?: number;
-  variant?: "fadeInUp" | "fadeIn" | "scaleIn";
+  variant?: "fadeInUp" | "fadeIn" | "scaleIn" | "maskIn";
 }) {
   const reduced = useReducedMotion();
 
@@ -231,7 +246,7 @@ export function SectionHeader({
       <ScrollReveal variant="fadeInUp" delay={0}>
         <p className="label text-primary">{label}</p>
       </ScrollReveal>
-      <ScrollReveal variant="fadeInUp" delay={0.1}>
+      <ScrollReveal variant="maskIn" delay={0.1}>
         <h2 className="section-title">{title}</h2>
       </ScrollReveal>
     </div>
