@@ -125,7 +125,8 @@ describe("Cloudflare Workers AI personalization adapter", () => {
     const [model, request] = run.mock.calls[0]!;
     expect(model).toBe(STUDIO_PERSONALIZATION_MODEL);
     expect(request).toMatchObject({
-      max_completion_tokens: 320,
+      max_completion_tokens: 1024,
+      chat_template_kwargs: { enable_thinking: false },
       stream: false,
     });
 

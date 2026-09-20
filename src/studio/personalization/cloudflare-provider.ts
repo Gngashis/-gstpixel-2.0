@@ -71,7 +71,45 @@ function extractJsonObject(response: unknown): unknown {
         const message = (first as { message?: unknown }).message;
         if (message && typeof message === "object" && "content" in message) {
           const content = (message as { content?: unknown }).content;
-          if (typeof content === "string") return JSON.parse(content.trim());
+          if (typeof content === "string") {
+            // Handle markdown code fences
+            const trimmed = content.trim();
+            if (trimmed.startsWith("```")) {
+              const fenceEnd = trimmed.indexOf("\n");
+              const fenceStart = trimmed.indexOf("```", fenceEnd + 1);
+              if (fenceEnd !== -1 && fenceStart !== -1) {
+                const inner = trimmed.slice(fenceEnd + 1, fenceStart).trim();
+                return JSON.parse(inner);
+              }
+            }
+            return JSON.parse(trimmed);
+          }
+          // GLM-4.7-flash may return reasoning content when content is not a string
+          const reasoning = (message as { reasoning_content?: unknown })
+            .reasoning_content;
+          if (typeof reasoning === "string") {
+            try {
+              return JSON.parse(reasoning.trim());
+            } catch {
+              // fall through to error
+            }
+          }
+          const reasoningObj = (message as { reasoning?: unknown }).reasoning;
+          if (
+            reasoningObj &&
+            typeof reasoningObj === "object" &&
+            "content" in reasoningObj
+          ) {
+            const reasoningContent = (reasoningObj as { content?: unknown })
+              .content;
+            if (typeof reasoningContent === "string") {
+              try {
+                return JSON.parse(reasoningContent.trim());
+              } catch {
+                // fall through to error
+              }
+            }
+          }
         }
       }
     }
@@ -90,7 +128,8 @@ export function createCloudflareWorkersAiProvider(
           { role: "system", content: SYSTEM_INSTRUCTION },
           { role: "user", content: buildUserInstruction(input) },
         ],
-        max_completion_tokens: 320,
+        max_completion_tokens: 1024,
+        chat_template_kwargs: { enable_thinking: false },
         temperature: 0.35,
         top_p: 0.8,
         stream: false,
