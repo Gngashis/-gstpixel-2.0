@@ -22,6 +22,21 @@ async function chooseHotelCinematic(page: Parameters<typeof safeGoto>[0]) {
   await expect(page.getByTestId("studio-preview")).toBeVisible();
 }
 
+async function chooseBusinessDirection(
+  page: Parameters<typeof safeGoto>[0],
+  business: "Hotel / Resort" | "Tours & Travel" | "Restaurant / Café",
+  direction: "Cinematic" | "Refined" | "Bold",
+) {
+  await page.getByRole("button", { name: new RegExp(business) }).click();
+  await expect(
+    page.getByRole("heading", { name: "Choose how it should feel." }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: new RegExp(`${direction}`, "i") })
+    .click();
+  await expect(page.getByTestId("studio-preview")).toBeVisible();
+}
+
 test.describe("Website Studio deterministic core", () => {
   test("progressively reveals every supported business category", async ({
     page,
@@ -102,6 +117,92 @@ test.describe("Website Studio deterministic core", () => {
     expect(errors).toHaveLength(0);
   });
 
+  for (const direction of ["Cinematic", "Refined", "Bold"] as const) {
+    test(`renders the Hotel / Resort flagship in the ${direction} direction`, async ({
+      page,
+    }) => {
+      await reduceMotion(page);
+      await safeGoto(page, studioRoute);
+      await waitForHydration(page);
+      await chooseBusinessDirection(page, "Hotel / Resort", direction);
+
+      await expect(page.getByTestId("studio-preview")).toHaveAttribute(
+        "data-business",
+        "hotel",
+      );
+      await expect(page.getByTestId("studio-hotel-flagship")).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Two quiet ways to arrive." }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Valley Suite", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Forest House", { exact: true }),
+      ).toBeVisible();
+      await expect(page.getByTestId("studio-tours-flagship")).toHaveCount(0);
+    });
+
+    test(`renders the Tours & Travel flagship in the ${direction} direction`, async ({
+      page,
+    }) => {
+      await reduceMotion(page);
+      await safeGoto(page, studioRoute);
+      await waitForHydration(page);
+      await chooseBusinessDirection(page, "Tours & Travel", direction);
+
+      await expect(page.getByTestId("studio-preview")).toHaveAttribute(
+        "data-business",
+        "tours",
+      );
+      await expect(page.getByTestId("studio-tours-flagship")).toBeVisible();
+      await expect(
+        page.getByRole("heading", {
+          name: "Valleys, dzongs and high passes.",
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", {
+          name: "The journey, understood at a glance.",
+        }),
+      ).toBeVisible();
+      await expect(page.getByText("8 days", { exact: true })).toBeVisible();
+      await expect(page.getByTestId("studio-hotel-flagship")).toHaveCount(0);
+    });
+  }
+
+  test("keeps non-flagship business previews on the Phase 1 generic system", async ({
+    page,
+  }) => {
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseBusinessDirection(page, "Restaurant / Café", "Cinematic");
+
+    await expect(page.getByTestId("studio-preview")).toHaveAttribute(
+      "data-business",
+      "restaurant",
+    );
+    await expect(page.locator(".studio-preview-art")).toBeVisible();
+    await expect(page.getByTestId("studio-hotel-flagship")).toHaveCount(0);
+    await expect(page.getByTestId("studio-tours-flagship")).toHaveCount(0);
+  });
+
+  test("keeps both flagship experiences within a 360px mobile viewport", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseBusinessDirection(page, "Hotel / Resort", "Cinematic");
+    expect((await checkOverflow(page)).docOverflow).toBeLessThanOrEqual(2);
+
+    await page.getByRole("button", { name: /Start again/i }).click();
+    await chooseBusinessDirection(page, "Tours & Travel", "Cinematic");
+    expect((await checkOverflow(page)).docOverflow).toBeLessThanOrEqual(2);
+  });
+
   test("uses canonical WhatsApp contact with a generic message only", async ({
     page,
   }) => {
@@ -169,9 +270,8 @@ test.describe("Website Studio deterministic core", () => {
     const animationNames = await page.evaluate(() => ({
       ambient: getComputedStyle(document.querySelector(".studio-ambient span")!)
         .animationName,
-      preview: getComputedStyle(
-        document.querySelector(".studio-art-orbit-one")!,
-      ).animationName,
+      preview: getComputedStyle(document.querySelector(".studio-hotel-sun")!)
+        .animationName,
     }));
     expect(animationNames).toEqual({ ambient: "none", preview: "none" });
     await expect(page.getByText("Build this for my business.")).toBeVisible();

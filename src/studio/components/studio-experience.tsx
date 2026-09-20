@@ -27,6 +27,7 @@ import type {
   StudioDirection,
   StudioVisualProfile,
 } from "../types";
+import { FlagshipPreview } from "./flagship-previews";
 import "../styles.css";
 
 function StudioProgress({
@@ -172,6 +173,7 @@ function ExperiencePreview({
   direction: StudioDirection;
 }) {
   const profile = studioVisualProfiles[direction.id];
+  const isFlagship = business.id === "hotel" || business.id === "tours";
   return (
     <div
       className={`studio-preview is-${profile.composition} is-${profile.surface} type-${profile.typeScale} motion-${profile.motion}`}
@@ -191,23 +193,29 @@ function ExperiencePreview({
         <span />
         <i>yourbusiness.com</i>
       </div>
-      <div className="studio-preview-nav">
-        <strong>{business.sampleName}</strong>
-        <span>Explore</span>
-        <i aria-hidden="true" />
-      </div>
-      <div className="studio-preview-stage">
-        <div className="studio-preview-message">
-          <p>{business.sampleEyebrow}</p>
-          <h2>{business.sampleHeadline}</h2>
-          <span>{business.sampleCopy}</span>
-          <div className="studio-preview-actions" aria-hidden="true">
-            <b>{business.primaryAction}</b>
-            <em>{business.secondaryAction}</em>
+      {isFlagship ? (
+        <FlagshipPreview business={business} direction={direction} />
+      ) : (
+        <>
+          <div className="studio-preview-nav">
+            <strong>{business.sampleName}</strong>
+            <span>Explore</span>
+            <i aria-hidden="true" />
           </div>
-        </div>
-        <PreviewArtwork business={business} profile={profile} />
-      </div>
+          <div className="studio-preview-stage">
+            <div className="studio-preview-message">
+              <p>{business.sampleEyebrow}</p>
+              <h2>{business.sampleHeadline}</h2>
+              <span>{business.sampleCopy}</span>
+              <div className="studio-preview-actions" aria-hidden="true">
+                <b>{business.primaryAction}</b>
+                <em>{business.secondaryAction}</em>
+              </div>
+            </div>
+            <PreviewArtwork business={business} profile={profile} />
+          </div>
+        </>
+      )}
       <div className="studio-preview-footer" aria-hidden="true">
         <span>{direction.name} direction</span>
         <i />

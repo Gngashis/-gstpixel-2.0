@@ -829,6 +829,840 @@
   background: var(--studio-line);
 }
 
+.studio-flagship {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  overflow: hidden;
+}
+
+.studio-flagship-nav {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4rem;
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-flagship-nav > strong {
+  overflow: hidden;
+  font: 750 0.68rem/1 var(--font-display);
+  letter-spacing: 0.12em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.studio-flagship-nav-links {
+  display: none;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.56rem;
+  opacity: 0.68;
+}
+
+.studio-flagship-action {
+  display: inline-flex;
+  min-height: 2.2rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.7rem;
+  color: var(--core-dark);
+  font-size: 0.58rem;
+  font-weight: 750;
+  background: var(--studio-business-accent);
+}
+
+.studio-flagship-hero {
+  position: relative;
+  display: grid;
+  gap: 1.5rem;
+  min-height: 34rem;
+  align-items: center;
+  padding: clamp(1.4rem, 5vw, 3.5rem);
+  overflow: hidden;
+}
+
+.studio-flagship-copy {
+  position: relative;
+  z-index: 3;
+}
+
+.studio-flagship-copy > p,
+.studio-flagship-section-copy > p,
+.studio-journey-copy > p {
+  margin: 0;
+  color: var(--studio-business-accent);
+  font: 600 0.55rem/1.3 var(--font-mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.studio-flagship-copy h3 {
+  max-width: 9ch;
+  margin: 0.75rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 13vw, 6.8rem);
+  font-weight: 760;
+  line-height: 0.86;
+  letter-spacing: -0.06em;
+  text-wrap: balance;
+}
+
+.studio-flagship-copy > span {
+  display: block;
+  max-width: 28rem;
+  margin-top: 1rem;
+  font-size: 0.76rem;
+  line-height: 1.65;
+  opacity: 0.74;
+}
+
+.studio-flagship-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.35rem;
+}
+
+.studio-flagship-actions b,
+.studio-flagship-actions em {
+  display: inline-flex;
+  min-height: 2.35rem;
+  align-items: center;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.6rem;
+  font-style: normal;
+}
+
+.studio-flagship-actions b {
+  color: var(--core-dark);
+  background: var(--studio-business-accent);
+}
+
+.studio-flagship-actions em {
+  border: 1px solid currentColor;
+}
+
+.studio-hotel-hero {
+  background:
+    linear-gradient(90deg, var(--core-dark) 0%, transparent 80%),
+    radial-gradient(
+      circle at 78% 38%,
+      var(--studio-business-accent-soft),
+      transparent 32%
+    );
+}
+
+.studio-hotel-scene {
+  position: relative;
+  min-height: 17rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  background:
+    linear-gradient(180deg, transparent 0 58%, var(--core-dark) 58%),
+    linear-gradient(
+      145deg,
+      color-mix(in oklab, var(--studio-business-accent) 24%, var(--core-dark)),
+      var(--core-dark)
+    );
+  box-shadow: var(--depth-shadow-lg);
+}
+
+.studio-hotel-sun {
+  position: absolute;
+  top: 2.25rem;
+  right: 17%;
+  width: 4.8rem;
+  height: 4.8rem;
+  border-radius: 50%;
+  background: var(--studio-business-accent);
+  box-shadow: 0 0 4rem var(--studio-business-accent-soft);
+}
+
+.studio-hotel-ridge {
+  position: absolute;
+  right: -12%;
+  bottom: 19%;
+  left: -12%;
+  height: 48%;
+  clip-path: polygon(
+    0 82%,
+    18% 42%,
+    32% 68%,
+    50% 18%,
+    68% 64%,
+    82% 36%,
+    100% 74%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.studio-hotel-ridge-far {
+  bottom: 28%;
+  background: color-mix(
+    in oklab,
+    var(--studio-business-accent) 25%,
+    var(--core-dark)
+  );
+  opacity: 0.72;
+}
+
+.studio-hotel-ridge-near {
+  background: color-mix(in oklab, var(--core-dark) 94%, transparent);
+}
+
+.studio-hotel-lodge {
+  position: absolute;
+  right: 10%;
+  bottom: 12%;
+  display: flex;
+  gap: 0.3rem;
+  width: 45%;
+  height: 24%;
+  align-items: end;
+  padding: 0.6rem;
+  border-top: 0.25rem solid var(--studio-business-accent);
+  background: color-mix(in oklab, var(--core-dark) 88%, transparent);
+  box-shadow: 0 1.2rem 2rem color-mix(in oklab, black 55%, transparent);
+}
+
+.studio-hotel-lodge i {
+  flex: 1;
+  height: 62%;
+  background: color-mix(
+    in oklab,
+    var(--studio-business-accent) 78%,
+    var(--core-light)
+  );
+  box-shadow: 0 0 1rem var(--studio-business-accent-soft);
+}
+
+.studio-hotel-scene-note {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font: 500 0.48rem/1 var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+.studio-stay-finder {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  margin: -1.25rem 1rem 0;
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  background: color-mix(in oklab, var(--core-dark-elevated) 94%, transparent);
+  box-shadow: var(--depth-shadow-lg);
+}
+
+.studio-stay-finder > span {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.2rem 0.6rem;
+  min-height: 4rem;
+  align-content: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid color-mix(in oklab, white 10%, transparent);
+}
+
+.studio-stay-finder svg {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--studio-business-accent);
+}
+
+.studio-stay-finder small {
+  font: 500 0.48rem/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.studio-stay-finder strong {
+  font-size: 0.72rem;
+}
+
+.studio-stay-finder > b {
+  display: grid;
+  min-height: 3.5rem;
+  place-items: center;
+  padding: 0.75rem;
+  color: var(--core-dark);
+  font-size: 0.65rem;
+  background: var(--studio-business-accent);
+}
+
+.studio-hotel-stays,
+.studio-itinerary {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(2.5rem, 8vw, 4.5rem) clamp(1rem, 5vw, 3.5rem);
+}
+
+.studio-flagship-section-copy h4,
+.studio-journey-copy h4 {
+  max-width: 12ch;
+  margin: 0.55rem 0 0;
+  font: 720 clamp(1.9rem, 8vw, 3.8rem)/0.95 var(--font-display);
+  letter-spacing: -0.05em;
+  text-wrap: balance;
+}
+
+.studio-flagship-section-copy > span,
+.studio-journey-copy > span {
+  display: block;
+  max-width: 30rem;
+  margin-top: 0.85rem;
+  font-size: 0.7rem;
+  line-height: 1.65;
+  opacity: 0.66;
+}
+
+.studio-hotel-room-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.studio-hotel-room {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 0.8fr) minmax(0, 1.2fr);
+  min-height: 8rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, currentColor 13%, transparent);
+}
+
+.studio-hotel-room > div:last-child {
+  display: grid;
+  align-content: center;
+  gap: 0.35rem;
+  padding: 0.9rem;
+}
+
+.studio-hotel-room small,
+.studio-journey-visual small {
+  font: 500 0.45rem/1.3 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.56;
+}
+
+.studio-hotel-room strong {
+  font: 680 1.1rem/1 var(--font-display);
+}
+
+.studio-hotel-room div > span {
+  font-size: 0.55rem;
+  line-height: 1.45;
+  opacity: 0.62;
+}
+
+.studio-hotel-room-art {
+  position: relative;
+  min-height: 8rem;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, transparent 52%, var(--core-dark) 52%),
+    color-mix(in oklab, var(--studio-business-accent) 24%, var(--core-dark));
+}
+
+.studio-hotel-room-art::before,
+.studio-hotel-room-art::after,
+.studio-hotel-room-art span {
+  content: "";
+  position: absolute;
+}
+
+.studio-hotel-room-art::before {
+  inset: 15% 18% 35%;
+  border: 0.22rem solid color-mix(in oklab, currentColor 65%, transparent);
+  border-bottom: 0;
+}
+
+.studio-hotel-room-art::after {
+  right: 8%;
+  bottom: 18%;
+  left: 8%;
+  height: 22%;
+  border-top: 0.18rem solid var(--studio-business-accent);
+  background: color-mix(in oklab, var(--core-light) 12%, var(--core-dark));
+}
+
+.studio-hotel-room-art span {
+  top: 24%;
+  left: 30%;
+  width: 40%;
+  height: 22%;
+  background: var(--studio-business-accent-soft);
+}
+
+.studio-hotel-room-art.is-forest {
+  background:
+    linear-gradient(180deg, transparent 52%, var(--core-dark) 52%),
+    color-mix(in oklab, var(--studio-business-accent) 12%, var(--core-dark));
+}
+
+.studio-hotel-detail {
+  display: grid;
+  border-top: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-hotel-detail > div {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.25rem 0.65rem;
+  min-height: 5.5rem;
+  align-content: center;
+  padding: 1rem;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-hotel-detail svg {
+  grid-row: 1 / 3;
+  align-self: center;
+  color: var(--studio-business-accent);
+}
+
+.studio-hotel-detail small {
+  font: 500 0.46rem/1 var(--font-mono);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+.studio-hotel-detail strong {
+  font-size: 0.68rem;
+}
+
+.studio-tours-hero {
+  min-height: 35rem;
+  background:
+    radial-gradient(
+      circle at 72% 44%,
+      var(--studio-business-accent-soft),
+      transparent 32%
+    ),
+    linear-gradient(
+      145deg,
+      var(--core-dark),
+      color-mix(in oklab, var(--studio-business-accent) 10%, var(--core-dark))
+    );
+}
+
+.studio-travel-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 1rem;
+}
+
+.studio-travel-tags span {
+  padding: 0.45rem 0.55rem;
+  font: 500 0.48rem/1 var(--font-mono);
+  border: 1px solid color-mix(in oklab, currentColor 18%, transparent);
+  border-radius: 999px;
+}
+
+.studio-route-map {
+  position: relative;
+  min-height: 20rem;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  background:
+    linear-gradient(
+      color-mix(in oklab, currentColor 7%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, currentColor 7%, transparent) 1px,
+      transparent 1px
+    ),
+    color-mix(in oklab, var(--studio-business-accent) 8%, var(--core-dark));
+  background-size: 2rem 2rem;
+  box-shadow: var(--depth-shadow-lg);
+}
+
+.studio-route-map svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.studio-route-path {
+  fill: none;
+  stroke: var(--studio-business-accent);
+  stroke-width: 3;
+  stroke-dasharray: 8 9;
+  stroke-linecap: round;
+}
+
+.studio-route-contour {
+  position: absolute;
+  border: 1px solid color-mix(in oklab, currentColor 10%, transparent);
+  border-radius: 48% 52% 38% 62%;
+  transform: rotate(-18deg);
+}
+
+.contour-one {
+  width: 13rem;
+  height: 8rem;
+  top: 2rem;
+  left: -3rem;
+}
+
+.contour-two {
+  width: 17rem;
+  height: 12rem;
+  right: -7rem;
+  bottom: 1rem;
+}
+
+.contour-three {
+  width: 8rem;
+  height: 6rem;
+  top: 7rem;
+  right: 4rem;
+}
+
+.studio-route-marker {
+  position: absolute;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font: 600 0.48rem/1 var(--font-mono);
+  letter-spacing: 0.03em;
+}
+
+.studio-route-marker i {
+  width: 0.52rem;
+  height: 0.52rem;
+  border: 0.14rem solid var(--core-dark);
+  border-radius: 50%;
+  background: var(--studio-business-accent);
+  box-shadow: 0 0 0 0.25rem var(--studio-business-accent-soft);
+}
+
+.marker-one {
+  bottom: 16%;
+  left: 8%;
+}
+
+.marker-two {
+  top: 45%;
+  left: 39%;
+}
+
+.marker-three {
+  top: 18%;
+  right: 7%;
+}
+
+.studio-route-card {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 0.65rem;
+  color: var(--core-dark);
+  font: 650 0.52rem/1 var(--font-mono);
+  background: var(--studio-business-accent);
+}
+
+.studio-journey-feature {
+  display: grid;
+  gap: 1.5rem;
+  padding: clamp(2.5rem, 8vw, 4.5rem) clamp(1rem, 5vw, 3.5rem);
+  border-top: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-journey-visual {
+  position: relative;
+  min-height: 17rem;
+  overflow: hidden;
+  background: color-mix(
+    in oklab,
+    var(--studio-business-accent) 13%,
+    var(--core-dark)
+  );
+}
+
+.studio-journey-sky,
+.studio-journey-mountain,
+.studio-journey-road {
+  position: absolute;
+}
+
+.studio-journey-sky {
+  inset: 0 0 45%;
+  background: linear-gradient(
+    180deg,
+    var(--studio-business-accent-soft),
+    transparent
+  );
+}
+
+.studio-journey-mountain {
+  right: -10%;
+  bottom: 20%;
+  left: -10%;
+  height: 58%;
+  clip-path: polygon(
+    0 84%,
+    20% 43%,
+    36% 70%,
+    56% 16%,
+    76% 66%,
+    88% 40%,
+    100% 77%,
+    100% 100%,
+    0 100%
+  );
+}
+
+.mountain-back {
+  bottom: 30%;
+  background: color-mix(
+    in oklab,
+    var(--studio-business-accent) 30%,
+    var(--core-dark)
+  );
+}
+
+.mountain-front {
+  background: color-mix(in oklab, var(--core-dark) 92%, transparent);
+}
+
+.studio-journey-road {
+  right: -8%;
+  bottom: -14%;
+  width: 65%;
+  height: 47%;
+  border-left: 0.65rem solid var(--studio-business-accent);
+  border-radius: 52% 0 0;
+  transform: rotate(18deg);
+}
+
+.studio-journey-visual small {
+  position: absolute;
+  bottom: 0.85rem;
+  left: 0.85rem;
+}
+
+.studio-journey-copy {
+  display: grid;
+  align-content: center;
+}
+
+.studio-journey-copy dl {
+  display: grid;
+  gap: 0;
+  margin: 1.25rem 0 0;
+}
+
+.studio-journey-copy dl > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-journey-copy dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.56rem;
+  opacity: 0.62;
+}
+
+.studio-journey-copy dd {
+  margin: 0;
+  font-size: 0.62rem;
+  font-weight: 700;
+}
+
+.studio-itinerary {
+  border-top: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-itinerary ol {
+  display: grid;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-itinerary li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 4.5rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+}
+
+.studio-itinerary li > span {
+  color: var(--studio-business-accent);
+  font: 600 0.5rem/1 var(--font-mono);
+}
+
+.studio-itinerary li div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.studio-itinerary li small {
+  font-size: 0.48rem;
+  opacity: 0.55;
+}
+
+.studio-itinerary li strong {
+  font: 650 0.8rem/1.1 var(--font-display);
+}
+
+.studio-itinerary li svg,
+.studio-itinerary-note svg {
+  color: var(--studio-business-accent);
+}
+
+.studio-itinerary-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  max-width: max-content;
+  padding: 0.55rem 0.7rem;
+  font: 500 0.48rem/1.4 var(--font-mono);
+  border: 1px solid color-mix(in oklab, currentColor 14%, transparent);
+  border-radius: 999px;
+}
+
+.studio-preview.is-editorial .studio-flagship {
+  color: var(--core-light-text);
+}
+
+.studio-preview.is-editorial .studio-hotel-hero,
+.studio-preview.is-editorial .studio-tours-hero {
+  background:
+    radial-gradient(
+      circle at 76% 40%,
+      color-mix(in oklab, var(--studio-business-accent) 18%, transparent),
+      transparent 34%
+    ),
+    var(--core-light);
+}
+
+.studio-preview.is-editorial .studio-stay-finder {
+  color: var(--core-light-text);
+  background: var(--core-light-elevated);
+  border-color: color-mix(in oklab, var(--core-dark) 16%, transparent);
+}
+
+.studio-preview.is-editorial .studio-stay-finder > span {
+  border-color: color-mix(in oklab, var(--core-dark) 10%, transparent);
+}
+
+.studio-preview.is-editorial .studio-route-map,
+.studio-preview.is-editorial .studio-journey-visual,
+.studio-preview.is-editorial .studio-hotel-room-art {
+  color: var(--ink-foreground);
+}
+
+.studio-preview.is-graphic .studio-flagship-copy > p,
+.studio-preview.is-graphic .studio-flagship-section-copy > p,
+.studio-preview.is-graphic .studio-journey-copy > p,
+.studio-preview.is-graphic .studio-hotel-detail svg,
+.studio-preview.is-graphic .studio-itinerary li > span,
+.studio-preview.is-graphic .studio-itinerary li svg,
+.studio-preview.is-graphic .studio-itinerary-note svg {
+  color: var(--core-dark);
+}
+
+.studio-preview.is-graphic .studio-flagship-action,
+.studio-preview.is-graphic .studio-flagship-actions b,
+.studio-preview.is-graphic .studio-stay-finder > b,
+.studio-preview.is-graphic .studio-route-card {
+  color: var(--ink-foreground);
+  background: var(--core-dark);
+}
+
+.studio-preview.is-graphic .studio-flagship-hero {
+  background-image:
+    linear-gradient(
+      color-mix(in oklab, var(--core-dark) 12%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in oklab, var(--core-dark) 12%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 2rem 2rem;
+}
+
+.studio-preview.is-graphic .studio-hotel-scene,
+.studio-preview.is-graphic .studio-route-map,
+.studio-preview.is-graphic .studio-journey-visual {
+  transform: rotate(1deg);
+}
+
+.studio-preview.motion-drift .studio-hotel-sun {
+  animation: studio-flagship-float 6s var(--easing-standard) infinite alternate;
+}
+
+.studio-preview.motion-drift .studio-route-path {
+  animation: studio-route-travel 12s linear infinite;
+}
+
+.studio-preview.motion-reveal .studio-hotel-scene,
+.studio-preview.motion-reveal .studio-route-map {
+  animation: studio-flagship-breathe 7s var(--easing-standard) infinite
+    alternate;
+}
+
+.studio-preview.motion-snap .studio-hotel-lodge,
+.studio-preview.motion-snap .studio-route-card {
+  animation: studio-flagship-nudge 3.2s steps(2, jump-none) infinite;
+}
+
+@keyframes studio-flagship-float {
+  to {
+    transform: translateY(0.45rem) scale(0.96);
+  }
+}
+
+@keyframes studio-route-travel {
+  to {
+    stroke-dashoffset: -136;
+  }
+}
+
+@keyframes studio-flagship-breathe {
+  to {
+    transform: scale(0.985);
+  }
+}
+
+@keyframes studio-flagship-nudge {
+  50% {
+    transform: translate(-0.25rem, -0.2rem) rotate(-1deg);
+  }
+}
+
 .studio-preview.is-immersive {
   background:
     radial-gradient(
@@ -1099,6 +1933,36 @@
     width: auto;
   }
 
+  .studio-flagship-nav {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .studio-flagship-nav-links {
+    display: flex;
+  }
+
+  .studio-stay-finder {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+
+  .studio-stay-finder > span {
+    border-right: 1px solid color-mix(in oklab, white 10%, transparent);
+    border-bottom: 0;
+  }
+
+  .studio-preview.is-editorial .studio-stay-finder > span {
+    border-right-color: color-mix(in oklab, var(--core-dark) 10%, transparent);
+  }
+
+  .studio-hotel-detail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .studio-hotel-detail > div {
+    border-right: 1px solid color-mix(in oklab, currentColor 12%, transparent);
+    border-bottom: 0;
+  }
+
   .studio-system-flow {
     grid-template-columns: repeat(3, 1fr);
     border-left: 1px solid var(--studio-line);
@@ -1127,6 +1991,43 @@
 
   .studio-preview-stage {
     grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+  }
+
+  .studio-flagship-hero,
+  .studio-journey-feature {
+    grid-template-columns: minmax(0, 1.05fr) minmax(18rem, 0.95fr);
+  }
+
+  .studio-preview.is-editorial .studio-flagship-hero,
+  .studio-preview.is-editorial .studio-journey-feature {
+    grid-template-columns: minmax(18rem, 0.9fr) minmax(0, 1.1fr);
+  }
+
+  .studio-preview.is-editorial .studio-flagship-copy,
+  .studio-preview.is-editorial .studio-journey-copy {
+    order: 2;
+  }
+
+  .studio-hotel-stays {
+    grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+
+  .studio-hotel-room-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .studio-hotel-room {
+    grid-template-columns: 1fr;
+  }
+
+  .studio-itinerary {
+    grid-template-columns: minmax(14rem, 0.7fr) minmax(0, 1.3fr);
+    align-items: start;
+  }
+
+  .studio-itinerary-note {
+    grid-column: 2;
   }
 
   .studio-preview.is-editorial .studio-preview-stage {
@@ -1203,8 +2104,14 @@
   .studio-ambient span,
   .studio-preview.motion-drift .studio-art-orbit-one,
   .studio-preview.motion-drift .studio-art-orbit-two,
+  .studio-preview.motion-drift .studio-hotel-sun,
+  .studio-preview.motion-drift .studio-route-path,
   .studio-preview.motion-reveal .studio-preview-art,
-  .studio-preview.motion-snap .studio-art-mark {
+  .studio-preview.motion-reveal .studio-hotel-scene,
+  .studio-preview.motion-reveal .studio-route-map,
+  .studio-preview.motion-snap .studio-art-mark,
+  .studio-preview.motion-snap .studio-hotel-lodge,
+  .studio-preview.motion-snap .studio-route-card {
     animation: none;
   }
 
