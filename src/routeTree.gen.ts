@@ -19,6 +19,7 @@ import { Route as ServicesRouteRouteImport } from './routes/services.route'
 import { Route as SolutionsRouteRouteImport } from './routes/solutions.route'
 import { Route as StartYourProjectRouteImport } from './routes/start-your-project'
 import { Route as ToolsRouteRouteImport } from './routes/tools.route'
+import { Route as WebsiteStudioRouteImport } from './routes/website-studio'
 import { Route as WorkRouteRouteImport } from './routes/work.route'
 import { Route as LocationsPhuentsholingRouteImport } from './routes/locations.phuentsholing'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
@@ -87,6 +88,11 @@ const StartYourProjectRoute = StartYourProjectRouteImport.update({
 const ToolsRouteRoute = ToolsRouteRouteImport.update({
   id: '/tools',
   path: '/tools',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WebsiteStudioRoute = WebsiteStudioRouteImport.update({
+  id: '/website-studio',
+  path: '/website-studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WorkRouteRoute = WorkRouteRouteImport.update({
@@ -199,6 +205,7 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
+  '/website-studio': typeof WebsiteStudioRoute
   '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
@@ -226,6 +233,7 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
+  '/website-studio': typeof WebsiteStudioRoute
   '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
@@ -258,6 +266,7 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
+  '/website-studio': typeof WebsiteStudioRoute
   '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
@@ -291,6 +300,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/privacy'
     | '/start-your-project'
+    | '/website-studio'
     | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
@@ -318,6 +328,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/privacy'
     | '/start-your-project'
+    | '/website-studio'
     | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
@@ -349,6 +360,7 @@ export interface FileRouteTypes {
     | '/insights'
     | '/privacy'
     | '/start-your-project'
+    | '/website-studio'
     | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
@@ -381,6 +393,7 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   PrivacyRoute: typeof PrivacyRoute
   StartYourProjectRoute: typeof StartYourProjectRoute
+  WebsiteStudioRoute: typeof WebsiteStudioRoute
   LocationsPhuentsholingRoute: typeof LocationsPhuentsholingRoute
 }
 
@@ -454,6 +467,13 @@ declare module '@tanstack/react-router' {
       path: '/tools'
       fullPath: '/tools'
       preLoaderRoute: typeof ToolsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/website-studio': {
+      id: '/website-studio'
+      path: '/website-studio'
+      fullPath: '/website-studio'
+      preLoaderRoute: typeof WebsiteStudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/work': {
@@ -678,6 +698,7 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   PrivacyRoute: PrivacyRoute,
   StartYourProjectRoute: StartYourProjectRoute,
+  WebsiteStudioRoute: WebsiteStudioRoute,
   LocationsPhuentsholingRoute: LocationsPhuentsholingRoute,
 }
 export const routeTree = rootRouteImport
