@@ -27,7 +27,7 @@ import type {
   StudioDirection,
   StudioVisualProfile,
 } from "../types";
-import { FlagshipPreview } from "./flagship-previews";
+import { FlagshipPreview, flagshipBusinessIds } from "./flagship-previews";
 import "../styles.css";
 
 function StudioProgress({
@@ -173,7 +173,9 @@ function ExperiencePreview({
   direction: StudioDirection;
 }) {
   const profile = studioVisualProfiles[direction.id];
-  const isFlagship = business.id === "hotel" || business.id === "tours";
+  const isFlagship = flagshipBusinessIds.includes(
+    business.id as (typeof flagshipBusinessIds)[number],
+  );
   return (
     <div
       className={`studio-preview is-${profile.composition} is-${profile.surface} type-${profile.typeScale} motion-${profile.motion}`}

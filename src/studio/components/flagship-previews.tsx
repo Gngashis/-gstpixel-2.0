@@ -1,5 +1,4 @@
 import {
-  ArrowUpRight,
   BedDouble,
   CalendarDays,
   Check,
@@ -13,20 +12,20 @@ import {
   Users,
 } from "lucide-react";
 import type { StudioBusiness, StudioDirection } from "../types";
+import { FlagshipAction, type FlagshipPreviewProps } from "./flagship-shared";
+import { GymFlagshipPreview } from "./gym-preview";
+import { ProfessionalFlagshipPreview } from "./professional-preview";
+import { RestaurantFlagshipPreview } from "./restaurant-preview";
+import { RetailFlagshipPreview } from "./retail-preview";
 
-type FlagshipPreviewProps = {
-  business: StudioBusiness;
-  direction: StudioDirection;
-};
-
-function FlagshipAction({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="studio-flagship-action">
-      {children}
-      <ArrowUpRight size={13} aria-hidden="true" />
-    </span>
-  );
-}
+export const flagshipBusinessIds = [
+  "hotel",
+  "tours",
+  "restaurant",
+  "retail",
+  "professional",
+  "gym",
+] as const;
 
 function HotelFlagshipPreview({ business, direction }: FlagshipPreviewProps) {
   return (
@@ -296,6 +295,22 @@ export function FlagshipPreview(props: FlagshipPreviewProps) {
 
   if (props.business.id === "tours") {
     return <ToursFlagshipPreview {...props} />;
+  }
+
+  if (props.business.id === "restaurant") {
+    return <RestaurantFlagshipPreview {...props} />;
+  }
+
+  if (props.business.id === "retail") {
+    return <RetailFlagshipPreview {...props} />;
+  }
+
+  if (props.business.id === "professional") {
+    return <ProfessionalFlagshipPreview {...props} />;
+  }
+
+  if (props.business.id === "gym") {
+    return <GymFlagshipPreview {...props} />;
   }
 
   return null;
