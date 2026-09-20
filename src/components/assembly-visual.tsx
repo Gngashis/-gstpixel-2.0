@@ -67,7 +67,7 @@ const stages: StageDef[] = [
     title: "Automate",
     icon: Zap,
     hint: "Connect intelligent workflows",
-    to: "/services#automation",
+    to: "/services/ai-automation",
   },
   {
     id: "operate",
@@ -85,7 +85,7 @@ const stages: StageDef[] = [
     title: "Grow",
     icon: Layers3,
     hint: "Scale what works",
-    to: "/services/digital-growth-consulting",
+    to: "/services/business-technology-consulting",
   },
 ];
 
@@ -101,6 +101,8 @@ export function AssemblyVisual({
   const containerRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef<number | undefined>(undefined);
   const pointerRef = useRef({ x: 0, y: 0 });
+  const navigationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const ignoreSyntheticClick = useRef(false);
   const reduced = useReducedMotion();
   const navigate = useNavigate();
 
@@ -157,12 +159,16 @@ export function AssemblyVisual({
   /** Navigate to a stage's destination with a brief selection transition. */
   const handleStageNav = useCallback(
     (stage: StageDef, idx: number) => {
+      if (navigationTimer.current) clearTimeout(navigationTimer.current);
       setSelectedIdx(idx);
       // Brief visual transition before navigation begins
-      setTimeout(() => {
-        navigate({ to: stage.to });
-        setSelectedIdx(-1);
-      }, reduced ? 0 : 280);
+      navigationTimer.current = setTimeout(
+        () => {
+          navigate({ to: stage.to });
+          setSelectedIdx(-1);
+        },
+        reduced ? 0 : 280,
+      );
     },
     [navigate, reduced],
   );
@@ -185,22 +191,46 @@ export function AssemblyVisual({
     [],
   );
 
-  const handleTouchMove = useCallback(() => {
-    // If the user is scrolling, mark it so we don't trigger navigation
-    isScrolling.current = true;
+  const handleTouchMoveForStage = useCallback((e: React.TouchEvent) => {
+    const start = touchStart.current;
+    const touch = e.touches[0];
+    if (!start || !touch) return;
+    if (Math.hypot(touch.clientX - start.x, touch.clientY - start.y) > 10) {
+      isScrolling.current = true;
+      setPressedIdx(-1);
+    }
   }, []);
 
   const handleTouchEnd = useCallback(
     (stage: StageDef, idx: number) => () => {
       setPressedIdx(-1);
-      if (isScrolling.current) return;
+      if (isScrolling.current) {
+        touchStart.current = null;
+        ignoreSyntheticClick.current = true;
+        window.setTimeout(() => {
+          ignoreSyntheticClick.current = false;
+        }, 450);
+        return;
+      }
       if (!touchStart.current) return;
       const elapsed = Date.now() - touchStart.current.time;
+      touchStart.current = null;
       // Reject very slow holds (>500ms) as they're likely scroll intent
       if (elapsed > 500) return;
+      ignoreSyntheticClick.current = true;
+      window.setTimeout(() => {
+        ignoreSyntheticClick.current = false;
+      }, 450);
       handleStageNav(stage, idx);
     },
     [handleStageNav],
+  );
+
+  useEffect(
+    () => () => {
+      if (navigationTimer.current) clearTimeout(navigationTimer.current);
+    },
+    [],
   );
 
   return (
@@ -242,69 +272,74 @@ export function AssemblyVisual({
 
         <ol className="asm-stages" role="list">
           {stages.map((stage, i) => {
-              const { id, index, role, title, icon: Icon, hint } = stage;
-              const isActive = activeIdx === i;
-              const isPressed = pressedIdx === i;
-              const isSelected = selectedIdx === i;
-              const isDimmed = selectedIdx >= 0 && selectedIdx !== i;
+            const { id, index, role, title, icon: Icon, hint } = stage;
+            const isActive = activeIdx === i;
+            const isPressed = pressedIdx === i;
+            const isSelected = selectedIdx === i;
+            const isDimmed = selectedIdx >= 0 && selectedIdx !== i;
 
-              return (
-                <li
-                  key={id}
-                  className={[
-                    "asm-stage",
-                    isActive ? "asm-stage-active" : "",
-                    isPressed ? "asm-stage-pressed" : "",
-                    isSelected ? "asm-stage-selected" : "",
-                    isDimmed ? "asm-stage-dimmed" : "",
-                  ]
-                    .filter(Boolean)
-                    .join(" ")}
-                  data-stage={id}
-                  style={{
-                    ["--stage-weight" as string]: `var(--env-w${i}, 0)`,
+            return (
+              <li
+                key={id}
+                className={[
+                  "asm-stage",
+                  isActive ? "asm-stage-active" : "",
+                  isPressed ? "asm-stage-pressed" : "",
+                  isSelected ? "asm-stage-selected" : "",
+                  isDimmed ? "asm-stage-dimmed" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                data-stage={id}
+                style={{
+                  ["--stage-weight" as string]: `var(--env-w${i}, 0)`,
+                }}
+              >
+                <span className="asm-stage-flow" aria-hidden="true" />
+
+                <button
+                  type="button"
+                  className="asm-stage-btn"
+                  aria-label={`${title}: ${hint}`}
+                  tabIndex={0}
+                  onClick={() => {
+                    if (ignoreSyntheticClick.current) {
+                      ignoreSyntheticClick.current = false;
+                      return;
+                    }
+                    handleStageNav(stage, i);
                   }}
+                  onPointerEnter={() => setActiveIdx(i)}
+                  onPointerLeave={() => setActiveIdx(-1)}
+                  onFocus={() => setActiveIdx(i)}
+                  onBlur={() => setActiveIdx(-1)}
+                  onTouchStart={handleTouchStart(i)}
+                  onTouchMove={handleTouchMoveForStage}
+                  onTouchEnd={handleTouchEnd(stage, i)}
+                  onMouseDown={() => setPressedIdx(i)}
+                  onMouseUp={() => setPressedIdx(-1)}
                 >
-                  <span className="asm-stage-flow" aria-hidden="true" />
-
-                  <button
-                    type="button"
-                    className="asm-stage-btn"
-                    aria-label={`${title}: ${hint}`}
-                    tabIndex={0}
-                    onClick={() => handleStageNav(stage, i)}
-                    onPointerEnter={() => setActiveIdx(i)}
-                    onPointerLeave={() => setActiveIdx(-1)}
-                    onFocus={() => setActiveIdx(i)}
-                    onBlur={() => setActiveIdx(-1)}
-                    onTouchStart={handleTouchStart(i)}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd(stage, i)}
-                    onMouseDown={() => setPressedIdx(i)}
-                    onMouseUp={() => setPressedIdx(-1)}
-                  >
-                    <span className="asm-stage-node">
-                      <Icon size={14} aria-hidden="true" />
+                  <span className="asm-stage-node">
+                    <Icon size={14} aria-hidden="true" />
+                  </span>
+                  <span className="asm-stage-text">
+                    <span className="asm-stage-meta">
+                      {index} / {role}
                     </span>
-                    <span className="asm-stage-text">
-                      <span className="asm-stage-meta">
-                        {index} / {role}
-                      </span>
-                      <strong>{title}</strong>
-                    </span>
-                    <span className="asm-stage-hint" aria-hidden="true">
-                      {hint}
-                    </span>
-                    <ArrowRight
-                      size={12}
-                      className="asm-stage-arrow"
-                      aria-hidden="true"
-                    />
-                  </button>
-                </li>
-              );
-            },
-          )}
+                    <strong>{title}</strong>
+                  </span>
+                  <span className="asm-stage-hint" aria-hidden="true">
+                    {hint}
+                  </span>
+                  <ArrowRight
+                    size={12}
+                    className="asm-stage-arrow"
+                    aria-hidden="true"
+                  />
+                </button>
+              </li>
+            );
+          })}
         </ol>
       </div>
     </div>

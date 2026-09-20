@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { PageIntro, ScrollReveal, StaggeredReveal } from "@/components/page";
 import { Button, ButtonLink } from "@/components/ui/button";
+import { buildCanonical } from "@/lib/seo";
 
 const STORAGE_KEY = "gstpixel-website-requirement-generator";
 
@@ -416,7 +417,19 @@ export const Route = createFileRoute("/tools/website-requirement-generator")({
         content: "Turn a business questionnaire into a useful website brief.",
       },
       { property: "og:type", content: "website" },
+      {
+        property: "og:url",
+        content: buildCanonical("/tools/website-requirement-generator"),
+      },
+      { property: "og:site_name", content: "GSTPIXEL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@gstpixel" },
+    ],
+    links: [
+      {
+        rel: "canonical",
+        href: buildCanonical("/tools/website-requirement-generator"),
+      },
     ],
   }),
   component: Page,

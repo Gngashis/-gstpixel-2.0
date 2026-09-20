@@ -124,6 +124,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const menuTriggerRef = useRef<HTMLButtonElement>(null);
   const menuNavRef = useRef<HTMLElement>(null);
   const autoCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pointerHeld = useRef(false);
   const reduced = useReducedMotion();
   const headerCta = useMagnetic<HTMLSpanElement>();
   const matches = useMatches();
@@ -141,32 +143,66 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   /** Close with smooth exit animation, then unmount. */
   const requestClose = useCallback(() => {
     if (!open || closing) return;
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
     setClosing(true);
-    setTimeout(() => {
-      setOpen(false);
-      setClosing(false);
-      menuTriggerRef.current?.focus();
-    }, reduced ? 0 : 280);
+    closeTimer.current = setTimeout(
+      () => {
+        setOpen(false);
+        setClosing(false);
+        menuTriggerRef.current?.focus();
+      },
+      reduced ? 0 : 280,
+    );
   }, [open, closing, reduced]);
+
+  const pauseAutoClose = useCallback(() => {
+    if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    autoCloseTimer.current = null;
+  }, []);
 
   /** Reset the auto-close inactivity timer. */
   const resetAutoClose = useCallback(() => {
     if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
     if (!open || closing) return;
     autoCloseTimer.current = setTimeout(() => {
+      const menu = menuNavRef.current;
+      if (menu?.contains(document.activeElement)) {
+        resetAutoClose();
+        return;
+      }
       requestClose();
     }, MOBILE_AUTO_CLOSE_MS);
   }, [open, closing, requestClose]);
 
+  const handleMenuPointerDown = useCallback(() => {
+    pointerHeld.current = true;
+    pauseAutoClose();
+  }, [pauseAutoClose]);
+
+  const handleMenuPointerEnd = useCallback(() => {
+    pointerHeld.current = false;
+    resetAutoClose();
+  }, [resetAutoClose]);
+
   /** Handle menu item selection: close immediately and navigate. */
   const handleNavClick = useCallback(() => {
     if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
     setClosing(true);
-    setTimeout(() => {
+    closeTimer.current = setTimeout(() => {
       setOpen(false);
       setClosing(false);
     }, 0);
   }, []);
+
+  useEffect(
+    () => () => {
+      if (autoCloseTimer.current) clearTimeout(autoCloseTimer.current);
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    },
+    [],
+  );
 
   /* Cursor-lit glass: one delegated listener for the whole site, parked when
      the pointer rests, and never attached for coarse pointers or reduced
@@ -245,7 +281,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const isDarkPhase = headerEnv?.id !== undefined && headerEnv.id >= 3;
 
   return (
-    <div className="min-h-screen text-foreground env-section">
+    <div className="site-shell min-h-screen text-foreground env-section">
       <EnvironmentAtmosphere />
       <a href="#main" className="skip-link">
         Skip to content
@@ -304,7 +340,8 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 className="luminous-edge tactile"
                 style={{ borderRadius: "0.5rem", padding: "0.6rem 1.25rem" }}
               >
-                Start your project
+                <span>Start your project</span>
+                <span aria-hidden="true">↗</span>
               </ButtonLink>
             </span>
             <Button
@@ -348,10 +385,23 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 backdropFilter: "blur(22px) saturate(1.2)",
                 borderTop: `1px solid color-mix(in oklab, var(--color-brand-primary) 20%, transparent)`,
               }}
-              onPointerMove={resetAutoClose}
+              onPointerMove={() => {
+                if (!pointerHeld.current) resetAutoClose();
+              }}
               onPointerEnter={resetAutoClose}
-              onPointerDown={resetAutoClose}
-              onFocus={resetAutoClose}
+              onPointerDown={handleMenuPointerDown}
+              onPointerUp={handleMenuPointerEnd}
+              onPointerCancel={handleMenuPointerEnd}
+              onFocus={pauseAutoClose}
+              onBlur={(event) => {
+                if (
+                  !event.currentTarget.contains(event.relatedTarget as Node)
+                ) {
+                  resetAutoClose();
+                }
+              }}
+              onKeyDown={pauseAutoClose}
+              onKeyUp={pauseAutoClose}
               onScroll={resetAutoClose}
             >
               {nav.map(([label, to]) => {
