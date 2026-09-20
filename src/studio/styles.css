@@ -630,6 +630,261 @@
     0 0 5rem var(--studio-business-accent-soft);
 }
 
+.studio-personalization {
+  position: relative;
+  display: grid;
+  gap: clamp(1.5rem, 5vw, 3rem);
+  margin-bottom: clamp(2rem, 6vw, 3.5rem);
+  padding: clamp(1.25rem, 5vw, 2.75rem);
+  overflow: hidden;
+  border-block: 1px solid
+    color-mix(
+      in oklab,
+      var(--studio-business-accent, var(--primary)) 26%,
+      var(--studio-line)
+    );
+  background:
+    linear-gradient(
+      110deg,
+      color-mix(
+        in oklab,
+        var(--studio-business-accent-soft, transparent) 72%,
+        transparent
+      ),
+      transparent 48%
+    ),
+    color-mix(in oklab, var(--studio-panel) 82%, transparent);
+}
+
+.studio-personalization::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: clamp(1.25rem, 5vw, 2.75rem);
+  width: 4rem;
+  height: 2px;
+  background: var(--studio-business-accent, var(--primary));
+}
+
+.studio-personalization.is-applied {
+  border-color: color-mix(
+    in oklab,
+    var(--studio-business-accent, var(--primary)) 44%,
+    var(--studio-line)
+  );
+}
+
+.studio-personalization-intro > p,
+.studio-personalized-notes > p {
+  margin: 0;
+  color: var(--studio-business-accent, var(--primary));
+  font: 600 0.66rem/1.2 var(--font-mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.studio-personalization-intro h2 {
+  max-width: 12ch;
+  margin: 0.75rem 0 0;
+  font: 700 clamp(1.85rem, 7vw, 3.4rem)/0.98 var(--font-display);
+  letter-spacing: -0.045em;
+  text-wrap: balance;
+}
+
+.studio-personalization-intro > span {
+  display: block;
+  max-width: 36rem;
+  margin-top: 1rem;
+  color: var(--studio-muted);
+  font-size: 0.88rem;
+  line-height: 1.65;
+}
+
+.studio-personalization-form {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.studio-personalization-field {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.studio-personalization-field label,
+.studio-personalization-label-row > span {
+  font: 600 0.68rem/1.2 var(--font-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.studio-personalization-label-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.studio-personalization-label-row > span {
+  color: var(--studio-muted);
+  font-weight: 500;
+}
+
+.studio-personalization input,
+.studio-personalization textarea {
+  width: 100%;
+  min-height: 3.25rem;
+  padding: 0.85rem 0.9rem;
+  color: var(--ink-foreground);
+  font: inherit;
+  line-height: 1.55;
+  border: 1px solid var(--studio-line);
+  border-radius: 0.35rem;
+  outline: 0;
+  background: color-mix(in oklab, var(--core-dark) 72%, transparent);
+  transition:
+    border-color var(--motion-micro),
+    box-shadow var(--motion-micro);
+}
+
+.studio-personalization textarea {
+  min-height: 8.5rem;
+  resize: vertical;
+}
+
+.studio-personalization input:focus-visible,
+.studio-personalization textarea:focus-visible {
+  border-color: var(--studio-business-accent, var(--primary));
+  box-shadow: 0 0 0 3px
+    color-mix(
+      in oklab,
+      var(--studio-business-accent, var(--primary)) 24%,
+      transparent
+    );
+}
+
+.studio-personalization :is(input, textarea):disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.studio-example-copy,
+.studio-privacy-copy,
+.studio-personalization-status p {
+  margin: 0;
+  color: var(--studio-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.studio-privacy-copy {
+  padding-left: 0.8rem;
+  border-left: 2px solid
+    color-mix(
+      in oklab,
+      var(--studio-business-accent, var(--primary)) 42%,
+      transparent
+    );
+}
+
+.studio-personalization-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+}
+
+.studio-personalize-button,
+.studio-reset-personalization {
+  min-height: 3rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.72rem;
+  font-weight: 750;
+  border-radius: 0.35rem;
+}
+
+.studio-personalize-button {
+  color: var(--core-dark);
+  border: 1px solid var(--studio-business-accent, var(--primary));
+  background: var(--studio-business-accent, var(--primary));
+}
+
+.studio-personalize-button:disabled {
+  cursor: wait;
+  opacity: 0.62;
+}
+
+.studio-reset-personalization {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  color: var(--ink-foreground);
+  border: 1px solid var(--studio-line);
+  background: transparent;
+}
+
+.studio-personalize-button:focus-visible,
+.studio-reset-personalization:focus-visible {
+  outline: 2px solid var(--studio-business-accent, var(--primary)) !important;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 4px
+    color-mix(
+      in oklab,
+      var(--studio-business-accent, var(--primary)) 28%,
+      transparent
+    );
+}
+
+.studio-personalization-status {
+  min-height: 1.2rem;
+}
+
+.studio-personalization-status [role="alert"] {
+  color: color-mix(
+    in oklab,
+    var(--state-error, oklch(0.68 0.2 25)) 82%,
+    var(--ink-foreground)
+  );
+}
+
+.studio-personalized-notes {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding: 1.2rem;
+  border: 1px solid var(--studio-line);
+  border-radius: 0.5rem;
+  background: var(--studio-panel);
+}
+
+.studio-personalized-notes ul {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.studio-personalized-notes li {
+  position: relative;
+  padding-left: 1rem;
+  color: var(--studio-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.studio-personalized-notes li::before {
+  content: "";
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 0.35rem;
+  height: 0.35rem;
+  border-radius: 50%;
+  background: var(--studio-business-accent, var(--primary));
+}
+
 .studio-browser-bar {
   display: flex;
   align-items: center;
@@ -1831,6 +2086,41 @@
   border-bottom: 1px solid var(--studio-line);
 }
 
+.studio-system-flow li.is-featured,
+.studio-system-flow li.is-secondary {
+  position: relative;
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+.studio-system-flow li.is-featured::before,
+.studio-system-flow li.is-secondary::before {
+  content: "";
+  position: absolute;
+  inset-block: 0.7rem;
+  left: 0;
+  width: 2px;
+  background: var(--primary);
+}
+
+.studio-system-flow li.is-featured strong::after,
+.studio-system-flow li.is-secondary strong::after {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--primary);
+  font: 500 0.5rem/1 var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.studio-system-flow li.is-featured strong::after {
+  content: "Featured emphasis";
+}
+
+.studio-system-flow li.is-secondary strong::after {
+  content: "Supporting emphasis";
+  opacity: 0.72;
+}
+
 .studio-system-flow li > span {
   color: var(--primary);
   font: 500 0.58rem/1 var(--font-mono);
@@ -1978,6 +2268,20 @@
 
 @media (min-width: 768px) {
   .studio-direction-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .studio-personalization {
+    grid-template-columns: minmax(15rem, 0.75fr) minmax(0, 1.25fr);
+    align-items: start;
+  }
+
+  .studio-personalized-notes {
+    grid-template-columns: minmax(10rem, 0.4fr) minmax(0, 1.6fr);
+    align-items: start;
+  }
+
+  .studio-personalized-notes ul {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -3762,6 +4066,14 @@
 }
 
 @media (max-width: 390px) {
+  .studio-personalization {
+    padding-inline: 1rem;
+  }
+
+  .studio-personalization-actions > * {
+    width: 100%;
+  }
+
   .studio-menu-list li {
     gap: 0.55rem;
   }

@@ -366,6 +366,298 @@ test.describe("Website Studio deterministic core", () => {
   });
 });
 
+test.describe("Website Studio optional AI personalization", () => {
+  test("submits only after explicit action, applies valid content, and resets in memory", async ({
+    page,
+  }) => {
+    const requests: Record<string, unknown>[] = [];
+    await page.route("**/api/studio-personalize", async (route) => {
+      requests.push(route.request().postDataJSON() as Record<string, unknown>);
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personalization: {
+            schemaVersion: 1,
+            headline: "A private mountain stay made for two.",
+            intro:
+              "Quiet rooms, open views and local experiences shape a slower stay near the border.",
+            highlights: [
+              "Private stays for couples",
+              "Mountain views from every room",
+              "Guided local walks on request",
+            ],
+            featuredModule: "rooms",
+            secondaryModule: "experiences",
+            ctaSupport: "Bring this quiet retreat to life online.",
+          },
+        }),
+      });
+    });
+
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseHotelCinematic(page);
+
+    const preview = page.getByTestId("studio-preview");
+    await expect(preview).toContainText("Stay where the horizon slows down.");
+
+    await page.getByLabel("Business name (optional)").fill("Still Ridge");
+    await page
+      .getByLabel("Describe your business")
+      .fill(
+        "A private mountain retreat for couples who value quiet stays and guided local walks.",
+      );
+
+    expect(requests).toHaveLength(0);
+
+    await page
+      .getByRole("button", { name: "Personalize this concept" })
+      .focus();
+    await page.keyboard.press("Enter");
+
+    await expect(preview).toHaveAttribute("data-business", "hotel");
+    await expect(preview).toHaveAttribute("data-direction", "cinematic");
+    await expect(preview).toHaveAttribute("data-personalized", "true");
+    await expect(preview).toContainText(
+      "A private mountain stay made for two.",
+    );
+    await expect(preview).toContainText("Still Ridge");
+    await expect(page.getByTestId("studio-personalized-notes")).toContainText(
+      "Private stays for couples",
+    );
+    await expect(page.locator('[data-module="rooms"]')).toHaveAttribute(
+      "data-emphasis",
+      "featured",
+    );
+    await expect(page.locator('[data-module="experiences"]')).toHaveAttribute(
+      "data-emphasis",
+      "secondary",
+    );
+
+    expect(requests).toEqual([
+      {
+        category: "hotel",
+        direction: "cinematic",
+        businessName: "Still Ridge",
+        description:
+          "A private mountain retreat for couples who value quiet stays and guided local walks.",
+      },
+    ]);
+
+    const href = await page.getByTestId("studio-whatsapp").getAttribute("href");
+    const whatsapp = new URL(href!);
+    expect(whatsapp.searchParams.get("text")).toBe(STUDIO_WHATSAPP_MESSAGE);
+    expect(decodeURIComponent(whatsapp.search).toLowerCase()).not.toContain(
+      "still ridge",
+    );
+
+    const storedValues = await page.evaluate(() => {
+      const snapshot = (storage: Storage) =>
+        Array.from({ length: storage.length }, (_, index) => {
+          const key = storage.key(index) ?? "";
+          return [key, storage.getItem(key) ?? ""] as const;
+        });
+      return {
+        local: snapshot(window.localStorage),
+        session: snapshot(window.sessionStorage),
+      };
+    });
+    expect(JSON.stringify(storedValues).toLowerCase()).not.toContain(
+      "still ridge",
+    );
+    expect(JSON.stringify(storedValues).toLowerCase()).not.toContain(
+      "private mountain retreat",
+    );
+    expect(
+      [...storedValues.local, ...storedValues.session].some(([key]) =>
+        key.toLowerCase().includes("studio"),
+      ),
+    ).toBe(false);
+
+    await page.getByRole("button", { name: "Reset personalization" }).click();
+    await expect(preview).toHaveAttribute("data-personalized", "false");
+    await expect(preview).toContainText("Stay where the horizon slows down.");
+    await expect(preview).not.toContainText(
+      "A private mountain stay made for two.",
+    );
+    await expect(preview).toHaveAttribute("data-business", "hotel");
+    await expect(preview).toHaveAttribute("data-direction", "cinematic");
+  });
+
+  test("rejects invalid input without transmitting it", async ({ page }) => {
+    let requestCount = 0;
+    await page.route("**/api/studio-personalize", async (route) => {
+      requestCount += 1;
+      await route.abort();
+    });
+
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseHotelCinematic(page);
+
+    await page.getByLabel("Describe your business").fill("Too short");
+    await page
+      .getByRole("button", { name: "Personalize this concept" })
+      .click();
+
+    expect(requestCount).toBe(0);
+    await expect(page.getByTestId("studio-preview")).toContainText(
+      "Stay where the horizon slows down.",
+    );
+  });
+
+  test("preserves the deterministic preview when personalization fails", async ({
+    page,
+  }) => {
+    await page.route("**/api/studio-personalize", async (route) => {
+      await route.fulfill({
+        status: 503,
+        contentType: "application/json",
+        body: JSON.stringify({
+          error:
+            "Personalization isn't available right now. Your selected concept is still ready.",
+        }),
+      });
+    });
+
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseHotelCinematic(page);
+
+    const preview = page.getByTestId("studio-preview");
+    await page
+      .getByLabel("Describe your business")
+      .fill(
+        "A private mountain retreat for couples who value quiet stays and guided local walks.",
+      );
+    await page
+      .getByRole("button", { name: "Personalize this concept" })
+      .click();
+
+    await expect(page.getByRole("alert")).toContainText(
+      "Personalization isn't available right now",
+    );
+    await expect(preview).toHaveAttribute("data-personalized", "false");
+    await expect(preview).toContainText("Stay where the horizon slows down.");
+    await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
+  });
+
+  test("keeps the preview visible and prevents duplicate submission while loading", async ({
+    page,
+  }) => {
+    await page.route("**/api/studio-personalize", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personalization: {
+            schemaVersion: 1,
+            headline: "A private mountain stay made for two.",
+            intro:
+              "Quiet rooms, open views and local experiences shape a slower stay near the border.",
+            highlights: ["Private stays for couples"],
+            featuredModule: "rooms",
+            secondaryModule: "experiences",
+            ctaSupport: "Bring this quiet retreat to life online.",
+          },
+        }),
+      });
+    });
+
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseHotelCinematic(page);
+
+    const preview = page.getByTestId("studio-preview");
+    await page
+      .getByLabel("Describe your business")
+      .fill(
+        "A private mountain retreat for couples who value quiet stays and guided local walks.",
+      );
+    const submit = page.getByRole("button", {
+      name: "Personalize this concept",
+    });
+    await submit.click();
+
+    await expect(preview).toBeVisible();
+    await expect(preview).toContainText("Stay where the horizon slows down.");
+    await expect(
+      page.getByRole("button", { name: "Personalizing concept…" }),
+    ).toBeDisabled();
+    await expect(page.locator(".studio-personalization-form")).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+    await expect(page.getByRole("status")).toContainText(
+      "The original preview stays ready",
+    );
+
+    await expect(preview).toHaveAttribute("data-personalized", "true");
+  });
+
+  test("does not apply a stale result after business and direction change", async ({
+    page,
+  }) => {
+    await page.route("**/api/studio-personalize", async (route) => {
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      if (route.request().isNavigationRequest()) return route.continue();
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          personalization: {
+            schemaVersion: 1,
+            headline: "A private mountain stay made for two.",
+            intro:
+              "Quiet rooms, open views and local experiences shape a slower stay near the border.",
+            highlights: ["Private stays for couples"],
+            featuredModule: "rooms",
+            secondaryModule: "experiences",
+            ctaSupport: "Bring this quiet retreat to life online.",
+          },
+        }),
+      });
+    });
+
+    await reduceMotion(page);
+    await safeGoto(page, studioRoute);
+    await waitForHydration(page);
+    await chooseHotelCinematic(page);
+
+    await page
+      .getByLabel("Describe your business")
+      .fill(
+        "A private mountain retreat for couples who value quiet stays and guided local walks.",
+      );
+    await page
+      .getByRole("button", { name: "Personalize this concept" })
+      .click();
+    await expect(
+      page.getByRole("button", { name: "Personalizing concept…" }),
+    ).toBeDisabled();
+
+    await page.getByRole("button", { name: /Start again/i }).click();
+    await chooseBusinessDirection(page, "Tours & Travel", "Bold");
+
+    const preview = page.getByTestId("studio-preview");
+    await expect(preview).toHaveAttribute("data-business", "tours");
+    await expect(preview).toHaveAttribute("data-direction", "bold");
+    await expect(preview).toHaveAttribute("data-personalized", "false");
+    await expect(preview).toContainText(
+      "Follow the road into something unforgettable.",
+    );
+    await expect(preview).not.toContainText(
+      "A private mountain stay made for two.",
+    );
+  });
+});
+
 const visualViewports = [
   { name: "mobile-360", width: 360, height: 800 },
   { name: "mobile-390", width: 390, height: 844 },

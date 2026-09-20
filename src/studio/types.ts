@@ -44,7 +44,10 @@ export type StudioVisualProfile = {
 export type StudioExperienceModule = {
   businessId: StudioBusinessId;
   sectionLabel: string;
-  sections: readonly string[];
+  sections: readonly {
+    id: string;
+    label: string;
+  }[];
   proofPoints: readonly string[];
 };
 

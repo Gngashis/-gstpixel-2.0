@@ -7,7 +7,7 @@ import {
   RotateCcw,
   Sparkles,
 } from "lucide-react";
-import { useEffect, useMemo, useReducer, useRef } from "react";
+import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { ScrollReveal } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { useReducedMotion } from "@/lib/motion";
@@ -28,6 +28,10 @@ import type {
   StudioVisualProfile,
 } from "../types";
 import { FlagshipPreview, flagshipBusinessIds } from "./flagship-previews";
+import {
+  PersonalizationPanel,
+  type AppliedPersonalization,
+} from "./personalization-panel";
 import "../styles.css";
 
 function StudioProgress({
@@ -168,11 +172,21 @@ function PreviewArtwork({
 function ExperiencePreview({
   business,
   direction,
+  personalization,
 }: {
   business: StudioBusiness;
   direction: StudioDirection;
+  personalization: AppliedPersonalization | null;
 }) {
   const profile = studioVisualProfiles[direction.id];
+  const personalizedBusiness = personalization
+    ? {
+        ...business,
+        sampleName: personalization.businessName || business.sampleName,
+        sampleHeadline: personalization.content.headline,
+        sampleCopy: personalization.content.intro,
+      }
+    : business;
   const isFlagship = flagshipBusinessIds.includes(
     business.id as (typeof flagshipBusinessIds)[number],
   );
@@ -182,6 +196,7 @@ function ExperiencePreview({
       data-testid="studio-preview"
       data-business={business.id}
       data-direction={direction.id}
+      data-personalized={personalization ? "true" : "false"}
       style={
         {
           "--studio-business-accent": business.accent,
@@ -196,25 +211,28 @@ function ExperiencePreview({
         <i>yourbusiness.com</i>
       </div>
       {isFlagship ? (
-        <FlagshipPreview business={business} direction={direction} />
+        <FlagshipPreview
+          business={personalizedBusiness}
+          direction={direction}
+        />
       ) : (
         <>
           <div className="studio-preview-nav">
-            <strong>{business.sampleName}</strong>
+            <strong>{personalizedBusiness.sampleName}</strong>
             <span>Explore</span>
             <i aria-hidden="true" />
           </div>
           <div className="studio-preview-stage">
             <div className="studio-preview-message">
-              <p>{business.sampleEyebrow}</p>
-              <h2>{business.sampleHeadline}</h2>
-              <span>{business.sampleCopy}</span>
+              <p>{personalizedBusiness.sampleEyebrow}</p>
+              <h2>{personalizedBusiness.sampleHeadline}</h2>
+              <span>{personalizedBusiness.sampleCopy}</span>
               <div className="studio-preview-actions" aria-hidden="true">
-                <b>{business.primaryAction}</b>
-                <em>{business.secondaryAction}</em>
+                <b>{personalizedBusiness.primaryAction}</b>
+                <em>{personalizedBusiness.secondaryAction}</em>
               </div>
             </div>
-            <PreviewArtwork business={business} profile={profile} />
+            <PreviewArtwork business={personalizedBusiness} profile={profile} />
           </div>
         </>
       )}
@@ -227,7 +245,13 @@ function ExperiencePreview({
   );
 }
 
-function BusinessSystem({ business }: { business: StudioBusiness }) {
+function BusinessSystem({
+  business,
+  personalization,
+}: {
+  business: StudioBusiness;
+  personalization: AppliedPersonalization | null;
+}) {
   const module = studioExperienceModules[business.id];
   return (
     <section className="studio-system" aria-labelledby="studio-system-title">
@@ -236,15 +260,29 @@ function BusinessSystem({ business }: { business: StudioBusiness }) {
         <h2 id="studio-system-title">{module.sectionLabel}</h2>
       </div>
       <ol className="studio-system-flow">
-        {module.sections.map((section, index) => (
-          <li key={section}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <strong>{section}</strong>
-            {index < module.sections.length - 1 && (
-              <ArrowRight size={14} aria-hidden="true" />
-            )}
-          </li>
-        ))}
+        {module.sections.map((section, index) => {
+          const emphasis =
+            personalization?.content.featuredModule === section.id
+              ? "featured"
+              : personalization?.content.secondaryModule === section.id
+                ? "secondary"
+                : undefined;
+
+          return (
+            <li
+              key={section.id}
+              className={emphasis ? `is-${emphasis}` : undefined}
+              data-module={section.id}
+              data-emphasis={emphasis}
+            >
+              <span>{String(index + 1).padStart(2, "0")}</span>
+              <strong>{section.label}</strong>
+              {index < module.sections.length - 1 && (
+                <ArrowRight size={14} aria-hidden="true" />
+              )}
+            </li>
+          );
+        })}
       </ol>
       <div className="studio-proof-points">
         {module.proofPoints.map((point) => (
@@ -259,6 +297,8 @@ function BusinessSystem({ business }: { business: StudioBusiness }) {
 
 export function StudioExperience() {
   const [state, dispatch] = useReducer(studioReducer, initialStudioState);
+  const [personalization, setPersonalization] =
+    useState<AppliedPersonalization | null>(null);
   const reducedMotion = useReducedMotion();
   const stepHeadingRef = useRef<HTMLHeadingElement>(null);
   const hasInteracted = useRef(false);
@@ -288,6 +328,7 @@ export function StudioExperience() {
 
   const dispatchInteraction = (action: Parameters<typeof dispatch>[0]) => {
     hasInteracted.current = true;
+    if (action.type !== "showMoreBusinesses") setPersonalization(null);
     dispatch(action);
   };
 
@@ -454,12 +495,45 @@ export function StudioExperience() {
                     </h2>
                     <span>{selectedBusiness.outcome}</span>
                   </div>
+                  <PersonalizationPanel
+                    key={`${selectedBusiness.id}-${selectedDirection.id}`}
+                    business={selectedBusiness}
+                    direction={selectedDirection}
+                    applied={personalization}
+                    onApply={(nextPersonalization) => {
+                      if (
+                        nextPersonalization.category === selectedBusiness.id &&
+                        nextPersonalization.direction === selectedDirection.id
+                      ) {
+                        setPersonalization(nextPersonalization);
+                      }
+                    }}
+                    onReset={() => setPersonalization(null)}
+                  />
                   <ExperiencePreview
                     business={selectedBusiness}
                     direction={selectedDirection}
+                    personalization={personalization}
                   />
+                  {personalization && (
+                    <aside
+                      className="studio-personalized-notes"
+                      aria-label="Personalized business highlights"
+                      data-testid="studio-personalized-notes"
+                    >
+                      <p>Personalized emphasis</p>
+                      <ul>
+                        {personalization.content.highlights.map((highlight) => (
+                          <li key={highlight}>{highlight}</li>
+                        ))}
+                      </ul>
+                    </aside>
+                  )}
                 </section>
-                <BusinessSystem business={selectedBusiness} />
+                <BusinessSystem
+                  business={selectedBusiness}
+                  personalization={personalization}
+                />
                 <section
                   className="studio-contact"
                   aria-labelledby="studio-contact-title"
@@ -470,8 +544,10 @@ export function StudioExperience() {
                       Build this for my business.
                     </h2>
                     <span>
-                      Talk directly with GSTPIXEL about your website. Your
-                      Studio choices are not added to the message.
+                      {personalization?.content.ctaSupport ??
+                        "Talk directly with GSTPIXEL about your website."}{" "}
+                      Your Studio choices and personalization are not added to
+                      the message.
                     </span>
                   </div>
                   <a

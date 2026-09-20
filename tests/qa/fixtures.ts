@@ -207,6 +207,16 @@ export async function waitForHydration(page: Page) {
   await page.waitForFunction(() => "__TSR_ROUTER__" in window, undefined, {
     timeout: 10000,
   });
+  // On a cold Vite dependency-optimization load, the router marker can appear
+  // immediately before React commits its delegated event listeners. Waiting for
+  // two browser frames lets that commit complete without relying on a fixed
+  // timing delay, preserving the documented hydration guard for real clicks.
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }),
+  );
 }
 
 /** Apply reduced-motion emulation and neutralize CSS animations/transitions. */
