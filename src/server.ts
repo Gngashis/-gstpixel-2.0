@@ -3,7 +3,11 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { STUDIO_PERSONALIZATION_API_PATH } from "./studio/personalization/config";
-import { handleStudioPersonalization } from "./studio/personalization/api";
+import {
+  handleStudioPersonalization,
+  resolveStudioPersonalizationEnv,
+  type StudioPersonalizationEnv,
+} from "./studio/personalization/api";
 import type { WorkersAiBinding } from "./studio/personalization/cloudflare-provider";
 
 type ServerEntry = {
@@ -14,7 +18,7 @@ type ServerEntry = {
   ) => Promise<Response> | Response;
 };
 
-type ServerEnvironment = {
+type ServerEnvironment = StudioPersonalizationEnv & {
   AI?: WorkersAiBinding;
 };
 
@@ -68,7 +72,10 @@ export default {
     ctx: unknown,
   ) {
     if (new URL(request.url).pathname === STUDIO_PERSONALIZATION_API_PATH) {
-      return handleStudioPersonalization(request, env);
+      return handleStudioPersonalization(
+        request,
+        resolveStudioPersonalizationEnv(request, env),
+      );
     }
 
     try {

@@ -10,9 +10,26 @@ import {
   type StudioPersonalizationProvider,
 } from "./provider";
 
-type StudioPersonalizationEnv = {
+export type StudioPersonalizationEnv = {
   AI?: WorkersAiBinding;
 };
+
+type NitroCloudflareRequest = Request & {
+  runtime?: {
+    cloudflare?: {
+      env?: StudioPersonalizationEnv;
+    };
+  };
+};
+
+export function resolveStudioPersonalizationEnv(
+  request: Request,
+  directEnv?: StudioPersonalizationEnv,
+): StudioPersonalizationEnv | undefined {
+  return (
+    directEnv ?? (request as NitroCloudflareRequest).runtime?.cloudflare?.env
+  );
+}
 
 type RequestGuard = {
   enter(): boolean;

@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { createStudioPersonalizationHandler } from "./api";
+import {
+  createStudioPersonalizationHandler,
+  resolveStudioPersonalizationEnv,
+} from "./api";
 import { createCloudflareWorkersAiProvider } from "./cloudflare-provider";
 import { STUDIO_PERSONALIZATION_MODEL } from "./config";
 import type { StudioPersonalizationProvider } from "./provider";
@@ -145,6 +148,22 @@ describe("Cloudflare Workers AI personalization adapter", () => {
 });
 
 describe("Studio personalization API", () => {
+  it("resolves Cloudflare bindings from Nitro's augmented request", () => {
+    const ai = { run: vi.fn() };
+    const request = new Request(
+      "https://gstpixel.test/api/studio-personalize",
+    ) as
+      | Request
+      | (Request & {
+          runtime: { cloudflare: { env: { AI: typeof ai } } };
+        });
+    Object.assign(request, {
+      runtime: { cloudflare: { env: { AI: ai } } },
+    });
+
+    expect(resolveStudioPersonalizationEnv(request)?.AI).toBe(ai);
+  });
+
   it("passes only validated category, direction and submitted fields to the provider", async () => {
     const personalize = vi.fn(async () => validPersonalization);
     const provider: StudioPersonalizationProvider = { personalize };
