@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { StudioExperience } from "@/studio/components/studio-experience";
+import { StudioBuilder } from "@/studio/builder/editor";
 import { buildCanonical } from "@/lib/seo";
 
 export const Route = createFileRoute("/website-studio")({
@@ -9,13 +9,13 @@ export const Route = createFileRoute("/website-studio")({
       {
         name: "description",
         content:
-          "Choose your business and a premium creative direction to see what your GSTPIXEL website could become.",
+          "Describe your business and watch GSTPIXEL Website Studio generate a premium, editable website experience.",
       },
       { property: "og:title", content: "Website Studio — GSTPIXEL" },
       {
         property: "og:description",
         content:
-          "Choose your business and immediately experience a premium website direction from GSTPIXEL.",
+          "Describe it, generate a premium website, and refine the design live with GSTPIXEL Website Studio.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/website-studio") },
@@ -29,5 +29,5 @@ export const Route = createFileRoute("/website-studio")({
 });
 
 function WebsiteStudioPage() {
-  return <StudioExperience />;
+  return <StudioBuilder />;
 }

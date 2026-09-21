@@ -12,680 +12,353 @@ import {
 } from "./fixtures";
 
 const studioRoute = "/website-studio";
+const resortPrompt =
+  "Create a premium luxury resort website for a property near Jaigaon with 15 rooms, mountain views, a restaurant and booking enquiries. Use deep forest green, warm ivory and refined gold accents. Make it elegant, cinematic and modern.";
+const cafePrompt =
+  "Create a bright modern premium café website with warm cream backgrounds, terracotta accents, editorial photography, friendly typography and a simple menu.";
 
-async function chooseHotelCinematic(page: Parameters<typeof safeGoto>[0]) {
-  await page.getByRole("button", { name: /Hotel \/ Resort/i }).click();
+async function openStudio(page: Parameters<typeof safeGoto>[0]) {
+  await reduceMotion(page);
+  const errors = await safeGoto(page, studioRoute);
+  await waitForHydration(page);
   await expect(
-    page.getByRole("heading", { name: "Choose how it should feel." }),
+    page.getByRole("heading", {
+      level: 1,
+      name: /Describe it\.\s*Watch it become a website\./i,
+    }),
   ).toBeVisible();
-  await page.getByRole("button", { name: /^Feel it first Cinematic/i }).click();
-  await expect(page.getByTestId("studio-preview")).toBeVisible();
+  return errors;
 }
 
-async function chooseBusinessDirection(
+async function generateWebsite(
   page: Parameters<typeof safeGoto>[0],
-  business:
-    | "Hotel / Resort"
-    | "Tours & Travel"
-    | "Restaurant / Café"
-    | "Retail / Commerce"
-    | "Professional / Corporate"
-    | "Gym / Fitness",
-  direction: "Cinematic" | "Refined" | "Bold",
+  prompt = resortPrompt,
 ) {
-  const businessButton = page.getByRole("button", {
-    name: new RegExp(business),
+  await page.getByLabel("Describe the website you want").fill(prompt);
+  await page.getByRole("button", { name: /Generate website/i }).click();
+  await expect(page.getByText("Preparing your website")).toBeVisible();
+  await expect(page.getByTestId("studio-preview")).toBeVisible({
+    timeout: 10_000,
   });
-  if ((await businessButton.count()) === 0) {
-    await page
-      .getByRole("button", { name: /Show more business types/i })
-      .click();
-  }
-  await businessButton.click();
-  await expect(
-    page.getByRole("heading", { name: "Choose how it should feel." }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: new RegExp(`${direction}`, "i") })
-    .click();
-  await expect(page.getByTestId("studio-preview")).toBeVisible();
 }
 
-test.describe("Website Studio deterministic core", () => {
-  test("progressively reveals every supported business category", async ({
-    page,
-  }) => {
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
+async function tellStudio(
+  page: Parameters<typeof safeGoto>[0],
+  instruction: string,
+) {
+  await page.getByLabel("Tell Studio what to change").fill(instruction);
+  await page.getByRole("button", { name: "Apply change" }).click();
+  await expect(
+    page.getByText("Your instruction changed the website."),
+  ).toBeVisible();
+}
 
-    await expect(
-      page.getByRole("button", { name: /Retail \/ Commerce/i }),
-    ).toHaveCount(0);
-    await page
-      .getByRole("button", { name: /Show more business types/i })
-      .click();
-
-    await expect(
-      page.getByRole("button", { name: /Retail \/ Commerce/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Professional \/ Corporate/i }),
-    ).toBeVisible();
-    await expect(
-      page.getByRole("button", { name: /Gym \/ Fitness/i }),
-    ).toBeVisible();
-  });
-
-  test("preserves normal browser back and forward navigation", async ({
+test.describe("Website Studio V2", () => {
+  test("loads directly and preserves normal browser navigation", async ({
     page,
   }) => {
     await reduceMotion(page);
     await safeGoto(page, "/");
     await page.goto(studioRoute, { waitUntil: "load" });
     await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Choose your business",
+      "Describe it.",
     );
-
     await page.goBack({ waitUntil: "load" });
     await expect(page).toHaveURL(/\/$/);
-    await expect(page.locator("#main")).toContainText("GSTPIXEL");
-
     await page.goForward({ waitUntil: "load" });
     await expect(page).toHaveURL(/\/website-studio$/);
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Choose your business",
-    );
+    await expect(
+      page.getByLabel("Describe the website you want"),
+    ).toBeVisible();
   });
 
-  test("loads directly, refreshes, and completes the core flow", async ({
+  test("generates the flagship resort through deterministic fallback", async ({
     page,
-    setViewport,
   }) => {
-    await setViewport({ name: "mobile-390", width: 390, height: 844 });
-    await reduceMotion(page);
-    const errors = await safeGoto(page, studioRoute);
+    await page.route("**/api/studio-build", async (route) => route.abort());
+    const errors = await openStudio(page);
+    await generateWebsite(page);
 
-    await expect(page.getByRole("heading", { level: 1 })).toContainText(
-      "Choose your business",
-    );
-    await page.reload({ waitUntil: "load" });
+    const preview = page.getByTestId("studio-preview");
+    await expect(preview).toHaveAttribute("data-palette", "forest-gold");
+    await expect(preview).toHaveAttribute("data-mood", /luxury|cinematic/);
+    await expect(preview).toContainText("MOUNTAIN HOUSE");
+    await expect(preview).toContainText("Fifteen considered rooms");
+    await expect(preview).toContainText("Rooms & private stays");
+    await expect(preview).toContainText("The restaurant");
     await expect(
-      page.getByRole("button", { name: /Hotel \/ Resort/i }),
+      preview.locator('[data-section-type="gallery"]'),
     ).toBeVisible();
-    await waitForHydration(page);
-
-    await chooseHotelCinematic(page);
-    await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-      "data-business",
-      "hotel",
-    );
-    await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-      "data-direction",
-      "cinematic",
-    );
-    await expect(page.getByText("Rooms", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("Book / Enquire", { exact: true }),
+      page.getByText(
+        "Website generated with Studio’s resilient design system.",
+      ),
     ).toBeVisible();
     expect(errors).toHaveLength(0);
   });
 
-  for (const direction of ["Cinematic", "Refined", "Bold"] as const) {
-    test(`renders the Hotel / Resort flagship in the ${direction} direction`, async ({
-      page,
-    }) => {
-      await reduceMotion(page);
-      await safeGoto(page, studioRoute);
-      await waitForHydration(page);
-      await chooseBusinessDirection(page, "Hotel / Resort", direction);
-
-      await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-        "data-business",
-        "hotel",
-      );
-      await expect(page.getByTestId("studio-hotel-flagship")).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: "Two quiet ways to arrive." }),
-      ).toBeVisible();
-      await expect(
-        page.getByText("Valley Suite", { exact: true }),
-      ).toBeVisible();
-      await expect(
-        page.getByText("Forest House", { exact: true }),
-      ).toBeVisible();
-      await expect(page.getByTestId("studio-tours-flagship")).toHaveCount(0);
-    });
-
-    test(`renders the Tours & Travel flagship in the ${direction} direction`, async ({
-      page,
-    }) => {
-      await reduceMotion(page);
-      await safeGoto(page, studioRoute);
-      await waitForHydration(page);
-      await chooseBusinessDirection(page, "Tours & Travel", direction);
-
-      await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-        "data-business",
-        "tours",
-      );
-      await expect(page.getByTestId("studio-tours-flagship")).toBeVisible();
-      await expect(
-        page.getByRole("heading", {
-          name: "Valleys, dzongs and high passes.",
-        }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("heading", {
-          name: "The journey, understood at a glance.",
-        }),
-      ).toBeVisible();
-      await expect(page.getByText("8 days", { exact: true })).toBeVisible();
-      await expect(page.getByTestId("studio-hotel-flagship")).toHaveCount(0);
-    });
-  }
-
-  const phaseThreeExperiences = [
-    {
-      business: "Restaurant / Café",
-      id: "restaurant",
-      testId: "studio-restaurant-flagship",
-      headings: ["Tonight’s short menu.", "Sourced within the valley."],
-      detail: "Fire-grilled river trout, red rice",
-    },
-    {
-      business: "Retail / Commerce",
-      id: "retail",
-      testId: "studio-retail-flagship",
-      headings: ["Built to be used daily.", "A shop that stays reachable."],
-      detail: "Turned bowl",
-    },
-    {
-      business: "Professional / Corporate",
-      id: "professional",
-      testId: "studio-professional-flagship",
-      headings: [
-        "We work on decisions that do not get a second try.",
-        "How an engagement actually runs.",
-      ],
-      detail: "Fixed scope, named team",
-    },
-    {
-      business: "Gym / Fitness",
-      id: "gym",
-      testId: "studio-gym-flagship",
-      headings: [
-        "A timetable you can plan around.",
-        "Two ways in. No lock-ins.",
-      ],
-      detail: "Nu 6,500 / month",
-    },
-  ] as const;
-
-  for (const experience of phaseThreeExperiences) {
-    for (const direction of ["Cinematic", "Refined", "Bold"] as const) {
-      test(`renders the ${experience.business} flagship in the ${direction} direction`, async ({
-        page,
-      }) => {
-        await reduceMotion(page);
-        await safeGoto(page, studioRoute);
-        await waitForHydration(page);
-        await chooseBusinessDirection(page, experience.business, direction);
-
-        await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-          "data-business",
-          experience.id,
-        );
-        await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-          "data-direction",
-          direction.toLowerCase(),
-        );
-        await expect(page.getByTestId(experience.testId)).toBeVisible();
-        for (const heading of experience.headings) {
-          await expect(
-            page.getByRole("heading", { name: heading }),
-          ).toBeVisible();
-        }
-        await expect(
-          page.getByText(experience.detail, { exact: true }),
-        ).toBeVisible();
-        await expect(page.locator(".studio-preview-art")).toHaveCount(0);
-      });
-    }
-  }
-
-  test("keeps all six flagship experiences within a 360px mobile viewport", async ({
+  test("creates a structurally different café rather than recolouring the resort", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    const businesses = [
-      "Hotel / Resort",
-      "Tours & Travel",
-      "Restaurant / Café",
-      "Retail / Commerce",
-      "Professional / Corporate",
-      "Gym / Fitness",
-    ] as const;
-
-    for (const [index, business] of businesses.entries()) {
-      if (index > 0) {
-        await page.getByRole("button", { name: /Start again/i }).click();
-      }
-      await chooseBusinessDirection(page, business, "Cinematic");
-      expect(
-        (await checkOverflow(page)).docOverflow,
-        `${business} overflowed at 360px`,
-      ).toBeLessThanOrEqual(2);
-    }
+    await openStudio(page);
+    await generateWebsite(page, cafePrompt);
+    const preview = page.getByTestId("studio-preview");
+    await expect(preview).toHaveAttribute("data-palette", "ivory-terracotta");
+    await expect(preview).toContainText("COMMON GROUND CAFÉ");
+    await expect(preview).toContainText(
+      "Made for morning rituals and long lunches.",
+    );
+    await expect(preview.locator(".studio-v2-site-hero")).toHaveClass(
+      /variant-split-composition/,
+    );
+    await expect(preview.locator('[data-section-type="listings"]')).toHaveCount(
+      0,
+    );
   });
 
-  test("uses canonical WhatsApp contact with a generic message only", async ({
+  test("switches between desktop and responsive mobile preview", async ({
     page,
   }) => {
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    await chooseHotelCinematic(page);
+    await openStudio(page);
+    await generateWebsite(page);
+    const canvas = page.locator(".studio-v2-canvas");
+    await expect(canvas).toHaveClass(/is-desktop/);
+    await page.getByRole("button", { name: /Mobile/i }).click();
+    await expect(canvas).toHaveClass(/is-mobile/);
+    const widths = await canvas.evaluate((node) => ({
+      canvas: node.getBoundingClientRect().width,
+      viewport: window.innerWidth,
+    }));
+    expect(widths.canvas).toBeLessThan(Math.min(widths.viewport, 430));
+    await expect(
+      page.getByTestId("studio-preview").locator("nav"),
+    ).toBeHidden();
+  });
+
+  test("applies palette, mood, hero, copy, section and page instructions", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const preview = page.getByTestId("studio-preview");
+
+    await tellStudio(page, "Change the colors to black and champagne gold.");
+    await expect(preview).toHaveAttribute("data-palette", "midnight-champagne");
+    await tellStudio(page, "Make it more luxurious.");
+    await expect(preview).toHaveAttribute("data-mood", "luxury");
+    await tellStudio(page, "Make the hero more cinematic.");
+    await expect(preview.locator(".studio-v2-site-hero")).toHaveClass(
+      /variant-cinematic-editorial/,
+    );
+    await tellStudio(
+      page,
+      'Change the headline to "A private horizon of your own."',
+    );
+    await expect(preview.getByRole("heading", { level: 1 })).toContainText(
+      "A private horizon of your own.",
+    );
+
+    await tellStudio(page, "Add testimonials.");
+    await expect(
+      preview.locator('[data-section-type="testimonials"]'),
+    ).toBeVisible();
+    await tellStudio(page, "Remove testimonials.");
+    await expect(
+      preview.locator('[data-section-type="testimonials"]'),
+    ).toHaveCount(0);
+
+    await tellStudio(page, "Move gallery above rooms.");
+    const order = await preview
+      .locator("[data-section-type]")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("data-section-type")),
+      );
+    expect(order.indexOf("gallery")).toBeLessThan(order.indexOf("listings"));
+
+    await tellStudio(page, "Add an About page.");
+    await expect(
+      page.getByRole("button", { name: /^About\s+3$/ }),
+    ).toBeVisible();
+  });
+
+  test("produces an alternate version and supports undo and redo", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const preview = page.getByTestId("studio-preview");
+    const originalPalette = await preview.getAttribute("data-palette");
+    const originalHero = await preview
+      .locator(".studio-v2-site-hero")
+      .getAttribute("class");
+
+    await page.getByRole("button", { name: /Show another version/i }).click();
+    await expect(
+      page.getByText("A substantially different visual version is ready."),
+    ).toBeVisible();
+    expect(await preview.getAttribute("data-palette")).not.toBe(
+      originalPalette,
+    );
+    expect(
+      await preview.locator(".studio-v2-site-hero").getAttribute("class"),
+    ).not.toBe(originalHero);
+
+    await page.getByRole("button", { name: "Undo last change" }).click();
+    await expect(preview).toHaveAttribute("data-palette", originalPalette!);
+    await page.getByRole("button", { name: "Redo change" }).click();
+    await expect(preview).not.toHaveAttribute("data-palette", originalPalette!);
+  });
+
+  test("manual controls add, edit, vary, move and remove real sections", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const preview = page.getByTestId("studio-preview");
+
+    await page.getByLabel("Add section").selectOption("testimonials");
+    await page
+      .getByRole("button", { name: "Add testimonials section" })
+      .click();
+    await expect(
+      preview.locator('[data-section-type="testimonials"]'),
+    ).toBeVisible();
+
+    await page
+      .getByLabel("Heading")
+      .fill("Verified guest stories belong here.");
+    await expect(preview).toContainText("Verified guest stories belong here.");
+    await page.getByLabel("Layout variant").selectOption("editorial-quotes");
+    await expect(
+      preview.locator('[data-section-type="testimonials"] section'),
+    ).toHaveClass(/variant-editorial-quotes/);
+    await page.getByRole("button", { name: /^Up$/ }).click();
+    await expect(page.getByText("Section moved up.")).toBeVisible();
+    await page.getByRole("button", { name: "Remove" }).click();
+    await expect(
+      preview.locator('[data-section-type="testimonials"]'),
+    ).toHaveCount(0);
+  });
+
+  test("uses canonical WhatsApp text and never persists visitor content", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    await tellStudio(
+      page,
+      'Change the headline to "Still Ridge private retreat."',
+    );
 
     const href = await page.getByTestId("studio-whatsapp").getAttribute("href");
-    expect(href).toBeTruthy();
-
     const actual = new URL(href!);
     const canonical = new URL(businessFacts.whatsapp.href);
     expect(`${actual.origin}${actual.pathname}`).toBe(
       `${canonical.origin}${canonical.pathname}`,
     );
     expect(actual.searchParams.get("text")).toBe(STUDIO_WHATSAPP_MESSAGE);
+    expect(decodeURIComponent(actual.search).toLowerCase()).not.toContain(
+      "still ridge",
+    );
 
-    const transmitted = decodeURIComponent(actual.search).toLowerCase();
-    expect(transmitted).not.toContain("hotel");
-    expect(transmitted).not.toContain("cinematic");
-    expect(transmitted).not.toContain("direction");
+    const storage = await page.evaluate(() => ({
+      local: Object.fromEntries(
+        Array.from({ length: localStorage.length }, (_, index) => {
+          const key = localStorage.key(index) ?? "";
+          return [key, localStorage.getItem(key)];
+        }),
+      ),
+      session: Object.fromEntries(
+        Array.from({ length: sessionStorage.length }, (_, index) => {
+          const key = sessionStorage.key(index) ?? "";
+          return [key, sessionStorage.getItem(key)];
+        }),
+      ),
+    }));
+    expect(JSON.stringify(storage).toLowerCase()).not.toContain("still ridge");
+    expect(JSON.stringify(storage).toLowerCase()).not.toContain(
+      "mountain views",
+    );
+    expect(
+      Object.keys(storage.local).some((key) => key.includes("studio")),
+    ).toBe(false);
+    expect(
+      Object.keys(storage.session).some((key) => key.includes("studio")),
+    ).toBe(false);
   });
 
-  test("supports keyboard-only business and direction selection", async ({
+  test("supports keyboard section selection under reduced motion", async ({
     page,
   }) => {
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-
-    const hotel = page.getByRole("button", { name: /Hotel \/ Resort/i });
-    await hotel.focus();
-    await expect(hotel).toBeFocused();
-    await page.keyboard.press("Enter");
-
-    const directionHeading = page.getByRole("heading", {
-      name: "Choose how it should feel.",
-    });
-    await expect(directionHeading).toBeFocused();
-
-    const refined = page.getByRole("button", {
-      name: /^Clarity with presence Refined/i,
-    });
-    await refined.focus();
-    await page.keyboard.press("Space");
-
-    await expect(page.getByTestId("studio-preview")).toHaveAttribute(
-      "data-direction",
-      "refined",
-    );
-    await expect(
-      page.getByRole("heading", {
-        name: "Your direction is ready to experience.",
-      }),
-    ).toBeFocused();
-  });
-
-  test("remains understandable with reduced motion", async ({ page }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
     await safeGoto(page, studioRoute);
     await waitForHydration(page);
-    await chooseHotelCinematic(page);
+    await generateWebsite(page);
 
-    const animationNames = await page.evaluate(() => ({
-      ambient: getComputedStyle(document.querySelector(".studio-ambient span")!)
-        .animationName,
-      preview: getComputedStyle(document.querySelector(".studio-hotel-sun")!)
-        .animationName,
-    }));
-    expect(animationNames).toEqual({ ambient: "none", preview: "none" });
-    await expect(page.getByText("Build this for my business.")).toBeVisible();
-
-    await page.getByRole("button", { name: /Start again/i }).click();
-    await chooseBusinessDirection(page, "Restaurant / Café", "Cinematic");
-    const phaseThreeAnimation = await page.evaluate(
-      () =>
-        getComputedStyle(document.querySelector(".studio-dining-steam")!)
-          .animationName,
-    );
-    expect(phaseThreeAnimation).toBe("none");
-  });
-});
-
-test.describe("Website Studio optional AI personalization", () => {
-  test("submits only after explicit action, applies valid content, and resets in memory", async ({
-    page,
-  }) => {
-    const requests: Record<string, unknown>[] = [];
-    await page.route("**/api/studio-personalize", async (route) => {
-      requests.push(route.request().postDataJSON() as Record<string, unknown>);
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          personalization: {
-            schemaVersion: 1,
-            headline: "A private mountain stay made for two.",
-            intro:
-              "Quiet rooms, open views and local experiences shape a slower stay near the border.",
-            highlights: [
-              "Private stays for couples",
-              "Mountain views from every room",
-              "Guided local walks on request",
-            ],
-            featuredModule: "rooms",
-            secondaryModule: "experiences",
-            ctaSupport: "Bring this quiet retreat to life online.",
-          },
-        }),
-      });
-    });
-
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    await chooseHotelCinematic(page);
-
-    const preview = page.getByTestId("studio-preview");
-    await expect(preview).toContainText("Stay where the horizon slows down.");
-
-    await page.getByLabel("Business name (optional)").fill("Still Ridge");
-    await page
-      .getByLabel("Describe your business")
-      .fill(
-        "A private mountain retreat for couples who value quiet stays and guided local walks.",
-      );
-
-    expect(requests).toHaveLength(0);
-
-    await page
-      .getByRole("button", { name: "Personalize this concept" })
-      .focus();
+    const gallery = page
+      .getByTestId("studio-preview")
+      .locator('[data-section-type="gallery"]');
+    await gallery.focus();
     await page.keyboard.press("Enter");
-
-    await expect(preview).toHaveAttribute("data-business", "hotel");
-    await expect(preview).toHaveAttribute("data-direction", "cinematic");
-    await expect(preview).toHaveAttribute("data-personalized", "true");
-    await expect(preview).toContainText(
-      "A private mountain stay made for two.",
-    );
-    await expect(preview).toContainText("Still Ridge");
-    await expect(page.getByTestId("studio-personalized-notes")).toContainText(
-      "Private stays for couples",
-    );
-    await expect(page.locator('[data-module="rooms"]')).toHaveAttribute(
-      "data-emphasis",
-      "featured",
-    );
-    await expect(page.locator('[data-module="experiences"]')).toHaveAttribute(
-      "data-emphasis",
-      "secondary",
-    );
-
-    expect(requests).toEqual([
-      {
-        category: "hotel",
-        direction: "cinematic",
-        businessName: "Still Ridge",
-        description:
-          "A private mountain retreat for couples who value quiet stays and guided local walks.",
-      },
-    ]);
-
-    const href = await page.getByTestId("studio-whatsapp").getAttribute("href");
-    const whatsapp = new URL(href!);
-    expect(whatsapp.searchParams.get("text")).toBe(STUDIO_WHATSAPP_MESSAGE);
-    expect(decodeURIComponent(whatsapp.search).toLowerCase()).not.toContain(
-      "still ridge",
-    );
-
-    const storedValues = await page.evaluate(() => {
-      const snapshot = (storage: Storage) =>
-        Array.from({ length: storage.length }, (_, index) => {
-          const key = storage.key(index) ?? "";
-          return [key, storage.getItem(key) ?? ""] as const;
-        });
-      return {
-        local: snapshot(window.localStorage),
-        session: snapshot(window.sessionStorage),
-      };
-    });
-    expect(JSON.stringify(storedValues).toLowerCase()).not.toContain(
-      "still ridge",
-    );
-    expect(JSON.stringify(storedValues).toLowerCase()).not.toContain(
-      "private mountain retreat",
+    await expect(page.getByText("Selected section")).toBeVisible();
+    await expect(page.getByLabel("Layout variant")).toHaveValue(
+      "cinematic-mosaic",
     );
     expect(
-      [...storedValues.local, ...storedValues.session].some(([key]) =>
-        key.toLowerCase().includes("studio"),
-      ),
-    ).toBe(false);
-
-    await page.getByRole("button", { name: "Reset personalization" }).click();
-    await expect(preview).toHaveAttribute("data-personalized", "false");
-    await expect(preview).toContainText("Stay where the horizon slows down.");
-    await expect(preview).not.toContainText(
-      "A private mountain stay made for two.",
-    );
-    await expect(preview).toHaveAttribute("data-business", "hotel");
-    await expect(preview).toHaveAttribute("data-direction", "cinematic");
+      await page
+        .locator(".studio-v2-change-sweep")
+        .evaluate((node) => getComputedStyle(node).animationName),
+    ).toBe("none");
   });
 
-  test("rejects invalid input without transmitting it", async ({ page }) => {
-    let requestCount = 0;
-    await page.route("**/api/studio-personalize", async (route) => {
-      requestCount += 1;
-      await route.abort();
-    });
-
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    await chooseHotelCinematic(page);
-
-    await page.getByLabel("Describe your business").fill("Too short");
-    await page
-      .getByRole("button", { name: "Personalize this concept" })
-      .click();
-
-    expect(requestCount).toBe(0);
-    await expect(page.getByTestId("studio-preview")).toContainText(
-      "Stay where the horizon slows down.",
-    );
-  });
-
-  test("preserves the deterministic preview when personalization fails", async ({
+  test("runs generation and modification without serious browser or network errors", async ({
     page,
   }) => {
-    await page.route("**/api/studio-personalize", async (route) => {
-      await route.fulfill({
-        status: 503,
-        contentType: "application/json",
-        body: JSON.stringify({
-          error:
-            "Personalization isn't available right now. Your selected concept is still ready.",
-        }),
-      });
+    const consoleErrors: string[] = [];
+    const pageErrors: string[] = [];
+    const failedRequests: string[] = [];
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    page.on("pageerror", (error) => pageErrors.push(error.message));
+    page.on("requestfailed", (request) => {
+      if (!request.url().includes("fonts.googleapis.com")) {
+        failedRequests.push(`${request.method()} ${request.url()}`);
+      }
     });
 
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    await chooseHotelCinematic(page);
-
-    const preview = page.getByTestId("studio-preview");
-    await page
-      .getByLabel("Describe your business")
-      .fill(
-        "A private mountain retreat for couples who value quiet stays and guided local walks.",
-      );
-    await page
-      .getByRole("button", { name: "Personalize this concept" })
-      .click();
-
-    await expect(page.getByRole("alert")).toContainText(
-      "Personalization isn't available right now",
+    await openStudio(page);
+    await generateWebsite(page);
+    await tellStudio(
+      page,
+      "Use a lighter design and make the hero more cinematic.",
     );
-    await expect(preview).toHaveAttribute("data-personalized", "false");
-    await expect(preview).toContainText("Stay where the horizon slows down.");
-    await expect(page.getByRole("button", { name: "Try again" })).toBeVisible();
-  });
-
-  test("keeps the preview visible and prevents duplicate submission while loading", async ({
-    page,
-  }) => {
-    await page.route("**/api/studio-personalize", async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 700));
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          personalization: {
-            schemaVersion: 1,
-            headline: "A private mountain stay made for two.",
-            intro:
-              "Quiet rooms, open views and local experiences shape a slower stay near the border.",
-            highlights: ["Private stays for couples"],
-            featuredModule: "rooms",
-            secondaryModule: "experiences",
-            ctaSupport: "Bring this quiet retreat to life online.",
-          },
-        }),
-      });
-    });
-
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    await chooseHotelCinematic(page);
-
-    const preview = page.getByTestId("studio-preview");
-    await page
-      .getByLabel("Describe your business")
-      .fill(
-        "A private mountain retreat for couples who value quiet stays and guided local walks.",
-      );
-    const submit = page.getByRole("button", {
-      name: "Personalize this concept",
-    });
-    await submit.click();
-
-    await expect(preview).toBeVisible();
-    await expect(preview).toContainText("Stay where the horizon slows down.");
-    await expect(
-      page.getByRole("button", { name: "Personalizing concept…" }),
-    ).toBeDisabled();
-    await expect(page.locator(".studio-personalization-form")).toHaveAttribute(
-      "aria-busy",
-      "true",
+    await expect(page.getByTestId("studio-preview")).toHaveAttribute(
+      "data-palette",
+      "paper-ink",
     );
-    await expect(page.getByRole("status")).toContainText(
-      "The original preview stays ready",
-    );
-
-    await expect(preview).toHaveAttribute("data-personalized", "true");
-  });
-
-  test("does not apply a stale result after business and direction change", async ({
-    page,
-  }) => {
-    await page.route("**/api/studio-personalize", async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      if (route.request().isNavigationRequest()) return route.continue();
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          personalization: {
-            schemaVersion: 1,
-            headline: "A private mountain stay made for two.",
-            intro:
-              "Quiet rooms, open views and local experiences shape a slower stay near the border.",
-            highlights: ["Private stays for couples"],
-            featuredModule: "rooms",
-            secondaryModule: "experiences",
-            ctaSupport: "Bring this quiet retreat to life online.",
-          },
-        }),
-      });
-    });
-
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-    await chooseHotelCinematic(page);
-
-    await page
-      .getByLabel("Describe your business")
-      .fill(
-        "A private mountain retreat for couples who value quiet stays and guided local walks.",
-      );
-    await page
-      .getByRole("button", { name: "Personalize this concept" })
-      .click();
-    await expect(
-      page.getByRole("button", { name: "Personalizing concept…" }),
-    ).toBeDisabled();
-
-    await page.getByRole("button", { name: /Start again/i }).click();
-    await chooseBusinessDirection(page, "Tours & Travel", "Bold");
-
-    const preview = page.getByTestId("studio-preview");
-    await expect(preview).toHaveAttribute("data-business", "tours");
-    await expect(preview).toHaveAttribute("data-direction", "bold");
-    await expect(preview).toHaveAttribute("data-personalized", "false");
-    await expect(preview).toContainText(
-      "Follow the road into something unforgettable.",
-    );
-    await expect(preview).not.toContainText(
-      "A private mountain stay made for two.",
-    );
+    expect(consoleErrors).toEqual([]);
+    expect(pageErrors).toEqual([]);
+    expect(failedRequests).toEqual([]);
   });
 });
 
-const visualViewports = [
-  { name: "mobile-360", width: 360, height: 800 },
+for (const viewport of [
   { name: "mobile-390", width: 390, height: 844 },
-  { name: "tablet-768", width: 768, height: 1024 },
-  { name: "desktop-1280", width: 1280, height: 800 },
-] as const;
-
-for (const viewport of visualViewports) {
-  test(`Website Studio visual QA @ ${viewport.name}`, async ({ page }) => {
+  { name: "desktop-1440", width: 1440, height: 900 },
+] as const) {
+  test(`Website Studio V2 visual QA @ ${viewport.name}`, async ({ page }) => {
     await page.setViewportSize({
       width: viewport.width,
       height: viewport.height,
     });
-    await reduceMotion(page);
-    await safeGoto(page, studioRoute);
-    await waitForHydration(page);
-
-    const dir = path.join(process.cwd(), "qa-screenshots", "website-studio");
-    fs.mkdirSync(dir, { recursive: true });
-    await page.screenshot({
-      path: path.join(dir, `${viewport.name}-entry.png`),
-      fullPage: true,
-    });
-
-    await page.getByRole("button", { name: /Hotel \/ Resort/i }).click();
-    await expect(
-      page.getByRole("heading", { name: "Choose how it should feel." }),
-    ).toBeVisible();
+    await openStudio(page);
+    const directory = path.join(
+      process.cwd(),
+      "qa-screenshots",
+      "website-studio-v2",
+    );
+    fs.mkdirSync(directory, { recursive: true });
     await page.evaluate(() => {
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
@@ -693,61 +366,24 @@ for (const viewport of visualViewports) {
       window.scrollTo({ top: 0, behavior: "instant" });
     });
     await page.screenshot({
-      path: path.join(dir, `${viewport.name}-directions.png`),
+      path: path.join(directory, `${viewport.name}-landing.png`),
       fullPage: true,
     });
-
-    await page
-      .getByRole("button", { name: /^Feel it first Cinematic/i })
-      .click();
-    await expect(page.getByTestId("studio-preview")).toBeVisible();
-
+    await generateWebsite(page);
     const overflow = await checkOverflow(page);
     expect(
       overflow.docOverflow,
-      `Studio horizontal overflow @ ${viewport.name}: ${JSON.stringify(overflow)}`,
+      `Studio V2 overflow @ ${viewport.name}: ${JSON.stringify(overflow)}`,
     ).toBeLessThanOrEqual(2);
-
     await page.evaluate(() => {
       if (document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
       }
       window.scrollTo({ top: 0, behavior: "instant" });
     });
-
     await page.screenshot({
-      path: path.join(dir, `${viewport.name}.png`),
+      path: path.join(directory, `${viewport.name}-editor.png`),
       fullPage: true,
     });
-
-    const phaseThreeVisuals = [
-      { business: "Restaurant / Café", slug: "restaurant" },
-      { business: "Retail / Commerce", slug: "retail" },
-      { business: "Professional / Corporate", slug: "professional" },
-      { business: "Gym / Fitness", slug: "gym" },
-    ] as const;
-
-    for (const experience of phaseThreeVisuals) {
-      await page.getByRole("button", { name: /Start again/i }).click();
-      await chooseBusinessDirection(page, experience.business, "Cinematic");
-      const experienceOverflow = await checkOverflow(page);
-      expect(
-        experienceOverflow.docOverflow,
-        `${experience.business} horizontal overflow @ ${viewport.name}: ${JSON.stringify(experienceOverflow)}`,
-      ).toBeLessThanOrEqual(2);
-      await page.evaluate(() => {
-        if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur();
-        }
-        window.scrollTo({ top: 0, behavior: "instant" });
-      });
-      await page.screenshot({
-        path: path.join(
-          dir,
-          `${viewport.name}-${experience.slug}-cinematic.png`,
-        ),
-        fullPage: true,
-      });
-    }
   });
 }

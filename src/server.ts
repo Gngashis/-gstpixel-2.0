@@ -2,6 +2,8 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { STUDIO_BUILD_API_PATH } from "./studio/builder/config";
+import { handleStudioBuild } from "./studio/builder/api";
 import { STUDIO_PERSONALIZATION_API_PATH } from "./studio/personalization/config";
 import {
   handleStudioPersonalization,
@@ -71,6 +73,10 @@ export default {
     env: ServerEnvironment | undefined,
     ctx: unknown,
   ) {
+    if (new URL(request.url).pathname === STUDIO_BUILD_API_PATH) {
+      return handleStudioBuild(request, env);
+    }
+
     if (new URL(request.url).pathname === STUDIO_PERSONALIZATION_API_PATH) {
       return handleStudioPersonalization(
         request,
