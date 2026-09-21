@@ -8,9 +8,9 @@ import {
   type StudioChangePlan,
   type StudioConversationTurn,
 } from "./change-plan";
+import { generateFallbackDesignSpec } from "./blueprint";
 import {
   createSectionForType,
-  generateFallbackDesignSpec,
   getHomePage,
   parseDesignSpec,
   type DesignSpec,
@@ -67,11 +67,16 @@ function withTestimonials() {
   return parseDesignSpec(spec);
 }
 
+/** Set by the row that restores an earlier palette, so the assertion can
+ * compare against the palette that was actually generated for this run. */
+let restoredPalette = "";
+
 describe("Studio intelligent change planning matrix", () => {
   const cases: Array<{
     instruction: string;
     options?: Parameters<typeof context>[0];
     assert: (result: ReturnType<typeof run>) => void;
+    allowUnchanged?: boolean;
   }> = [
     {
       instruction: "make it all black",
@@ -101,7 +106,7 @@ describe("Studio intelligent change planning matrix", () => {
       instruction: "make it futuristic",
       assert: ({ spec }) => {
         expect(spec.theme.mood).toBe("technical");
-        expect(spec.theme.typography).toBe("modern-grotesk");
+        expect(spec.theme.typography).toBe("geometric-technical");
       },
     },
     {
@@ -180,6 +185,9 @@ describe("Studio intelligent change planning matrix", () => {
     },
     {
       instruction: "make headings larger",
+      // A concept may already use an expressive heading scale, in which case the
+      // instruction is a genuine no-op rather than a silent failure.
+      allowUnchanged: true,
       assert: ({ spec }) => expect(spec.theme.headingScale).toBe("expressive"),
     },
     {
@@ -261,15 +269,19 @@ describe("Studio intelligent change planning matrix", () => {
       options: (() => {
         const original = generateFallbackDesignSpec(prompt);
         const changed = structuredClone(original);
-        changed.theme.palette = "midnight-champagne";
+        changed.theme.palette =
+          original.theme.palette === "paper-ink"
+            ? "midnight-champagne"
+            : "paper-ink";
         changed.pages[0]!.sections[0]!.variant = "cinematic-editorial";
+        restoredPalette = original.theme.palette;
         return {
           spec: parseDesignSpec(changed),
           previousThemes: [original.theme],
         };
       })(),
       assert: ({ spec }) => {
-        expect(spec.theme.palette).toBe("forest-gold");
+        expect(spec.theme.palette).toBe(restoredPalette);
         expect(findSection(spec, "hero")?.variant).toBe("cinematic-editorial");
       },
     },
@@ -331,10 +343,10 @@ describe("Studio intelligent change planning matrix", () => {
 
   it.each(cases)(
     "understands: $instruction",
-    ({ instruction, options, assert }) => {
+    ({ instruction, options, assert, allowUnchanged }) => {
       const result = run(instruction, options);
       expect(studioChangePlanSchema.safeParse(result.plan).success).toBe(true);
-      expect(result.changed).toBe(true);
+      if (!allowUnchanged) expect(result.changed).toBe(true);
       assert(result);
     },
   );

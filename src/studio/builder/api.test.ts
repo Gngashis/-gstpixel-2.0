@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { createStudioBuildHandler } from "./api";
 import { STUDIO_BUILD_MAX_REQUEST_BYTES } from "./config";
-import { generateFallbackDesignSpec } from "./domain";
+import { generateFallbackDesignSpec } from "./blueprint";
 import { planStudioChange } from "./change-plan";
 
 const prompt =
@@ -52,9 +52,13 @@ describe("Website Studio V2 build API", () => {
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
 
-  it("uses validated AI output and keeps visitor injection inside the user message", async () => {
-    const valid = generateFallbackDesignSpec(prompt);
-    const run = vi.fn(async () => ({ response: JSON.stringify(valid) }));
+  it("uses validated AI creative direction and keeps visitor injection inside the user message", async () => {
+    const run = vi.fn(async () => ({
+      response: JSON.stringify({
+        direction: { intensity: "dramatic", premium: "luxury" },
+        hero: { family: "cinematic-media" },
+      }),
+    }));
     const response = await createStudioBuildHandler({ guard: openGuard })(
       request({
         action: "generate",
@@ -62,8 +66,12 @@ describe("Website Studio V2 build API", () => {
       }),
       { AI: { run } },
     );
-    const payload = (await response.json()) as { source: string };
+    const payload = (await response.json()) as {
+      source: string;
+      spec: { pages: Array<{ sections: Array<{ variant: string }> }> };
+    };
     expect(payload.source).toBe("ai");
+    expect(payload.spec.pages[0]?.sections[0]?.variant).toBe("cinematic-media");
     const calls = run.mock.calls as unknown as Array<
       [string, { messages?: Array<{ role: string; content: string }> }]
     >;
@@ -78,32 +86,101 @@ describe("Website Studio V2 build API", () => {
   });
 
   it("falls back when AI returns unsafe or non-allowlisted output", async () => {
-    const invalid = {
-      ...generateFallbackDesignSpec(prompt),
-      pages: [
+    const withVariant = async (variant: string) => {
+      const response = await createStudioBuildHandler({ guard: openGuard })(
+        request({ action: "generate", prompt }),
         {
-          ...generateFallbackDesignSpec(prompt).pages[0],
-          sections: [
-            {
-              ...generateFallbackDesignSpec(prompt).pages[0]!.sections[0],
-              variant: "visitor-code-component",
-            },
-          ],
+          AI: {
+            run: async () => ({
+              response: JSON.stringify({
+                sections: Array.from({ length: 5 }, () => ({
+                  type: "services",
+                  variant,
+                })),
+              }),
+            }),
+          },
         },
-      ],
+      );
+      return (await response.json()) as {
+        source: string;
+        spec: { pages: Array<{ sections: Array<{ variant: string }> }> };
+      };
     };
-    const response = await createStudioBuildHandler({ guard: openGuard })(
+
+    const nonAllowlisted = await withVariant("visitor-code-component");
+    expect(nonAllowlisted.source).toBe("fallback");
+    expect(
+      nonAllowlisted.spec.pages[0]?.sections.map((section) => section.variant),
+    ).not.toContain("visitor-code-component");
+
+    const injected = await createStudioBuildHandler({ guard: openGuard })(
       request({ action: "generate", prompt }),
-      { AI: { run: async () => ({ response: JSON.stringify(invalid) }) } },
+      {
+        AI: {
+          run: async () => ({
+            response: JSON.stringify({
+              business: { name: "<script>alert(1)</script>" },
+            }),
+          }),
+        },
+      },
     );
-    const payload = (await response.json()) as {
+    const injectedPayload = (await injected.json()) as {
       source: string;
-      spec: { pages: Array<{ sections: Array<{ variant: string }> }> };
+      spec: { site: { name: string } };
     };
-    expect(payload.source).toBe("fallback");
-    expect(payload.spec.pages[0]?.sections[0]?.variant).toBe(
-      "hospitality-focused",
+    expect(injectedPayload.source).toBe("fallback");
+    expect(injectedPayload.spec.site.name).not.toContain("script");
+  });
+
+  it("falls back when AI returns malformed JSON or a timeout", async () => {
+    const malformed = await createStudioBuildHandler({ guard: openGuard })(
+      request({ action: "generate", prompt }),
+      { AI: { run: async () => ({ response: "not json at all" }) } },
     );
+    expect(((await malformed.json()) as { source: string }).source).toBe(
+      "fallback",
+    );
+
+    const unavailable = await createStudioBuildHandler({ guard: openGuard })(
+      request({ action: "generate", prompt }),
+      {
+        AI: {
+          run: async () => {
+            throw new Error("rate limited");
+          },
+        },
+      },
+    );
+    expect(((await unavailable.json()) as { source: string }).source).toBe(
+      "fallback",
+    );
+  });
+
+  it("keeps simple commands local and escalates genuinely creative ones", async () => {
+    const run = vi.fn(async () => ({
+      response: JSON.stringify({
+        direction: { premium: "luxury" },
+        hero: { family: "cinematic-media" },
+      }),
+    }));
+    const handler = createStudioBuildHandler({ guard: openGuard });
+
+    const simple = await handler(request(modifyBody("Make the hero shorter")), {
+      AI: { run },
+    });
+    expect(((await simple.json()) as { source: string }).source).toBe(
+      "fallback",
+    );
+    expect(run).not.toHaveBeenCalled();
+
+    const creative = await handler(
+      request(modifyBody("Make this feel much more expensive and cinematic")),
+      { AI: { run } },
+    );
+    expect(creative.status).toBe(200);
+    expect(run).toHaveBeenCalledTimes(1);
   });
 
   it("rejects unknown keys, unsafe input, cross-origin requests and oversized bodies", async () => {
@@ -177,7 +254,7 @@ describe("Website Studio V2 build API", () => {
   });
 
   it("sends complete compact editor context and accepts a validated AI change plan", async () => {
-    const body = modifyBody("Make the hero darker and shorter");
+    const body = modifyBody("Make the hero feel darker and far more cinematic");
     const deterministicContext = {
       spec: body.spec,
       ...body.context,

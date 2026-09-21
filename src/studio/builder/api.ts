@@ -1,26 +1,34 @@
 import { z } from "zod";
 import type { WorkersAiBinding } from "../personalization/cloudflare-provider";
 import {
+  planCreativeBlueprintWithWorkersAi,
   planStudioChangeWithWorkersAi,
-  refineDesignSpecWithWorkersAi,
 } from "./cloudflare-provider";
 import {
   applyStudioChangePlan,
   planStudioChange,
+  shouldEscalateStudioInstruction,
   studioEditorContextSchema,
   type StudioChangeContext,
 } from "./change-plan";
 import {
+  applyBlueprintPatch,
+  blueprintToDesignSpec,
+  extractPromptTerms,
   generateFallbackDesignSpec,
-  parseDesignSpec,
-  type DesignSpec,
-} from "./domain";
+  planCreativeBlueprint,
+} from "./blueprint";
+import { parseDesignSpec, type DesignSpec } from "./domain";
 import {
   STUDIO_BUILD_MAX_REQUEST_BYTES,
   STUDIO_BUILD_TIMEOUT_MS,
 } from "./config";
 
-export type StudioBuildEnv = { AI?: WorkersAiBinding };
+export type StudioBuildEnv = {
+  AI?: WorkersAiBinding;
+  STUDIO_AI_MODEL?: string;
+  STUDIO_AI_PROVIDER?: string;
+};
 
 const safeText = (max: number, min: number) =>
   z
@@ -222,16 +230,27 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
     try {
       if (!env?.AI) return jsonResponse(fallbackPayload, 200);
       try {
-        if (parsed.data.action === "modify" && fallbackPlan && changeContext) {
+        const request = parsed.data;
+        if (request.action === "modify") {
+          const context = changeContext;
+          const draftPlan = fallbackPlan;
+          if (
+            !context ||
+            !draftPlan ||
+            !shouldEscalateStudioInstruction(request.instruction, draftPlan)
+          ) {
+            return jsonResponse(fallbackPayload, 200);
+          }
           const plan = await withTimeout(
             planStudioChangeWithWorkersAi({
               ai: env.AI,
-              instruction: parsed.data.instruction,
-              context: changeContext,
-              draftPlan: fallbackPlan,
+              instruction: request.instruction,
+              context,
+              draftPlan,
+              env,
             }),
           );
-          const result = applyStudioChangePlan(changeContext, plan);
+          const result = applyStudioChangePlan(context, plan);
           result.spec.metadata.source = "ai";
           return jsonResponse(
             {
@@ -245,19 +264,23 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
             200,
           );
         }
-        const spec = await withTimeout(
-          refineDesignSpecWithWorkersAi({
+        const terms = extractPromptTerms(request.prompt);
+        const candidate = planCreativeBlueprint(request.prompt);
+        const patch = await withTimeout(
+          planCreativeBlueprintWithWorkersAi({
             ai: env.AI,
-            action: parsed.data.action,
-            visitorText:
-              parsed.data.action === "generate"
-                ? parsed.data.prompt
-                : parsed.data.instruction,
-            candidate: fallback,
+            visitorText: request.prompt,
+            candidate,
+            env,
           }),
         );
-        spec.metadata.source = "ai";
-        return jsonResponse({ spec: parseDesignSpec(spec), source: "ai" }, 200);
+        const blueprint = applyBlueprintPatch(candidate, patch);
+        const refined = blueprintToDesignSpec(blueprint, terms);
+        refined.metadata.source = "ai";
+        return jsonResponse(
+          { spec: parseDesignSpec(refined), source: "ai" },
+          200,
+        );
       } catch {
         return jsonResponse(fallbackPayload, 200);
       }

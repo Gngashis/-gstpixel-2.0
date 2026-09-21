@@ -619,11 +619,14 @@ for (const viewport of [
   });
 }
 
+// Hero families are the creative-grammar vocabulary: each business resolves to
+// the family its own description calls for (cinematic, bold, minimal, product…)
+// falling back to that category's signature family.
 const businessVisualMatrix = [
   {
     slug: "luxury-resort",
     prompt: resortPrompt,
-    hero: "hospitality-focused",
+    hero: "cinematic-media",
   },
   {
     slug: "cafe",
@@ -634,31 +637,31 @@ const businessVisualMatrix = [
     slug: "fitness-studio",
     prompt:
       "Create a bold high-energy fitness studio website with programs, coaches, memberships and a trial enquiry.",
-    hero: "bold-typographic",
+    hero: "asymmetric-story",
   },
   {
     slug: "technology-company",
     prompt:
       "Create a minimal futuristic Apple-style technology company website for a premium software platform.",
-    hero: "minimal-luxury",
+    hero: "technical-grid",
   },
   {
     slug: "travel-agency",
     prompt:
       "Create a cinematic travel agency website with destinations, signature journeys and direct enquiries.",
-    hero: "immersive-image",
+    hero: "cinematic-media",
   },
   {
     slug: "professional-services",
     prompt:
       "Create a sophisticated professional services website with expertise, process and contact.",
-    hero: "split-composition",
+    hero: "minimal-professional",
   },
   {
     slug: "online-shop",
     prompt:
       "Create a premium online shop for considered home objects, product collections and editorial storytelling.",
-    hero: "product-focused",
+    hero: "commerce-product",
   },
 ] as const;
 

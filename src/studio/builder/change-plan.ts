@@ -1,6 +1,26 @@
 import { z } from "zod";
 import {
+  artDirections,
+  applyBlueprintPatch,
+  applyBlueprintToSpec,
+  blueprintFromSpec,
+  compositionFamilies,
+  ctaCharacters,
+  contentDensities,
   createAlternateDesignSpec,
+  heroFamilies,
+  mobileStrategies,
+  motionFamilies,
+  navigationFamilies,
+  premiumLevels,
+  shapeLanguages,
+  spacingRhythms,
+  surfaceSystems,
+  typographyCharacters,
+  visualIntensities,
+  type CreativeBlueprintPatch,
+} from "./blueprint";
+import {
   createSectionForType,
   designSpecSchema,
   getHomePage,
@@ -32,6 +52,8 @@ const studioChangeOperationTypes = [
   "setMobile",
   "alternate",
   "restoreTheme",
+  "setCreativeDirection",
+  "regenerateVariation",
 ] as const;
 
 const scopeSchema = z
@@ -197,6 +219,46 @@ const restoreThemeOperation = z
   })
   .strict();
 
+/**
+ * Creative direction changes map visitor language onto the CreativeBlueprint:
+ * composition families, hero family, typography character, colour
+ * environment, motion and mobile interpretation.
+ */
+const setCreativeDirectionOperation = z
+  .object({
+    type: z.literal("setCreativeDirection"),
+    premium: z.enum(premiumLevels).optional(),
+    intensity: z.enum(visualIntensities).optional(),
+    balance: z.enum(["editorial", "commercial", "hybrid"]).optional(),
+    density: z.enum(contentDensities).optional(),
+    shape: z.enum(shapeLanguages).optional(),
+    surface: z.enum(surfaceSystems).optional(),
+    whitespace: z.enum(spacingRhythms).optional(),
+    layering: z.enum(["flat", "depth", "overlap"]).optional(),
+    typographyDisplay: z.enum(typographyCharacters).optional(),
+    typographyTreatment: z
+      .enum(["editorial", "technical", "expressive", "functional"])
+      .optional(),
+    palette: z.enum(paletteIds).optional(),
+    mood: z.string().min(1).max(24).optional(),
+    environment: z.enum(["light", "dark", "tinted"]).optional(),
+    composition: z.enum(compositionFamilies).optional(),
+    heroFamily: z.enum(heroFamilies).optional(),
+    navigationFamily: z.enum(navigationFamilies).optional(),
+    artDirection: z.enum(artDirections).optional(),
+    motionFamily: z.enum(motionFamilies).optional(),
+    ctaCharacter: z.enum(ctaCharacters).optional(),
+    mobileStrategy: z.enum(mobileStrategies).optional(),
+  })
+  .strict();
+
+const regenerateVariationOperation = z
+  .object({
+    type: z.literal("regenerateVariation"),
+    scale: z.enum(["composition", "full"]),
+  })
+  .strict();
+
 export const studioChangeOperationSchema = z.discriminatedUnion("type", [
   setThemeOperation,
   setSectionStyleOperation,
@@ -210,6 +272,8 @@ export const studioChangeOperationSchema = z.discriminatedUnion("type", [
   setMobileOperation,
   alternateOperation,
   restoreThemeOperation,
+  setCreativeDirectionOperation,
+  regenerateVariationOperation,
 ]);
 
 export const studioChangePlanSchema = z
@@ -275,6 +339,10 @@ export const studioThemeSnapshotSchema = z
     headingScale: z.enum(["compact", "balanced", "expressive"]),
     bodyScale: z.enum(["small", "balanced", "large"]),
     buttonStyle: z.enum(["sharp", "subtle", "rounded", "pill"]),
+    rhythm: z
+      .enum(["even", "cadenced", "escalating", "measured"])
+      .default("measured"),
+    composition: z.string().min(1).max(32).default("editorial-single-column"),
   })
   .strict();
 
@@ -406,6 +474,10 @@ function operationLabel(operation: StudioChangeOperation): string {
         : "created a different section direction";
     case "restoreTheme":
       return `restored the earlier ${operation.aspect}`;
+    case "setCreativeDirection":
+      return "shifted the creative direction";
+    case "regenerateVariation":
+      return "built a different version of the whole site";
   }
   return "updated the website";
 }
@@ -1106,6 +1178,58 @@ export function planStudioChange(
   if (/(?:add|create) (?:a )?contact page/.test(value))
     operations.push({ type: "addPage", pageType: "contact" });
 
+  const creativeDirection = creativeDirectionPlan(value, {
+    sectionOnly: sectionOnly || mobileOnly || desktopOnly,
+    heroTargeted: /\bhero\b/.test(value),
+  });
+  if (creativeDirection) operations.push(creativeDirection);
+
+  const hero = context.spec.pages
+    .flatMap((page) => page.sections)
+    .find((section) => section.type === "hero");
+  const keepOnly = includesAny(value, [
+    "keep the",
+    "keep this",
+    "don't change",
+    "do not change",
+    "leave the",
+  ]);
+  if (
+    hero &&
+    !keepOnly &&
+    /\b(?:completely )?(?:different|new|another|swap the|change the) hero\b/.test(
+      value,
+    )
+  ) {
+    const position = heroFamilies.indexOf(hero.variant as never);
+    const next =
+      heroFamilies[(Math.max(0, position) + 1) % heroFamilies.length]!;
+    operations.push({
+      type: "setSectionStyle",
+      target: heroTarget,
+      variant: next,
+      ...(position < 0 ? { media: "abstract" as const } : {}),
+    });
+  }
+
+  if (
+    explicitSection === "about" &&
+    includesAny(value, [
+      "more visual",
+      "more imagery",
+      "image led",
+      "visual story",
+    ])
+  ) {
+    operations.push({
+      type: "setSectionStyle",
+      target: targetFor("about", context, true),
+      variant: "image-led-story",
+      media: "portrait",
+      surface: "elevated",
+    });
+  }
+
   if (
     includesAny(value, [
       "different version of this section",
@@ -1460,6 +1584,65 @@ export function applyStudioChangePlan(
         markChanged();
         break;
       }
+      case "setCreativeDirection": {
+        const patch: CreativeBlueprintPatch = {
+          direction: compactObject({
+            premium: operation.premium,
+            intensity: operation.intensity,
+            balance: operation.balance,
+            density: operation.density,
+            shape: operation.shape,
+            surface: operation.surface,
+            whitespace: operation.whitespace,
+            layering: operation.layering,
+          }),
+          typography: compactObject({
+            display: operation.typographyDisplay,
+            treatment: operation.typographyTreatment,
+          }),
+          colour: compactObject({
+            palette: operation.palette,
+            mood: operation.mood,
+            environment: operation.environment,
+          }),
+          layout: compactObject({ composition: operation.composition }),
+          hero: compactObject({
+            family: operation.heroFamily,
+            artDirection: operation.artDirection,
+          }),
+          navigation: compactObject({ family: operation.navigationFamily }),
+          motion: compactObject({ family: operation.motionFamily }),
+          cta: compactObject({ character: operation.ctaCharacter }),
+          mobile: compactObject({ strategy: operation.mobileStrategy }),
+        };
+        const responsiveBefore = structuredClone(spec.responsive);
+        const nextBlueprint = applyBlueprintPatch(
+          blueprintFromSpec(spec),
+          patch,
+        );
+        spec = applyBlueprintToSpec(spec, nextBlueprint, {
+          preservePresentation: true,
+        });
+        if (operation.heroFamily) {
+          const heroSection = spec.pages
+            .flatMap((page) => page.sections)
+            .find((section) => section.type === "hero");
+          if (heroSection) heroSection.variant = operation.heroFamily;
+        }
+        if (!operation.mobileStrategy) {
+          spec.responsive = responsiveBefore;
+        }
+        spec.metadata.blueprint = nextBlueprint;
+        markChanged();
+        break;
+      }
+      case "regenerateVariation": {
+        spec = createAlternateDesignSpec(spec, {
+          structural: operation.scale === "full",
+        });
+        markChanged();
+        break;
+      }
       case "restoreTheme": {
         const previous = context.previousThemes.find((theme) => {
           if (operation.aspect === "palette")
@@ -1490,6 +1673,7 @@ export function applyStudioChangePlan(
   changed = changed && actualChanged;
   if (changed) {
     spec.metadata = {
+      ...spec.metadata,
       source: "modified",
       conceptLabel: `Intelligent ${spec.theme.mood} direction`,
       revision: Math.min(999, context.spec.metadata.revision + 1),
@@ -1656,11 +1840,15 @@ export function validatePlanAgainstContext(
         );
       }
     }
-    if (operation.type === "setTheme") {
+    if (
+      operation.type === "setTheme" ||
+      operation.type === "setCreativeDirection"
+    ) {
       const entries = Object.entries(operation).filter(
         ([key, value]) => key !== "type" && value !== undefined,
       );
-      if (!entries.length) throw new Error("Theme operation has no changes.");
+      if (!entries.length)
+        throw new Error("Creative direction operation has no changes.");
     }
   }
   return plan;
@@ -1668,4 +1856,284 @@ export function validatePlanAgainstContext(
 
 export function parseContextSpec(value: unknown) {
   return designSpecSchema.parse(value);
+}
+
+/**
+ * Free-AI efficiency: simple, literal commands stay entirely in the
+ * deterministic local planner. Only genuinely semantic or creative requests
+ * are escalated to the AI creative director, and one request never triggers
+ * more than one inference call.
+ */
+export function shouldEscalateStudioInstruction(
+  instruction: string,
+  plan: StudioChangePlan,
+): boolean {
+  const value = instruction.toLowerCase();
+  if (!plan.operations.length) return true;
+  if (plan.unsupported.length) return true;
+  const operations = plan.operations.map((operation) => operation.type);
+  const creativeIntent = operations.some(
+    (type) =>
+      type === "setCreativeDirection" ||
+      type === "alternate" ||
+      type === "regenerateVariation",
+  );
+  const semanticMarkers = [
+    "feel",
+    "feels",
+    "vibe",
+    "mood",
+    "inspired",
+    "in the style",
+    "art direction",
+    "brand",
+    "positioning",
+    "personality",
+    "less corporate",
+    "more premium",
+    "more expensive",
+    "too generic",
+    "generic",
+    "story",
+    "narrative",
+    "copy",
+    "tone",
+    "rewrite",
+    "reword",
+    "like a",
+    "feel like",
+    "different direction",
+    "fresh direction",
+  ];
+  const semantic = semanticMarkers.some((marker) => value.includes(marker));
+  if (creativeIntent) {
+    const explicitFields = new Set(
+      plan.operations.flatMap((operation) =>
+        Object.entries(operation)
+          .filter(([key, entry]) => key !== "type" && entry !== undefined)
+          .map(([key]) => key),
+      ),
+    );
+    if (
+      operations.includes("alternate") ||
+      operations.includes("regenerateVariation")
+    )
+      return false;
+    if (operations.includes("setCreativeDirection") && explicitFields.size < 3)
+      return false;
+  }
+  return semantic;
+}
+
+function compactObject<T extends Record<string, unknown>>(
+  source: T,
+): T | undefined {
+  const entries = Object.entries(source).filter(
+    ([, value]) => value !== undefined,
+  );
+  if (!entries.length) return undefined;
+  return Object.fromEntries(entries) as T;
+}
+
+const creativeMarkers = {
+  cinematic: [
+    "cinematic",
+    "dramatic",
+    "immersive",
+    "atmospheric",
+    "moody",
+    "film-like",
+    "epic",
+  ],
+  luxury: [
+    "luxury",
+    "luxurious",
+    "expensive",
+    "premium",
+    "high-end",
+    "five star",
+    "5 star",
+    "exclusive",
+    "bespoke",
+    "high end",
+  ],
+  hospitality: ["hotel", "resort", "hospitality", "boutique stay"],
+  minimal: [
+    "minimal",
+    "minimalist",
+    "simpler",
+    "cleaner",
+    "less busy",
+    "understated",
+    "quieter",
+    "restrained",
+    "less corporate",
+    "swiss",
+  ],
+  playful: ["playful", "fun", "livelier", "friendlier", "youthful"],
+  editorial: ["editorial", "magazine", "literary", "typographic", "serif"],
+  technical: [
+    "technical",
+    "technological",
+    "software",
+    "apple",
+    "saas",
+    "engineering",
+    "futuristic",
+    "data-driven",
+    "cyber",
+  ],
+  bold: [
+    "bold",
+    "graphic",
+    "poster",
+    "loud",
+    "high contrast",
+    "statement",
+    "brutalist",
+  ],
+  organic: ["organic", "natural", "earthy", "botanical", "handmade", "rustic"],
+  heritage: [
+    "heritage",
+    "traditional",
+    "classic",
+    "timeless",
+    "artisan",
+    "vintage",
+  ],
+  dark: ["dark", "darker", "black", "noir", "midnight"],
+  light: ["light", "lighter", "bright", "airy", "white", "cleaner background"],
+  warm: ["warm", "cosy", "cozy", "inviting", "terracotta"],
+  premium: ["premium", "more expensive", "high-end", "high end"],
+} as const;
+
+/**
+ * Deterministic interpretation of creative language into an allowlisted
+ * blueprint change. Only structurally meaningful vocabulary counts as a
+ * match, so simple colour commands keep using the literal theme planner.
+ */
+function creativeDirectionPlan(
+  value: string,
+  options: { sectionOnly: boolean; heroTargeted: boolean },
+): z.infer<typeof setCreativeDirectionOperation> | null {
+  if (options.sectionOnly) return null;
+  const patch: Record<string, unknown> = {};
+  let decisive = false;
+  const has = (terms: readonly string[]) =>
+    terms.some((term) => value.includes(term));
+  const apply = (field: string, next: unknown, strong = true) => {
+    patch[field] = next;
+    if (strong) decisive = true;
+  };
+
+  const heroField = options.heroTargeted
+    ? () => undefined
+    : (field: string, next: unknown) => apply(field, next);
+  const applyIfAbsent = (field: string, next: unknown) => {
+    if (patch[field] === undefined) apply(field, next);
+  };
+
+  if (has(creativeMarkers.cinematic)) {
+    apply("intensity", "dramatic");
+    apply("motionFamily", "cinematic");
+    apply("mood", "cinematic");
+    heroField("heroFamily", "cinematic-media");
+    heroField("composition", "full-bleed-immersive");
+    apply("artDirection", "light-shafts");
+    apply("environment", "dark", false);
+  }
+  if (has(creativeMarkers.luxury)) {
+    apply("premium", "luxury");
+    apply("mood", "luxury");
+    apply("whitespace", "spacious");
+    apply("surface", "layered");
+    apply("typographyDisplay", "editorial-serif");
+    apply("typographyTreatment", "editorial");
+    apply("intensity", "dramatic");
+    apply("layering", "overlap");
+    apply("environment", "dark", false);
+  }
+  if (has(creativeMarkers.hospitality)) {
+    heroField("heroFamily", "hospitality-image-led");
+    apply("composition", "masonry-editorial", false);
+    apply("premium", "luxury", false);
+    apply("whitespace", "spacious", false);
+  }
+  if (has(creativeMarkers.minimal)) {
+    apply("intensity", "restrained");
+    apply("mood", "minimal");
+    apply("density", "sparse");
+    apply("composition", "editorial-single-column");
+    apply("whitespace", "spacious");
+    apply("shape", "sharp");
+    apply("motionFamily", "quiet");
+    apply("balance", "editorial");
+    apply("typographyTreatment", "functional");
+    apply("typographyDisplay", "grotesk-modern");
+    apply("layering", "flat");
+  }
+  if (has(creativeMarkers.playful)) {
+    apply("shape", "organic");
+    apply("mood", "playful");
+    applyIfAbsent("motionFamily", "playful");
+    apply("typographyDisplay", "expressive-display");
+    apply("balance", "editorial");
+    apply("intensity", "expressive");
+  }
+  if (has(creativeMarkers.editorial)) {
+    apply("mood", "editorial");
+    apply("typographyDisplay", "editorial-serif");
+    apply("balance", "editorial");
+    apply("typographyTreatment", "editorial");
+  }
+  if (has(creativeMarkers.technical)) {
+    apply("mood", "technical");
+    apply("typographyDisplay", "geometric-technical");
+    apply("typographyTreatment", "technical");
+    apply("composition", "technical-grid");
+    apply("surface", "glass");
+    applyIfAbsent("motionFamily", "technical");
+    apply("shape", "sharp");
+    apply("artDirection", "grid-technical");
+  }
+  if (has(creativeMarkers.bold)) {
+    apply("mood", "bold");
+    apply("typographyDisplay", "condensed-poster");
+    apply("intensity", "dramatic");
+    apply("shape", "sharp");
+  }
+  if (has(creativeMarkers.organic)) {
+    apply("mood", "organic");
+    apply("shape", "organic");
+    apply("surface", "grain");
+    apply("palette", "sand-olive", false);
+  }
+  if (has(creativeMarkers.heritage)) {
+    apply("mood", "heritage");
+    apply("typographyDisplay", "editorial-serif");
+    apply("premium", "luxury");
+    apply("surface", "paper");
+    apply("environment", "light", false);
+  }
+  if (has(creativeMarkers.premium)) {
+    apply("mood", "luxury", false);
+    apply("premium", "luxury");
+  }
+  if (has(creativeMarkers.dark)) {
+    apply("environment", "dark", false);
+    apply("palette", "midnight-champagne", false);
+  }
+  if (has(creativeMarkers.light)) {
+    apply("environment", "light", false);
+    apply("palette", "paper-ink", false);
+  }
+  if (has(creativeMarkers.warm)) {
+    apply("mood", "warm", false);
+    apply("palette", "ivory-terracotta", false);
+    apply("typographyDisplay", "humanist-warm", false);
+  }
+  if (!decisive) return null;
+  return { type: "setCreativeDirection", ...patch } as z.infer<
+    typeof setCreativeDirectionOperation
+  >;
 }

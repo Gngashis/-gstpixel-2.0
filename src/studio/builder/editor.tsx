@@ -26,8 +26,10 @@ import { buildStudioWhatsappHref } from "../contact";
 import { consumeStudioIntakePrompt } from "../intake";
 import {
   createAlternateDesignSpec,
-  createSectionForType,
   generateFallbackDesignSpec,
+} from "./blueprint";
+import {
+  createSectionForType,
   getHomePage,
   moveSection,
   paletteIds,
@@ -52,6 +54,15 @@ import {
 } from "./change-plan";
 import { WebsiteRenderer } from "./renderer";
 import "./v2-styles.css";
+
+const creativeSuggestions = [
+  "Show me a completely different version",
+  "Make it feel far more expensive",
+  "Less corporate, more editorial",
+  "Give it a technical, engineered feel",
+  "Try a different hero entirely",
+  "Make it warmer and more playful",
+] as const;
 
 const examplePrompts = {
   "Luxury hotel":
@@ -84,6 +95,12 @@ const paletteLabels: Record<PaletteId, string> = {
   "ocean-copper": "Ocean & copper",
   "sand-olive": "Sand & olive",
   "graphite-lime": "Graphite & lime",
+  "plum-brass": "Plum & brass",
+  "stone-sage": "Stone & sage",
+  "cobalt-cream": "Cobalt & cream",
+  "charcoal-amber": "Charcoal & amber",
+  "clay-indigo": "Clay & indigo",
+  "slate-coral": "Slate & coral",
 };
 
 type Viewport = "desktop" | "mobile";
