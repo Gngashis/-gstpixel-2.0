@@ -4,6 +4,7 @@ import {
   applyBlueprintPatch,
   applyBlueprintToSpec,
   blueprintFromSpec,
+  buildPageForKind,
   compositionFamilies,
   ctaCharacters,
   contentDensities,
@@ -19,7 +20,19 @@ import {
   typographyCharacters,
   visualIntensities,
   type CreativeBlueprintPatch,
+  type TypographyCharacter,
 } from "./blueprint";
+import {
+  designDnaSchema,
+  motionLevelForTheme,
+  withMotionLevel,
+} from "./design-dna";
+import {
+  pageArchetype,
+  pageKindFromText,
+  pageKinds,
+  type SitePageKind,
+} from "./site-pages";
 import {
   createSectionForType,
   designSpecSchema,
@@ -39,6 +52,9 @@ import {
 
 export const STUDIO_CHANGE_PLAN_VERSION = 1 as const;
 
+/** The site page ceiling: a concept is a concept, not an endless site. */
+export const STUDIO_PAGE_LIMIT = 8 as const;
+
 const studioChangeOperationTypes = [
   "setTheme",
   "setSectionStyle",
@@ -50,6 +66,7 @@ const studioChangeOperationTypes = [
   "addPage",
   "setNavigation",
   "setMobile",
+  "setMotion",
   "alternate",
   "restoreTheme",
   "setCreativeDirection",
@@ -176,7 +193,7 @@ const duplicateSectionOperation = z
 const addPageOperation = z
   .object({
     type: z.literal("addPage"),
-    pageType: z.enum(["about", "services", "contact"]),
+    pageType: z.enum(pageKinds),
   })
   .strict();
 
@@ -197,6 +214,19 @@ const setMobileOperation = z
     navigation: z.enum(["minimal", "standard"]).optional(),
     density: z.enum(["compact", "balanced"]).optional(),
     decoration: z.enum(["keep", "simplified", "hidden"]).optional(),
+  })
+  .strict();
+
+/**
+ * Motion is a whole-website decision, like the mobile interpretation: the
+ * visitor sets one level and every page follows it. The level also reaches the
+ * per-section intensities, so "reduce the motion" is felt rather than merely
+ * declared.
+ */
+const setMotionOperation = z
+  .object({
+    type: z.literal("setMotion"),
+    level: z.enum(["quiet", "fluid", "cinematic", "energetic"]),
   })
   .strict();
 
@@ -238,6 +268,8 @@ const addProductsOperation = z
       .default("/"),
     kind: z.enum(["products", "categories"]),
     subject: z.string().min(1).max(40).optional(),
+    /** "add six sample protein products" — honoured between 3 and 8. */
+    count: z.number().int().min(3).max(8).optional(),
     afterSectionType: z.enum(sectionTypes).optional(),
     /** When present, products are added to this existing section. */
     target: sectionTargetSchema.optional(),
@@ -344,6 +376,7 @@ export const studioChangeOperationSchema = z.discriminatedUnion("type", [
   addPageOperation,
   setNavigationOperation,
   setMobileOperation,
+  setMotionOperation,
   alternateOperation,
   restoreThemeOperation,
   setCreativeDirectionOperation,
@@ -403,6 +436,12 @@ export type StudioChangeResult = {
   spec: DesignSpec;
   plan: StudioChangePlan;
   changed: boolean;
+  /**
+   * Honest notes about an operation the plan asked for but could not apply —
+   * a page ceiling, a page that already exists. They are shown to the visitor
+   * so a request never looks like it succeeded when nothing changed.
+   */
+  notes: string[];
 };
 
 export const studioThemeSnapshotSchema = z
@@ -447,6 +486,10 @@ function sectionTypeFromText(value: string): SectionType | null {
     includesAny(value, ["room", "package", "product", "listing", "collection"])
   )
     return "listings";
+  // A project grid, portfolio or case-study showcase is a gallery: the same
+  // visual section, aimed at the work that a services business shows off.
+  if (includesAny(value, ["project", "portfolio", "case stud", "showcase"]))
+    return "gallery";
   if (includesAny(value, ["testimonial", "review", "quote"]))
     return "testimonials";
   if (includesAny(value, ["gallery", "photo", "image showcase"]))
@@ -460,6 +503,34 @@ function sectionTypeFromText(value: string): SectionType | null {
   if (includesAny(value, ["contact", "location", "visit"])) return "contact";
   if (includesAny(value, ["call to action", "cta", "enquiry"])) return "cta";
   return null;
+}
+
+/**
+ * The page the visitor named, if they named one.
+ *
+ * "make the shop page more visual" is a statement about the shop page, not
+ * about whichever page happens to be open. When a page of the concept is named,
+ * every page-scoped part of the plan is aimed at it.
+ */
+function mentionedPageSlug(
+  value: string,
+  context: StudioChangeContext,
+): string | undefined {
+  const known = new Set(context.spec.pages.map((page) => page.slug));
+  const candidates = [
+    /\b(?:the\s+)?([a-z][a-z &?]{1,26}?)\s+pages?\b/.exec(value)?.[1],
+    /\bpages?\s+(?:for|about|with|on|showing)\s+([a-z][a-z &?]{1,26})/.exec(
+      value,
+    )?.[1],
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const kind = pageKindFromText(candidate);
+    if (!kind) continue;
+    const slug = pageArchetype(kind).slug;
+    if (known.has(slug)) return slug;
+  }
+  return undefined;
 }
 
 function pageFor(context: StudioChangeContext, slug?: string) {
@@ -502,6 +573,166 @@ function resolveReferenceType(
     }
   }
   return null;
+}
+
+/** Hero layouts a visitor can name in plain language. */
+const heroLayoutPhrases: ReadonlyArray<readonly [RegExp, string]> = [
+  [
+    /\b(split|two column|side by side|half and half|duo)\b/,
+    "split-composition",
+  ],
+  [/\b(centred|centered|midcentury|symmetrical)\b/, "centered-luxury"],
+  [
+    /\b(full[- ]?bleed|full width|edge to edge|immersive)\b/,
+    "immersive-viewport",
+  ],
+  [
+    /\b(typographic|type led|type-led|editorial type|poster)\b/,
+    "editorial-typography",
+  ],
+  [/\b(cinematic|film|movie|dramatic)\b/, "cinematic-editorial"],
+  [
+    /\b(technical|engineered|grid|systematic|apple[- ]like|apple)\b/,
+    "technical-grid",
+  ],
+  [
+    /\b(photograph|photo led|image led|image-led|product led)\b/,
+    "commerce-product",
+  ],
+  [
+    /\b(asymmetric|off[- ]centre|off[- ]center|broken grid)\b/,
+    "asymmetric-story",
+  ],
+  [/\b(minimal|quiet|understated|simple)\b/, "minimal-professional"],
+  [/\b(layered|stacked|overlapping)\b/, "layered-spatial"],
+  [/\b(warm|hospitality|welcoming)\b/, "hospitality-image-led"],
+  [/\b(bold|brutalist|loud|striking)\b/, "poster-brutalist"],
+];
+
+/**
+ * The typography character a visitor named in plain language, paired with the
+ * treatment that reads with it. Ordered: the more specific word wins, so
+ * "elegant and warm" resolves to the elegance the visitor led with.
+ */
+const typographyCharacterPhrases: ReadonlyArray<
+  readonly [
+    RegExp,
+    TypographyCharacter,
+    "editorial" | "technical" | "expressive" | "functional",
+  ]
+> = [
+  [
+    /\b(elegant|refined|sophisticated|graceful|delicate|luxuri\w*|couture)\b/,
+    "editorial-serif",
+    "editorial",
+  ],
+  [
+    /\b(editorial|magazine|literary|serif|classic|timeless)\b/,
+    "editorial-serif",
+    "editorial",
+  ],
+  [
+    /\b(warm|friendly|approachable|human|soft|gentle)\b/,
+    "humanist-warm",
+    "editorial",
+  ],
+  [
+    /\b(technical|precise|engineered|systematic|mono|data|structural)\b/,
+    "geometric-technical",
+    "technical",
+  ],
+  [
+    /\b(modern|clean|contemporary|neutral|simple)\b/,
+    "grotesk-modern",
+    "functional",
+  ],
+  [
+    /\b(bold|dramatic|loud|poster|impactful|expressive|statement)\b/,
+    "condensed-poster",
+    "expressive",
+  ],
+];
+
+/**
+ * Treatments a visitor can name for a section that is otherwise the same
+ * family — "projects" is still a gallery, but a structured grid of work rather
+ * than a photo collage.
+ */
+const namedVariantPhrases: ReadonlyArray<
+  readonly [SectionType, RegExp, string]
+> = [
+  [
+    "gallery",
+    /\b(project|projects|portfolio|case stud|showcase|grid|work)\b/,
+    "editorial-grid",
+  ],
+];
+
+/** The treatment a visitor named for a section type, when one applies. */
+function namedVariantFor(type: SectionType, value: string): string | null {
+  const allowed = sectionVariantRegistry[type] as readonly string[];
+  for (const [sectionType, pattern, variant] of namedVariantPhrases) {
+    if (
+      sectionType === type &&
+      pattern.test(value) &&
+      allowed.includes(variant)
+    )
+      return variant;
+  }
+  return null;
+}
+
+/** The entry after the current one, so a swap never repeats itself. */
+function nextAfter(values: readonly string[], current: string): string {
+  const index = values.indexOf(current);
+  return values[(Math.max(0, index) + 1) % values.length]!;
+}
+
+/** The typography character a visitor named, if they named one. */
+function typographyCharacterFromText(value: string): {
+  display: TypographyCharacter;
+  treatment: "editorial" | "technical" | "expressive" | "functional";
+} | null {
+  for (const [pattern, display, treatment] of typographyCharacterPhrases) {
+    if (pattern.test(value)) return { display, treatment };
+  }
+  return null;
+}
+
+/** The hero layout a visitor named, if they named one the schema allows. */
+function heroLayoutFromText(value: string): string | null {
+  for (const [pattern, family] of heroLayoutPhrases) {
+    if (
+      pattern.test(value) &&
+      (heroVariants as readonly string[]).includes(family)
+    ) {
+      return family;
+    }
+  }
+  return null;
+}
+
+/**
+ * The page that holds both a section to move and the section to move it
+ * against, preferring the page the visitor is looking at.
+ *
+ * "move testimonials below products" is about the page that has both — asking
+ * for a reorder on a page that never showed testimonials would silently do
+ * nothing, which reads as Studio ignoring the visitor.
+ */
+function pageHoldingSections(
+  spec: DesignSpec,
+  from: SectionType,
+  anchor: SectionType,
+  activePageSlug: string,
+): string | null {
+  const holds = (page: DesignSpec["pages"][number]) =>
+    page.sections.some((section) => section.type === from) &&
+    page.sections.some((section) => section.type === anchor);
+  const matching = spec.pages.filter(holds);
+  if (!matching.length) return null;
+  return (matching.find((page) => page.slug === activePageSlug) ?? matching[0]!)
+    .slug;
 }
 
 function targetFor(
@@ -658,11 +889,15 @@ function operationLabel(operation: StudioChangeOperation): string {
     case "duplicateSection":
       return `duplicated the ${operation.target.sectionType ?? "selected"} section`;
     case "addPage":
-      return `added an ${operation.pageType} page`;
+      return `added the ${pageArchetype(operation.pageType).title} page`;
     case "setNavigation":
       return "refined the navigation";
     case "setMobile":
       return "cleaned up the mobile experience";
+    case "setMotion":
+      return operation.level === "quiet"
+        ? "calmed the motion down"
+        : "adjusted the motion";
     case "alternate":
       return operation.target === "site"
         ? "created a new visual direction"
@@ -866,6 +1101,17 @@ export function planStudioChange(
 ): StudioChangePlan {
   const instruction = rawInstruction.replace(/\s+/g, " ").trim();
   const value = instruction.toLowerCase();
+  // Aim a named page's request at that page instead of the open one.
+  const namedPage = mentionedPageSlug(value, context);
+  if (namedPage && namedPage !== context.activePageSlug) {
+    context = {
+      ...context,
+      activePageSlug: namedPage,
+      selectedSectionId:
+        context.spec.pages.find((page) => page.slug === namedPage)?.sections[0]
+          ?.id ?? null,
+    };
+  }
   if (
     /<\/?[a-z][^>]*>/i.test(instruction) ||
     /\bjavascript\s*:/i.test(instruction) ||
@@ -884,6 +1130,17 @@ export function planStudioChange(
   }
   const operations: StudioChangeOperation[] = [];
   const unsupported: string[] = [];
+  /* Named once, used by both the section and the page parts of the plan, so
+     "add an FAQ page" does not also add an FAQ section. */
+  const pagePhrase = /\b(?:add|create|make|include|need|want|build)\b/i.test(
+    value,
+  )
+    ? (/\b([a-z][a-z &?]{1,26}?)\s+page\b/.exec(value)?.[1] ??
+      /\bpage\s+(?:for|about|with|on|showing)\s+([a-z][a-z &?]{1,26})/.exec(
+        value,
+      )?.[1])
+    : undefined;
+  const requestedPageKind = pagePhrase ? pageKindFromText(pagePhrase) : null;
   const namedSection = sectionTypeFromText(instruction);
   const explicitSection = resolveReferenceType(instruction, context);
   const selected = selectedSection(context);
@@ -904,6 +1161,26 @@ export function planStudioChange(
     "selected section",
     "this section",
   ]);
+  /*
+   * Mobile scoping is deliberately broader than the literal phrases below.
+   * "make the mobile version simpler" names mobile as the subject, so the
+   * instruction belongs to the mobile interpretation and must not be read as a
+   * site-wide restyle. A request that names desktop too stays global, since the
+   * visitor clearly means both views.
+   */
+  const desktopNamed = /\b(?:desktop|computer|laptop|wide screens?)\b/.test(
+    value,
+  );
+  /*
+   * Bare "phone" is a device noun ("add my phone number"), not a mobile
+   * instruction, so only unambiguous mobile phrasing counts here.
+   */
+  const mobileNamed =
+    (/\bmobile\b/.test(value) ||
+      /\b(?:on|for|across) (?:a )?(?:phones?|mobile)\b/.test(value) ||
+      /\bsmall screens?\b/.test(value) ||
+      /\bresponsive\b/.test(value)) &&
+    !desktopNamed;
   const mobileOnly =
     includesAny(value, [
       "mobile only",
@@ -913,6 +1190,7 @@ export function planStudioChange(
       "don't change desktop",
       "do not change desktop",
     ]) ||
+    mobileNamed ||
     (context.viewport === "mobile" && value.includes("this view"));
   const desktopOnly = includesAny(value, [
     "desktop only",
@@ -1043,7 +1321,7 @@ export function planStudioChange(
             }
           : {}),
       });
-    } else if (!mobileOnly) {
+    } else if (!mobileOnly || explicitGlobalTheme) {
       operations.push(theme);
     }
   }
@@ -1379,12 +1657,14 @@ export function planStudioChange(
 
   if (wantsCategories || wantsProducts) {
     const subject = productSubject(instruction);
+    const count = requestedCount(value);
     const onPage = pageSectionTypes(context);
     operations.push({
       type: "addProducts",
       pageSlug: context.activePageSlug,
       kind: wantsCategories ? "categories" : "products",
       ...(subject ? { subject } : {}),
+      ...(count ? { count } : {}),
       ...(onPage.includes("listings")
         ? {
             target: targetFor(
@@ -1436,9 +1716,11 @@ export function planStudioChange(
     }
   }
 
-  /* FAQ sections land as an actual FAQ, not a generic feature grid. */
+  /* FAQ sections land as an actual FAQ, not a generic feature grid — unless the
+     visitor asked for a whole FAQ page, which the page plan already covers. */
   if (
     /\b(?:faq|frequently asked|questions?)\b/.test(value) &&
+    !(requestedPageKind === "faq" && /\bpages?\b/.test(value)) &&
     /\b(?:add|create|include|need|want|make)\b/.test(value)
   ) {
     operations.push({
@@ -1452,18 +1734,42 @@ export function planStudioChange(
   /* ------------------------------------------------------------------
      STRUCTURE
      ------------------------------------------------------------------ */
+  /*
+   * "replace the gallery with projects". Both sides are read with the shared
+   * section vocabulary, so the visitor can name anything they can see, and a
+   * word Studio does not know yields no replacement instead of a guess.
+   */
   const replaceMatch = value.match(
-    /replace (?:the |this )?(hero|about|services?|gallery|features?|listings?|testimonials?|contact|cta) (?:section )?with (?:a |an )?(hero|about|services?|gallery|features?|listings?|testimonials?|contact|cta)/,
+    /replace (?:the |this )?([\w'& -]{2,24}?) (?:section )?with (?:a |an )?([\w'& -]{2,24})/,
   );
   if (replaceMatch) {
     const fromType = sectionTypeFromText(replaceMatch[1]!);
     const toType = sectionTypeFromText(replaceMatch[2]!);
     if (fromType && toType && toType !== "hero") {
-      operations.push({
-        type: "replaceSection",
-        target: targetFor(fromType, context, fromType === selected?.type),
-        sectionType: toType,
-      });
+      const target = targetFor(fromType, context, fromType === selected?.type);
+      const resolved =
+        fromType === toType ? resolveSection(context.spec, target) : null;
+      if (resolved) {
+        // Both words name the same section: "replace the gallery with
+        // projects" is a treatment change, so swap how it looks rather than
+        // doing nothing at all.
+        operations.push({
+          type: "setSectionStyle",
+          target,
+          variant:
+            namedVariantFor(fromType, value) ??
+            nextAfter(
+              sectionVariantRegistry[fromType] as readonly string[],
+              resolved.section.variant,
+            ),
+        });
+      } else {
+        operations.push({
+          type: "replaceSection",
+          target,
+          sectionType: toType,
+        });
+      }
     }
   }
 
@@ -1529,6 +1835,57 @@ export function planStudioChange(
     adjustMobile({ navigation: "minimal" });
   }
 
+  /* ------------------------------------------------------------------
+     MOTION
+     ------------------------------------------------------------------ */
+  /* "reduce the motion", "make it calmer", "less animation", "more motion".
+     One level for the whole website, which is how a visitor thinks about it. */
+  if (
+    /\b(?:motion|animation|animations|movement|transitions?|effects?)\b/.test(
+      value,
+    ) &&
+    /\b(?:reduce|less|calmer|calm|quieter|quiet|slow|subtle|minimal|remove|turn off|disable|no)\b/.test(
+      value,
+    )
+  ) {
+    operations.push({ type: "setMotion", level: "quiet" });
+  } else if (
+    /\b(?:motion|animation|animations|movement|transitions?)\b/.test(value) &&
+    /\b(?:more|livelier|liveliness|energetic|energy|punchy|dynamic|playful|add)\b/.test(
+      value,
+    )
+  ) {
+    operations.push({
+      type: "setMotion",
+      level: context.spec.theme.motion === "energetic" ? "fluid" : "energetic",
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     TYPOGRAPHY CHARACTER
+     ------------------------------------------------------------------ */
+  /*
+   * "keep this design but make the typography more elegant", "make the type
+   * warmer". Deliberately narrow: only the type character moves, so the rest
+   * of the design the visitor liked stays exactly as it is. Needs a type noun
+   * so it never fires on a general mood request like "make it more editorial".
+   */
+  if (
+    /\b(?:typography|type|typeface|font|fonts|lettering|headlines?)\b/.test(
+      value,
+    ) &&
+    !/\b(?:size|bigger|smaller|larger|scale|spacing)\b/.test(value)
+  ) {
+    const character = typographyCharacterFromText(value);
+    if (character) {
+      operations.push({
+        type: "setCreativeDirection",
+        typographyDisplay: character.display,
+        typographyTreatment: character.treatment,
+      });
+    }
+  }
+
   const addMatch = value.match(
     /add (?:a |an )?(gallery|contact|services?|features?|testimonials?|about)(?: section)?(?: after (services?|about|gallery|features?|contact))?/,
   );
@@ -1559,12 +1916,24 @@ export function planStudioChange(
   ) {
     operations.push({
       type: "removeSection",
-      target: targetFor(removeType, context, removeType === selected?.type),
+      // "remove testimonials" removes the section wherever it appears;
+      // "remove this section" removes only the one the visitor selected.
+      target: targetFor(
+        removeType,
+        context,
+        /\b(this|selected)\b/.test(value) && removeType === selected?.type,
+      ),
     });
   }
 
+  /*
+   * "move testimonials below products", "put the gallery after services".
+   * The two sides are read with the shared section vocabulary rather than a
+   * fixed list, so any section the visitor can name can be moved — and an
+   * unrecognised word simply yields no move instead of guessing.
+   */
   const moveMatch = value.match(
-    /(?:put|move) (gallery|about|rooms?|restaurant|services?|features?|contact|this section) (above|before|below|after) (gallery|about|rooms?|restaurant|services?|features?|contact)/,
+    /(?:put|move) (this section|the section|[\w'& -]{2,24}?) (above|before|below|after) (?:the )?([\w'& -]{2,24})/,
   );
   if (moveMatch) {
     const from =
@@ -1572,15 +1941,30 @@ export function planStudioChange(
         ? (selected?.type ?? null)
         : sectionTypeFromText(moveMatch[1]!);
     const anchor = sectionTypeFromText(moveMatch[3]!);
-    if (from && anchor && from !== "hero") {
+    if (from && anchor && from !== "hero" && from !== anchor) {
+      const pageSlug = pageHoldingSections(
+        context.spec,
+        from,
+        anchor,
+        context.activePageSlug,
+      );
       operations.push({
         type: "moveSection",
-        target: targetFor(from, context, moveMatch[1] === "this section"),
+        target:
+          moveMatch[1] === "this section"
+            ? targetFor(from, context, true)
+            : {
+                pageSlug: pageSlug ?? context.activePageSlug,
+                sectionType: from,
+              },
         relation:
           moveMatch[2] === "above" || moveMatch[2] === "before"
             ? "before"
             : "after",
-        anchor: targetFor(anchor, context),
+        anchor: {
+          pageSlug: pageSlug ?? context.activePageSlug,
+          sectionType: anchor,
+        },
       });
     }
   } else if (
@@ -1594,10 +1978,68 @@ export function planStudioChange(
     });
   }
 
-  if (/(?:add|create) (?:an? )?about page/.test(value))
-    operations.push({ type: "addPage", pageType: "about" });
-  if (/(?:add|create) (?:a )?contact page/.test(value))
-    operations.push({ type: "addPage", pageType: "contact" });
+  /*
+   * "add an FAQ page", "create a booking page", "I need a page about our
+   * story". The page kind comes from the page vocabulary, so a business that
+   * genuinely needs a treatments, projects or destinations page gets one.
+   */
+  /*
+   * Only a genuine request to add a page adds one. "make the shop page more
+   * visual" names an existing page, and "add an FAQ page to the shop" names
+   * one that may already exist — neither should silently create a duplicate.
+   */
+  const existingPageKinds = new Set(
+    context.spec.pages.map((page) => page.slug),
+  );
+  // "... page more visual" describes a page the visitor already has, so a
+  // comparative right after the word "page" rules the request out.
+  const pageRequest =
+    /\b(?:add|create|build|include|need|want|set up|make|give me|also)\b[a-z ]{0,24}\bpages?\b(?!\s+(?:more|less|better|cleaner|visual|modern|premium|simpler|darker|lighter|denser))/i.test(
+      value,
+    );
+  if (
+    requestedPageKind &&
+    pageRequest &&
+    !existingPageKinds.has(pageArchetype(requestedPageKind).slug)
+  ) {
+    operations.push({ type: "addPage", pageType: requestedPageKind });
+  }
+
+  /*
+   * "keep the content but completely redesign it". The copy the visitor
+   * already has is preserved and the whole visual direction is rebuilt around
+   * it: a different hero, composition, type character, density and palette,
+   * with nothing regenerated from scratch. Every axis moves at once, so this
+   * is a real redesign rather than a recolour.
+   */
+  if (
+    /\b(?:redesign|rework|restyle|rebuild|start again|from scratch|shake it up|refresh the design)\b/.test(
+      value,
+    ) &&
+    /\b(?:keep|preserve|same|retain|don't change|do not change)\b[a-z ]{0,24}\b(?:content|copy|words|text|writing|pages?|structure)\b/.test(
+      value,
+    )
+  ) {
+    const blueprint = blueprintFromSpec(context.spec);
+    operations.push({
+      type: "setCreativeDirection",
+      heroFamily: nextAfter(heroFamilies, blueprint.hero.family) as never,
+      composition: nextAfter(
+        compositionFamilies,
+        blueprint.layout.composition,
+      ) as never,
+      typographyDisplay: nextAfter(
+        typographyCharacters,
+        blueprint.typography.display,
+      ) as never,
+      density: nextAfter(
+        contentDensities,
+        blueprint.direction.density,
+      ) as never,
+      motionFamily: nextAfter(motionFamilies, blueprint.motion.family) as never,
+      palette: nextAfter(paletteIds, blueprint.colour.palette) as PaletteId,
+    });
+  }
 
   const creativeDirection = creativeDirectionPlan(value, {
     sectionOnly: sectionOnly || mobileOnly || desktopOnly,
@@ -1631,6 +2073,22 @@ export function planStudioChange(
       variant: next,
       ...(position < 0 ? { media: "abstract" as const } : {}),
     });
+  }
+
+  /*
+   * "turn the hero into a split layout", "make the hero full-bleed", "give the
+   * hero an editorial type treatment". A named hero layout is a specific
+   * request, so it maps to that layout rather than to the next one in the list.
+   */
+  if (hero && !keepOnly && /\bhero\b/.test(value)) {
+    const namedLayout = heroLayoutFromText(value);
+    if (namedLayout && namedLayout !== hero.variant) {
+      operations.push({
+        type: "setSectionStyle",
+        target: heroTarget,
+        variant: namedLayout,
+      });
+    }
   }
 
   if (
@@ -1722,6 +2180,19 @@ export function planStudioChange(
   });
 }
 
+/**
+ * Keeps a stored design identity in step with the declared motion level, so the
+ * panel never claims more (or less) motion than the website actually uses.
+ * Absent an identity there is nothing to reconcile — one is derived on read.
+ */
+function reconcileDnaMotion(spec: DesignSpec) {
+  const stored = spec.metadata.designDna;
+  if (!stored) return undefined;
+  const parsed = designDnaSchema.safeParse(stored);
+  if (!parsed.success) return undefined;
+  return withMotionLevel(parsed.data, motionLevelForTheme(spec.theme.motion));
+}
+
 function resolveSection(
   spec: DesignSpec,
   target: z.infer<typeof sectionTargetSchema>,
@@ -1760,31 +2231,21 @@ function alternateSection(section: DesignSection) {
   section.motion = section.motion === "drift" ? "reveal" : "drift";
 }
 
-function pageTemplate(
-  type: "about" | "services" | "contact",
-  spec: DesignSpec,
-) {
-  const page = structuredClone(getHomePage(spec));
-  const title = type[0]!.toUpperCase() + type.slice(1);
-  page.slug = `/${type}`;
-  page.title = title;
-  page.navigationLabel = title;
-  page.sections = [
-    structuredClone(page.sections[0]!),
-    createSectionForType(type === "services" ? "services" : type, spec),
-    createSectionForType(type === "contact" ? "contact" : "cta", spec),
-  ];
-  page.sections[0]!.id = `${type}-hero`;
-  page.sections[0]!.content.eyebrow = title;
-  page.sections[0]!.content.title =
-    type === "about"
-      ? `The story behind ${spec.site.name}.`
-      : type === "services"
-        ? "A clearer view of what we offer."
-        : "Start a useful conversation.";
-  page.sections[1]!.id = `${type}-primary`;
-  page.sections[2]!.id = `${type}-cta`;
-  return page;
+/**
+ * A page added in conversation.
+ *
+ * The page is composed from the concept's own blueprint and DesignDNA, so an
+ * FAQ page or a booking page arrives as a real page of the same brand with
+ * business-specific copy — not a generic three-section template.
+ */
+function pageTemplate(kind: SitePageKind, spec: DesignSpec) {
+  const archetype = pageArchetype(kind);
+  const page = buildPageForKind(
+    spec,
+    kind,
+    Math.max(0, Math.min(7, spec.pages.length - 1)),
+  );
+  return { ...page, slug: archetype.slug, title: archetype.title };
 }
 
 /**
@@ -1794,9 +2255,28 @@ function pageTemplate(
  * copy for a real product, price or claim. The subject the visitor named is
  * used verbatim so the section obviously answers what they asked for.
  */
+const numberWords: Record<string, number> = {
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+};
+
+/** The count a visitor actually named, or null. */
+function requestedCount(value: string): number | null {
+  const word = /\b(\d{1,2}|three|four|five|six|seven|eight)\b/.exec(value)?.[1];
+  if (!word) return null;
+  const parsed = numberWords[word] ?? Number(word);
+  if (!Number.isFinite(parsed)) return null;
+  return Math.max(3, Math.min(8, Math.floor(parsed)));
+}
+
 function sampleCommerceItems(
   kind: "products" | "categories",
   subject?: string,
+  count?: number,
 ): DesignSection["content"]["items"] {
   const named = subject?.replace(/\s+/g, " ").trim() ?? "";
   const titled = named ? `${named[0]!.toUpperCase()}${named.slice(1)}` : "";
@@ -1822,26 +2302,44 @@ function sampleCommerceItems(
       },
     ];
   }
-  return [
-    {
-      title: titled ? `${titled} — sample item` : "Sample product",
-      body: "Replace this with your real product name, size and price.",
-      meta: "Sample item",
-      accent: "01",
-    },
-    {
-      title: "Sample product",
-      body: "A second product entry so the grid reads as a real shelf.",
-      meta: "Sample item",
-      accent: "02",
-    },
-    {
-      title: "Sample product",
-      body: "Add brand, flavour, weight and label details from your own packaging.",
-      meta: "Sample item",
-      accent: "03",
-    },
-  ];
+  /*
+   * Sample products are grouped into sample categories so the product grid a
+   * visitor asked for behaves like a real shelf: the category filter has real
+   * options and narrowing it visibly changes the grid. Category names are
+   * placeholders exactly like the product names, and never prices or claims.
+   */ const total = Math.max(3, Math.min(8, count ?? 4));
+  const categories = supplementCategorySamples(named);
+  return Array.from({ length: total }, (_unused, position) => ({
+    title:
+      position === 0 && titled
+        ? `${titled} — sample item`
+        : `Sample product ${String(position + 1).padStart(2, "0")}`,
+    body:
+      position === 0
+        ? "Replace this with your real product name, size and price."
+        : "Add brand, flavour, weight and label details from your own packaging.",
+    meta: categories[position % categories.length]!,
+    accent: String(position + 1).padStart(2, "0"),
+  }));
+}
+
+/**
+ * Sample category names for a product shelf. The visitor's own word leads, so
+ * a protein request produces a Protein group rather than an invented one.
+ */
+function supplementCategorySamples(subject: string): string[] {
+  const base = subject.toLowerCase();
+  const lead = base.includes("protein")
+    ? "Protein"
+    : base.includes("vitamin")
+      ? "Vitamins"
+      : base
+        ? base.charAt(0).toUpperCase() + base.slice(1)
+        : "Protein";
+  const others = ["Vitamins", "Daily essentials"].filter(
+    (entry) => entry.toLowerCase() !== lead.toLowerCase(),
+  );
+  return [lead, ...others];
 }
 
 /** Adds a section just before the page's closing action section. */
@@ -1873,6 +2371,7 @@ export function applyStudioChangePlan(
   let spec = structuredClone(context.spec);
   const original = structuredClone(context.spec);
   let changed = false;
+  const notes: string[] = [];
   const markChanged = () => {
     changed = true;
   };
@@ -1892,6 +2391,8 @@ export function applyStudioChangePlan(
         if (operation.bodyScale) spec.theme.bodyScale = operation.bodyScale;
         if (operation.buttonStyle)
           spec.theme.buttonStyle = operation.buttonStyle;
+        if (operation.motion)
+          spec.metadata.designDna = reconcileDnaMotion(spec);
         markChanged();
         break;
       }
@@ -1981,6 +2482,31 @@ export function applyStudioChangePlan(
         break;
       }
       case "removeSection": {
+        /*
+         * "remove testimonials" is a statement about the website, not about one
+         * page. When the visitor did not single out a section, the section type
+         * is removed wherever it appears — otherwise a multi-page concept would
+         * silently keep testimonials the visitor asked to be rid of. Naming a
+         * specific section keeps the change local.
+         */
+        if (!operation.target.sectionId && operation.target.sectionType) {
+          const type = operation.target.sectionType;
+          let removedAny = false;
+          for (const page of spec.pages) {
+            for (let index = page.sections.length - 1; index >= 1; index -= 1) {
+              if (page.sections.length <= 2) break;
+              if (page.sections[index]?.type !== type) continue;
+              page.sections.splice(index, 1);
+              removedAny = true;
+            }
+          }
+          if (removedAny) markChanged();
+          else
+            notes.push(
+              `This concept has no ${type} section yet, so there was nothing to remove.`,
+            );
+          break;
+        }
         const resolved = resolveSection(spec, operation.target);
         if (
           !resolved ||
@@ -1997,7 +2523,20 @@ export function applyStudioChangePlan(
       }
       case "moveSection": {
         const resolved = resolveSection(spec, operation.target);
-        if (!resolved || resolved.index === 0) break;
+        if (!resolved) {
+          if (operation.target.sectionType && !operation.target.sectionId) {
+            const type = operation.target.sectionType;
+            const present = spec.pages.some((page) =>
+              page.sections.some((section) => section.type === type),
+            );
+            if (!present)
+              notes.push(
+                `This concept has no ${type} section to move yet — add one first and Studio can reorder it.`,
+              );
+          }
+          break;
+        }
+        if (resolved.index === 0) break;
         let destination = resolved.index;
         if (operation.relation === "up")
           destination = Math.max(1, resolved.index - 1);
@@ -2046,22 +2585,60 @@ export function applyStudioChangePlan(
         break;
       }
       case "addPage": {
-        const slug = `/${operation.pageType}`;
-        if (!spec.pages.some((page) => page.slug === slug)) {
+        const archetype = pageArchetype(operation.pageType);
+        const existing = spec.pages.find(
+          (page) => page.slug === archetype.slug,
+        );
+        if (!existing) {
+          if (spec.pages.length >= STUDIO_PAGE_LIMIT) {
+            // Say why nothing happened instead of reporting a change that the
+            // page ceiling quietly prevented.
+            notes.push(
+              `This concept is at its ${STUDIO_PAGE_LIMIT}-page limit — remove a page before adding a ${archetype.title.toLowerCase()} page.`,
+            );
+            break;
+          }
           spec.pages.push(pageTemplate(operation.pageType, spec));
-          spec.navigation.items.push({
-            label:
-              operation.pageType[0]!.toUpperCase() +
-              operation.pageType.slice(1),
-            target: slug,
-          });
           markChanged();
+        }
+        // The page becomes reachable either way, so asking for a page the
+        // concept already has still leaves the visitor with a usable result.
+        if (
+          !spec.navigation.items.some((item) => item.target === archetype.slug)
+        ) {
+          spec.navigation.items = [
+            ...spec.navigation.items,
+            { label: archetype.navLabel, target: archetype.slug },
+          ].slice(0, STUDIO_PAGE_LIMIT);
+          markChanged();
+        } else if (existing) {
+          notes.push(
+            `This concept already has a ${archetype.title.toLowerCase()} page, so Studio kept the one you have.`,
+          );
         }
         break;
       }
       case "setNavigation": {
         if (operation.style) spec.navigation.style = operation.style;
         if (operation.ctaLabel) spec.navigation.ctaLabel = operation.ctaLabel;
+        markChanged();
+        break;
+      }
+      case "setMotion": {
+        spec.theme.motion = operation.level;
+        // The identity is stored on the spec, so the declared level has to be
+        // reconciled into it — otherwise the panel would keep claiming
+        // "premium motion" after the visitor asked for less.
+        spec.metadata.designDna = reconcileDnaMotion(spec);
+        for (const page of spec.pages) {
+          for (const section of page.sections) {
+            // Reducing motion clears the intensities that drive drift and
+            // snap; increasing it lifts the sections that were deliberately
+            // still, so a busier request reads as busier everywhere.
+            if (operation.level === "quiet") section.motion = "quiet";
+            else if (section.motion === "quiet") section.motion = "reveal";
+          }
+        }
         markChanged();
         break;
       }
@@ -2100,10 +2677,31 @@ export function applyStudioChangePlan(
         break;
       }
       case "addProducts": {
-        const items = sampleCommerceItems(operation.kind, operation.subject);
-        const existing = operation.target
+        const items = sampleCommerceItems(
+          operation.kind,
+          operation.subject,
+          operation.count,
+        );
+        const resolvedTarget = operation.target
           ? resolveSection(spec, operation.target)
           : null;
+        /*
+         * Products belong in a product grid. An index list, a comparison or a
+         * single featured item is a different shelf, so asking for products
+         * there adds a real product shelf instead of squeezing samples into a
+         * layout that cannot show them.
+         */
+        const gridReady =
+          resolvedTarget !== null &&
+          !["index-list", "comparison", "featured-item"].includes(
+            resolvedTarget.section.variant,
+          );
+        const existing =
+          operation.kind === "categories"
+            ? resolvedTarget
+            : gridReady
+              ? resolvedTarget
+              : null;
         if (existing) {
           existing.section.content.items = [
             ...existing.section.content.items,
@@ -2294,17 +2892,33 @@ export function applyStudioChangePlan(
           spec.theme.spacing = previous.spacing;
         else if (operation.aspect === "surface")
           spec.theme.surface = previous.surface;
-        else if (operation.aspect === "motion")
+        else if (operation.aspect === "motion") {
           spec.theme.motion = previous.motion;
+          spec.metadata.designDna = reconcileDnaMotion(spec);
+        }
         markChanged();
         break;
       }
     }
   }
 
-  const actualChanged =
-    JSON.stringify({ ...original, metadata: null }) !==
-    JSON.stringify({ ...spec, metadata: null });
+  /*
+   * A creative-direction request can legitimately move only the design
+   * blueprint (the DesignDNA carried in metadata) without touching the visible
+   * theme, so that state has to count as a real change too. Only the volatile
+   * bookkeeping fields are ignored.
+   */
+  const stableState = (entry: DesignSpec) => {
+    const blueprint = entry.metadata?.blueprint;
+    const designDna = entry.metadata?.designDna;
+    return JSON.stringify({
+      ...entry,
+      metadata: null,
+      blueprint: blueprint ? JSON.stringify(blueprint) : null,
+      designDna: designDna ? JSON.stringify(designDna) : null,
+    });
+  };
+  const actualChanged = stableState(original) !== stableState(spec);
   changed = changed && actualChanged;
   if (changed) {
     spec.metadata = {
@@ -2314,7 +2928,7 @@ export function applyStudioChangePlan(
       revision: Math.min(999, context.spec.metadata.revision + 1),
     };
   }
-  return { spec: parseDesignSpec(spec), plan, changed };
+  return { spec: parseDesignSpec(spec), plan, changed, notes };
 }
 
 export function getContextualSuggestions(

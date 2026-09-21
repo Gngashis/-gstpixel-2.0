@@ -5,6 +5,8 @@ import {
   ArrowUp,
   Check,
   ChevronDown,
+  Copy,
+  Image as ImageIcon,
   Layers3,
   MessageCircle,
   Monitor,
@@ -18,8 +20,16 @@ import {
   Sparkles,
   Trash2,
   WandSparkles,
+  X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { Link } from "@tanstack/react-router";
 import { useReducedMotion } from "@/lib/motion";
 import { buildStudioWhatsappHref } from "../contact";
@@ -28,6 +38,7 @@ import {
   applyBlueprintPatch,
   applyBlueprintToSpec,
   blueprintFromSpec,
+  buildPageForKind,
   compositionFamilies,
   createAlternateDesignSpec,
   generateFallbackDesignSpec,
@@ -35,6 +46,26 @@ import {
   motionFamilies,
   type CreativeBlueprintPatch,
 } from "./blueprint";
+import {
+  designDnaFromBlueprint,
+  describeDesignDna,
+  readDesignDna,
+  motionLevels,
+  type MotionLevel,
+} from "./design-dna";
+import {
+  directionDesignSpec,
+  planAdditionalDirection,
+  planCreativeDirections,
+  type CreativeDirection,
+} from "./directions";
+import {
+  pageArchetype,
+  pageKinds,
+  planSitePages,
+  type SitePageKind,
+} from "./site-pages";
+import type { RenderMedia } from "./renderer";
 import {
   designCategories,
   designPresetSpec,
@@ -167,8 +198,52 @@ const titleCase = (value: string) =>
     .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
     .join(" ");
 
-type Viewport = "desktop" | "mobile";
+const motionLabels: Record<MotionLevel, string> = {
+  none: "None",
+  subtle: "Subtle",
+  premium: "Premium",
+  cinematic: "Cinematic",
+};
+
+const motionLabel = (level: MotionLevel) => motionLabels[level];
+
+/** The motion family a formal level maps onto in the design vocabulary. */
+const motionFamilyForLevel = (
+  level: MotionLevel,
+): (typeof motionFamilies)[number] =>
+  level === "none"
+    ? "quiet"
+    : level === "subtle"
+      ? "editorial"
+      : level === "premium"
+        ? "luxury"
+        : "cinematic";
+
+type Viewport = "desktop" | "768" | "430" | "390";
 type BuilderPhase = "landing" | "generating" | "editing";
+
+/** Studio only distinguishes desktop from small-screen behaviour. */
+const contextViewport = (viewport: Viewport): "desktop" | "mobile" =>
+  viewport === "desktop" ? "desktop" : "mobile";
+
+/**
+ * A session version of the concept.
+ *
+ * Versions live in React state only: no storage API is touched, so a refresh
+ * legitimately discards them. Each version carries its own undo/redo trail, so
+ * exploring a direction never costs the visitor their history.
+ */
+type ConceptVersion = {
+  id: string;
+  label: string;
+  origin: string;
+  spec: DesignSpec;
+  history: DesignSpec[];
+  future: DesignSpec[];
+};
+
+/* Stable empties so a missing version never creates a fresh array each render. */
+const NO_SPECS: DesignSpec[] = [];
 
 const buildApiPath = "/api/studio-build";
 
@@ -178,6 +253,7 @@ type ServerBuildResult = {
   plan?: StudioChangePlan;
   summary?: string;
   unsupported?: string[];
+  notes?: string[];
   changed?: boolean;
 };
 
@@ -199,9 +275,16 @@ async function requestServerSpec(
       plan?: unknown;
       summary?: unknown;
       unsupported?: unknown;
+      notes?: unknown;
       changed?: unknown;
     };
+    const strings = (value: unknown): string[] | undefined =>
+      Array.isArray(value) && value.every((item) => typeof item === "string")
+        ? (value as string[])
+        : undefined;
     const plan = payload.plan ? parseStudioChangePlan(payload.plan) : undefined;
+    const unsupported = strings(payload.unsupported);
+    const notes = strings(payload.notes);
     return {
       spec: parseDesignSpec(payload.spec),
       source: payload.source === "ai" ? "ai" : "fallback",
@@ -209,10 +292,8 @@ async function requestServerSpec(
       ...(typeof payload.summary === "string"
         ? { summary: payload.summary }
         : {}),
-      ...(Array.isArray(payload.unsupported) &&
-      payload.unsupported.every((item) => typeof item === "string")
-        ? { unsupported: payload.unsupported }
-        : {}),
+      ...(unsupported ? { unsupported } : {}),
+      ...(notes ? { notes } : {}),
       ...(typeof payload.changed === "boolean"
         ? { changed: payload.changed }
         : {}),
@@ -226,14 +307,112 @@ export function StudioBuilder() {
   const [phase, setPhase] = useState<BuilderPhase>("landing");
   const [prompt, setPrompt] = useState("");
   const [instruction, setInstruction] = useState("");
-  const [spec, setSpec] = useState<DesignSpec | null>(null);
-  const [history, setHistory] = useState<DesignSpec[]>([]);
-  const [future, setFuture] = useState<DesignSpec[]>([]);
+  /*
+   * Session versions.
+   *
+   * `spec`, `history` and `future` below are the *active* version's working
+   * state, so every existing editing path keeps working unchanged while the
+   * visitor can duplicate a version, switch between versions, compare them and
+   * still undo and redo inside whichever version they are in.
+   */
+  const [versions, setVersions] = useState<ConceptVersion[]>([]);
+  const [activeVersionId, setActiveVersionId] = useState<string>("");
+  const [compareVersionId, setCompareVersionId] = useState<string>("");
+  const versionCounter = useRef(0);
+  const activeVersion =
+    versions.find((entry) => entry.id === activeVersionId) ?? versions[0];
+  const spec = activeVersion?.spec ?? null;
+  const history = activeVersion?.history ?? NO_SPECS;
+  const future = activeVersion?.future ?? NO_SPECS;
+
+  const updateActive = (
+    update: (version: ConceptVersion) => ConceptVersion,
+  ) => {
+    setVersions((items) => {
+      const id = activeVersionId || items[0]?.id;
+      if (!id) return items;
+      return items.map((entry) => (entry.id === id ? update(entry) : entry));
+    });
+  };
+  const setSpec = (next: DesignSpec) =>
+    updateActive((version) => ({ ...version, spec: next }));
+  const setHistory = (
+    next: DesignSpec[] | ((items: DesignSpec[]) => DesignSpec[]),
+  ) =>
+    updateActive((version) => ({
+      ...version,
+      history: typeof next === "function" ? next(version.history) : next,
+    }));
+  const setFuture = (
+    next: DesignSpec[] | ((items: DesignSpec[]) => DesignSpec[]),
+  ) =>
+    updateActive((version) => ({
+      ...version,
+      future: typeof next === "function" ? next(version.future) : next,
+    }));
+
+  const nextVersionId = () => {
+    versionCounter.current += 1;
+    return `version-${versionCounter.current}`;
+  };
+
+  /** Adds a version from a spec and makes it the active one. */
+  const addVersion = (
+    nextSpec: DesignSpec,
+    label: string,
+    origin: string,
+    history: DesignSpec[] = [],
+  ) => {
+    const version: ConceptVersion = {
+      id: nextVersionId(),
+      label,
+      origin,
+      spec: nextSpec,
+      history,
+      future: [],
+    };
+    setVersions((items) => [...items.slice(-7), version]);
+    setActiveVersionId(version.id);
+    return version;
+  };
+
+  /* Direction previews and the three proposals for the current description. */
+  const [directions, setDirections] = useState<CreativeDirection[]>([]);
+  const [previewDirectionId, setPreviewDirectionId] = useState<string | null>(
+    null,
+  );
+  const [extraDirectionOffset, setExtraDirectionOffset] = useState(0);
+  /* Session-only media. Object URLs are revoked as soon as they are replaced. */
+  const [media, setMedia] = useState<{
+    logo: string | null;
+    hero: string | null;
+    gallery: string[];
+  }>({ logo: null, hero: null, gallery: [] });
+  const objectUrlsRef = useRef<string[]>([]);
+
+  const trackObjectUrl = (url: string) => {
+    objectUrlsRef.current.push(url);
+    return url;
+  };
+  const releaseObjectUrl = (url: string | null) => {
+    if (!url) return;
+    URL.revokeObjectURL(url);
+    objectUrlsRef.current = objectUrlsRef.current.filter(
+      (entry) => entry !== url,
+    );
+  };
+  const clearMedia = () => {
+    for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
+    objectUrlsRef.current = [];
+    setMedia({ logo: null, hero: null, gallery: [] });
+  };
+
   const [viewport, setViewport] = useState<Viewport>("desktop");
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     null,
   );
   const [activePageSlug, setActivePageSlug] = useState("/");
+  const [showVersions, setShowVersions] = useState(true);
   const [generationStep, setGenerationStep] = useState(0);
   const [isChanging, setIsChanging] = useState(false);
   const [status, setStatus] = useState("");
@@ -245,6 +424,7 @@ export function StudioBuilder() {
   );
   const [addType, setAddType] =
     useState<Exclude<SectionType, "hero">>("gallery");
+  const [addPageKind, setAddPageKind] = useState<SitePageKind>("faq");
   const [landingMode, setLandingMode] = useState<"describe" | "browse">(
     "describe",
   );
@@ -354,9 +534,18 @@ export function StudioBuilder() {
     ]);
     if (controller.signal.aborted) return abandonGeneration(controller);
     const next = serverResult?.spec ?? fallback;
-    setSpec(next);
-    setHistory([]);
-    setFuture([]);
+    setVersions([]);
+    setActiveVersionId("");
+    setCompareVersionId("");
+    setPreviewDirectionId(null);
+    setExtraDirectionOffset(0);
+    clearMedia();
+    addVersion(
+      next,
+      "Version 1",
+      serverResult?.source === "ai" ? "Studio AI" : "Studio design system",
+    );
+    setDirections(planCreativeDirections(value));
     setConversation([]);
     setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
     setActivePageSlug("/");
@@ -447,9 +636,8 @@ export function StudioBuilder() {
   /** Loads a curated design from the library. No model call, no storage. */
   const startFromPreset = (entry: DesignPreset) => {
     const next = designPresetSpec(entry);
-    setSpec(next);
-    setHistory([]);
-    setFuture([]);
+    setPreviewDirectionId(null);
+    addVersion(next, entry.name, "Premium design library");
     setConversation([]);
     setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
     setActivePageSlug("/");
@@ -475,7 +663,7 @@ export function StudioBuilder() {
       spec,
       activePageSlug,
       selectedSectionId,
-      viewport,
+      viewport: contextViewport(viewport),
       recentTurns: conversation.slice(-4),
       previousThemes: history
         .slice()
@@ -508,7 +696,7 @@ export function StudioBuilder() {
           context: {
             activePageSlug,
             selectedSectionId,
-            viewport,
+            viewport: contextViewport(viewport),
             recentTurns: conversation.slice(-4),
             previousThemes: context.previousThemes,
           },
@@ -526,7 +714,12 @@ export function StudioBuilder() {
     const plan = serverResult?.plan ?? fallbackPlan;
     const changed = serverResult?.changed ?? fallbackResult.changed;
     const summary = serverResult?.summary ?? plan.summary;
-    const unsupported = serverResult?.unsupported ?? plan.unsupported;
+    const unsupported = [
+      ...new Set([
+        ...(serverResult?.unsupported ?? plan.unsupported),
+        ...(serverResult?.notes ?? fallbackResult.notes),
+      ]),
+    ];
     if (changed) {
       setHistory((items) => [...items.slice(-9), spec]);
       setFuture([]);
@@ -578,6 +771,162 @@ export function StudioBuilder() {
     setStatus("Change restored.");
   };
 
+  /* ------------------------------------------------------------------
+     Session versions
+     ------------------------------------------------------------------ */
+  const switchVersion = (id: string) => {
+    const version = versions.find((entry) => entry.id === id);
+    if (!version) return;
+    setActiveVersionId(id);
+    setPreviewDirectionId(null);
+    setActivePageSlug("/");
+    setSelectedSectionId(version.spec.pages[0]?.sections[0]?.id ?? null);
+    setStatus(`${version.label} is open.`);
+  };
+
+  const duplicateVersion = () => {
+    if (!spec) return;
+    addVersion(
+      structuredClone(spec),
+      `Version ${versions.length + 1}`,
+      `Copy of ${activeVersion?.label ?? "version"}`,
+    );
+    setStatus(
+      "Version duplicated — it is a separate branch you can change without affecting the original.",
+    );
+  };
+
+  const createFreshVersion = () => {
+    if (!spec) return;
+    const previous = spec;
+    const next = createAlternateDesignSpec(previous);
+    addVersion(
+      next,
+      `Version ${versions.length + 1}`,
+      "A different design direction",
+      // Carrying the previous design into the new version's history keeps Undo
+      // meaningful across versions: one step back returns to what was there.
+      [previous],
+    );
+    setPreviewDirectionId(null);
+    setActivePageSlug("/");
+    setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
+    setStatus(
+      "A new version is open — the same business, designed completely differently.",
+    );
+  };
+
+  const removeVersion = (id: string) => {
+    if (versions.length <= 1) return;
+    const remaining = versions.filter((entry) => entry.id !== id);
+    setVersions(remaining);
+    if (activeVersionId === id) setActiveVersionId(remaining[0]!.id);
+    if (compareVersionId === id) setCompareVersionId("");
+    setStatus("Version removed from this session.");
+  };
+
+  /* ------------------------------------------------------------------
+     Creative directions
+     ------------------------------------------------------------------ */
+  const askForAnotherDirection = () => {
+    if (!spec) return;
+    const source = prompt.trim().length >= 10 ? prompt : spec.site.descriptor;
+    const next = planAdditionalDirection(source, extraDirectionOffset);
+    setExtraDirectionOffset((value) => value + 1);
+    setDirections((items) => [...items.slice(-5), next]);
+    setPreviewDirectionId(next.id);
+    setStatus(
+      `Direction ${String(next.index).padStart(2, "0")} — ${next.name} is ready to preview.`,
+    );
+  };
+
+  /* ------------------------------------------------------------------
+     Pages
+     ------------------------------------------------------------------ */
+  const addPageToSite = () => {
+    if (!spec) return;
+    const archetype = pageArchetype(addPageKind);
+    if (spec.pages.some((page) => page.slug === archetype.slug)) {
+      setStatus(`${archetype.title} is already part of this concept.`);
+      return;
+    }
+    if (spec.pages.length >= 8) {
+      setStatus("This concept is at its page limit — remove one first.");
+      return;
+    }
+    const page = buildPageForKind(spec, addPageKind, spec.pages.length - 1);
+    const next = parseDesignSpec({
+      ...spec,
+      pages: [...spec.pages, page],
+      navigation: {
+        ...spec.navigation,
+        items: [
+          ...spec.navigation.items,
+          { label: archetype.navLabel, target: archetype.slug },
+        ].slice(0, 8),
+      },
+    });
+    applySpec(
+      next,
+      `${archetype.title} page added in the same design language.`,
+    );
+    setActivePageSlug(archetype.slug);
+    setSelectedSectionId(page.sections[0]?.id ?? null);
+  };
+
+  const removePage = (slug: string) => {
+    if (!spec || slug === "/" || spec.pages.length <= 2) return;
+    const next = parseDesignSpec({
+      ...spec,
+      pages: spec.pages.filter((page) => page.slug !== slug),
+      navigation: {
+        ...spec.navigation,
+        items: spec.navigation.items.filter((item) => item.target !== slug),
+      },
+    });
+    applySpec(next, "Page removed.");
+    setActivePageSlug("/");
+    setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
+  };
+
+  /* ------------------------------------------------------------------
+     Session-only media
+
+     Files never leave the browser: each one becomes an object URL, is used
+     for the design, and is revoked as soon as it is replaced or the Studio
+     unmounts.
+     ------------------------------------------------------------------ */
+  const addMedia = (
+    event: ChangeEvent<HTMLInputElement>,
+    slot: "logo" | "hero" | "gallery",
+  ) => {
+    const files = Array.from(event.target.files ?? []).filter((file) =>
+      file.type.startsWith("image/"),
+    );
+    event.target.value = "";
+    if (files.length === 0) {
+      setStatus("Please choose an image file.");
+      return;
+    }
+    const urls = files
+      .slice(0, slot === "gallery" ? 6 : 1)
+      .map((file) => trackObjectUrl(URL.createObjectURL(file)));
+    setMedia((current) => {
+      if (slot === "gallery") {
+        const combined = [...current.gallery, ...urls];
+        for (const dropped of combined.slice(8)) releaseObjectUrl(dropped);
+        return { ...current, gallery: combined.slice(0, 8) };
+      }
+      releaseObjectUrl(current[slot]);
+      return { ...current, [slot]: urls[0]! };
+    });
+    setStatus(
+      slot === "gallery"
+        ? `${urls.length} gallery image${urls.length > 1 ? "s" : ""} added for this session only.`
+        : `${slot === "logo" ? "Logo" : "Hero image"} added for this session only.`,
+    );
+  };
+
   const suggestions = useMemo(
     () =>
       spec
@@ -585,7 +934,7 @@ export function StudioBuilder() {
             spec,
             activePageSlug,
             selectedSectionId,
-            viewport,
+            viewport: contextViewport(viewport),
             recentTurns: conversation.slice(-4),
             previousThemes: history
               .slice()
@@ -595,6 +944,78 @@ export function StudioBuilder() {
           })
         : [],
     [spec, activePageSlug, selectedSectionId, viewport, conversation, history],
+  );
+
+  /* A direction preview is composed from the direction's own blueprint and is
+     never committed until the visitor chooses it. */
+  const previewSpec = useMemo(() => {
+    const direction = directions.find(
+      (entry) => entry.id === previewDirectionId,
+    );
+    return direction ? directionDesignSpec(direction) : null;
+  }, [directions, previewDirectionId]);
+  const previewDirection =
+    previewDirectionId && previewSpec
+      ? (directions.find((entry) => entry.id === previewDirectionId) ?? null)
+      : null;
+  const identity = useMemo(() => (spec ? readDesignDna(spec) : null), [spec]);
+  const identityChips = useMemo(
+    () => (identity ? describeDesignDna(identity) : []),
+    [identity],
+  );
+
+  /* What actually differs between two session versions, in customer language. */
+  const compareRows = useMemo(() => {
+    const other = versions.find((entry) => entry.id === compareVersionId);
+    if (!spec || !other || other.id === activeVersionId) return [];
+    const rows: Array<{ label: string; mine: string; theirs: string }> = [];
+    const push = (label: string, mine: string, theirs: string) => {
+      if (mine !== theirs) rows.push({ label, mine, theirs });
+    };
+    const otherSpec = other.spec;
+    push(
+      "Creative direction",
+      spec.metadata.conceptLabel,
+      otherSpec.metadata.conceptLabel,
+    );
+    push("Mood", spec.theme.mood, otherSpec.theme.mood);
+    push("Palette", spec.theme.palette, otherSpec.theme.palette);
+    push("Typography", spec.theme.typography, otherSpec.theme.typography);
+    push("Spacing", spec.theme.spacing, otherSpec.theme.spacing);
+    push("Corners", spec.theme.radius, otherSpec.theme.radius);
+    push("Buttons", spec.theme.buttonStyle, otherSpec.theme.buttonStyle);
+    push("Surface", spec.theme.surface, otherSpec.theme.surface);
+    push("Navigation", spec.navigation.style, otherSpec.navigation.style);
+    push(
+      "Motion",
+      readDesignDna(spec).motion.level,
+      readDesignDna(otherSpec).motion.level,
+    );
+    push(
+      "Opening hero",
+      spec.pages[0]?.sections[0]?.variant ?? "",
+      otherSpec.pages[0]?.sections[0]?.variant ?? "",
+    );
+    push(
+      "Pages",
+      spec.pages.map((page) => page.title).join(", "),
+      otherSpec.pages.map((page) => page.title).join(", "),
+    );
+    push(
+      "Home sections",
+      String(spec.pages[0]?.sections.length ?? 0),
+      String(otherSpec.pages[0]?.sections.length ?? 0),
+    );
+    return rows;
+  }, [spec, versions, compareVersionId, activeVersionId]);
+
+  /* Object URLs are revoked when the Studio goes away. */
+  useEffect(
+    () => () => {
+      for (const url of objectUrlsRef.current) URL.revokeObjectURL(url);
+      objectUrlsRef.current = [];
+    },
+    [],
   );
 
   if (phase === "landing") {
@@ -796,6 +1217,13 @@ export function StudioBuilder() {
 
   if (!spec || !activePage) return null;
 
+  const renderedSpec: DesignSpec = previewSpec ?? spec;
+  const renderMedia: RenderMedia = {
+    logoUrl: media.logo,
+    heroUrl: media.hero,
+    galleryUrls: media.gallery,
+  };
+
   return (
     <div className="studio-v2-shell is-editing" ref={canvasRef} tabIndex={-1}>
       <header className="studio-v2-editor-topbar">
@@ -804,7 +1232,10 @@ export function StudioBuilder() {
             type="button"
             onClick={() => {
               setPhase("landing");
-              setSpec(null);
+              setVersions([]);
+              setActiveVersionId("");
+              setPreviewDirectionId(null);
+              clearMedia();
             }}
             aria-label="Start a new website"
           >
@@ -826,9 +1257,28 @@ export function StudioBuilder() {
           </button>
           <button
             type="button"
-            className={viewport === "mobile" ? "is-active" : undefined}
-            onClick={() => setViewport("mobile")}
-            aria-pressed={viewport === "mobile"}
+            className={viewport === "768" ? "is-active" : undefined}
+            onClick={() => setViewport("768")}
+            aria-pressed={viewport === "768"}
+            data-testid="viewport-768"
+          >
+            <Smartphone size={15} /> 768
+          </button>
+          <button
+            type="button"
+            className={viewport === "430" ? "is-active" : undefined}
+            onClick={() => setViewport("430")}
+            aria-pressed={viewport === "430"}
+            data-testid="viewport-430"
+          >
+            <Smartphone size={15} /> 430
+          </button>
+          <button
+            type="button"
+            className={viewport === "390" ? "is-active" : undefined}
+            onClick={() => setViewport("390")}
+            aria-pressed={viewport === "390"}
+            data-testid="viewport-390"
           >
             <Smartphone size={15} /> Mobile
           </button>
@@ -850,6 +1300,15 @@ export function StudioBuilder() {
           >
             <Redo2 size={16} />
           </button>
+          <button
+            type="button"
+            className={showVersions ? "is-active" : undefined}
+            onClick={() => setShowVersions((value) => !value)}
+            aria-expanded={showVersions}
+            data-testid="studio-versions-toggle"
+          >
+            <Layers3 size={16} /> Versions ({versions.length})
+          </button>
         </div>
       </header>
 
@@ -865,13 +1324,16 @@ export function StudioBuilder() {
               <strong>Pages & sections</strong>
             </span>
           </div>
-          <div className="studio-v2-pages">
+          <div className="studio-v2-pages" data-testid="studio-pages">
             {spec.pages.map((page) => (
               <button
                 key={page.slug}
                 type="button"
                 className={
                   activePage.slug === page.slug ? "is-active" : undefined
+                }
+                aria-current={
+                  activePage.slug === page.slug ? "page" : undefined
                 }
                 onClick={() => {
                   setActivePageSlug(page.slug);
@@ -882,6 +1344,40 @@ export function StudioBuilder() {
                 <small>{page.sections.length}</small>
               </button>
             ))}
+          </div>
+          <div className="studio-v2-add-page">
+            <label htmlFor="studio-v2-add-page-kind">Add a page</label>
+            <div>
+              <select
+                id="studio-v2-add-page-kind"
+                value={addPageKind}
+                onChange={(event) =>
+                  setAddPageKind(event.target.value as SitePageKind)
+                }
+              >
+                {pageKinds.map((kind) => (
+                  <option key={kind} value={kind}>
+                    {pageArchetype(kind).title}
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                aria-label="Add this page"
+                onClick={addPageToSite}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            {activePage.slug !== "/" && spec.pages.length > 2 && (
+              <button
+                type="button"
+                className="studio-v2-remove-page"
+                onClick={() => removePage(activePage.slug)}
+              >
+                <Trash2 size={14} /> Remove “{activePage.navigationLabel}” page
+              </button>
+            )}
           </div>
           <ol className="studio-v2-section-list">
             {activePage.sections.map((section, index) => (
@@ -954,8 +1450,51 @@ export function StudioBuilder() {
         </aside>
 
         <main className="studio-v2-canvas-column">
+          {previewDirection && (
+            <div className="studio-v2-direction-banner" role="status">
+              <span>
+                <strong>
+                  Previewing direction{" "}
+                  {String(previewDirection.index).padStart(2, "0")} —{" "}
+                  {previewDirection.name}
+                </strong>
+                Nothing has changed yet. Choose it to make it your website.
+              </span>
+              <div>
+                <button
+                  type="button"
+                  data-testid="use-direction"
+                  onClick={() => {
+                    const version = addVersion(
+                      directionDesignSpec(previewDirection),
+                      `Version ${versions.length + 1}`,
+                      `Direction ${String(previewDirection.index).padStart(2, "0")} · ${previewDirection.name}`,
+                    );
+                    void version;
+                    setPreviewDirectionId(null);
+                    setActivePageSlug("/");
+                    setSelectedSectionId(
+                      spec.pages[0]?.sections[0]?.id ?? null,
+                    );
+                    setStatus(
+                      `Direction ${String(previewDirection.index).padStart(2, "0")} — ${previewDirection.name} is now a new session version.`,
+                    );
+                  }}
+                >
+                  Use this direction
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPreviewDirectionId(null)}
+                >
+                  <X size={14} /> Exit preview
+                </button>
+              </div>
+            </div>
+          )}
           <div
-            className={`studio-v2-canvas is-${viewport}${isChanging ? " is-changing" : ""}`}
+            className={`studio-v2-canvas is-${viewport}${viewport === "desktop" ? "" : " is-mobile"}${isChanging ? " is-changing" : ""}`}
+            data-viewport={viewport}
           >
             <div className="studio-v2-browser-bar">
               <span />
@@ -967,10 +1506,20 @@ export function StudioBuilder() {
             </div>
             <div className="studio-v2-preview-scroll">
               <WebsiteRenderer
-                spec={spec}
+                spec={renderedSpec}
                 pageSlug={activePage.slug}
-                selectedSectionId={selectedSectionId}
-                onSelectSection={setSelectedSectionId}
+                selectedSectionId={previewDirection ? null : selectedSectionId}
+                onSelectSection={
+                  previewDirection ? undefined : setSelectedSectionId
+                }
+                onNavigatePage={(slug) => {
+                  setActivePageSlug(slug);
+                  const page = renderedSpec.pages.find(
+                    (entry) => entry.slug === slug,
+                  );
+                  setSelectedSectionId(page?.sections[0]?.id ?? null);
+                }}
+                media={renderMedia}
               />
             </div>
             <span className="studio-v2-change-sweep" aria-hidden="true" />
@@ -1055,18 +1604,164 @@ export function StudioBuilder() {
               <strong>Style, layout, mobile</strong>
             </span>
           </div>
+          {/* The same design identity holds every page together, so it is
+              stated once, in the visitor's language, above the controls. */}
+          <div className="studio-v2-identity" data-testid="studio-identity">
+            <small>Design identity · {identity?.identity.name}</small>
+            <div>
+              {identityChips.map((chip) => (
+                <span key={chip}>{chip}</span>
+              ))}
+            </div>
+          </div>
+          <details className="studio-v2-control-group" open>
+            <summary>Directions</summary>
+            <p className="studio-v2-group-note">
+              Three complete design directions for this business. Preview any of
+              them — nothing changes until you choose one.
+            </p>
+            <div className="studio-v2-direction-list">
+              {directions.map((direction) => (
+                <article
+                  key={direction.id}
+                  className={
+                    previewDirectionId === direction.id
+                      ? "is-previewing"
+                      : undefined
+                  }
+                  data-testid={`studio-direction-${direction.index}`}
+                >
+                  <small>{`${String(direction.index).padStart(2, "0")} — ${direction.summary}`}</small>
+                  <strong>{direction.name}</strong>
+                  <div>
+                    {direction.character.map((chip) => (
+                      <span key={chip}>{chip}</span>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPreviewDirectionId(
+                        previewDirectionId === direction.id
+                          ? null
+                          : direction.id,
+                      )
+                    }
+                  >
+                    {previewDirectionId === direction.id
+                      ? "Stop preview"
+                      : "Preview"}
+                  </button>
+                </article>
+              ))}
+            </div>
+            {directions.length === 0 && (
+              <p className="studio-v2-group-note">
+                Describe the business again to see three directions.
+              </p>
+            )}
+            <button
+              type="button"
+              className="studio-v2-direction-more"
+              onClick={askForAnotherDirection}
+              data-testid="studio-another-direction"
+            >
+              <Sparkles size={15} /> Show me another direction
+            </button>
+          </details>
+          <details
+            className="studio-v2-control-group"
+            open={showVersions}
+            onToggle={(event) => setShowVersions(event.currentTarget.open)}
+          >
+            <summary>Versions</summary>
+            <p className="studio-v2-group-note">
+              Versions live in this browser session only and are never saved.
+            </p>
+            <div
+              className="studio-v2-version-list"
+              data-testid="studio-versions"
+            >
+              {versions.map((version) => (
+                <div
+                  key={version.id}
+                  data-testid="studio-version-row"
+                  className={
+                    version.id === activeVersionId ? "is-active" : undefined
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => switchVersion(version.id)}
+                    aria-current={version.id === activeVersionId}
+                  >
+                    <strong>{version.label}</strong>
+                    <small>{version.origin}</small>
+                  </button>
+                  {versions.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        aria-label={`Compare with ${version.label}`}
+                        onClick={() =>
+                          setCompareVersionId((current) =>
+                            current === version.id ? "" : version.id,
+                          )
+                        }
+                      >
+                        Compare
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Remove ${version.label}`}
+                        onClick={() => removeVersion(version.id)}
+                      >
+                        <X size={14} />
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="studio-v2-version-actions">
+              <button type="button" onClick={duplicateVersion}>
+                <Copy size={15} /> Duplicate this version
+              </button>
+              <button type="button" onClick={createFreshVersion}>
+                <WandSparkles size={15} /> New version from a different design
+              </button>
+            </div>
+            {compareRows.length > 0 && (
+              <div className="studio-v2-compare" data-testid="studio-compare">
+                <small>What differs</small>
+                <table>
+                  <thead>
+                    <tr>
+                      <th scope="col">Aspect</th>
+                      <th scope="col">{activeVersion?.label}</th>
+                      <th scope="col">
+                        {versions.find((entry) => entry.id === compareVersionId)
+                          ?.label ?? "Other"}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {compareRows.map((row) => (
+                      <tr key={row.label}>
+                        <th scope="row">{row.label}</th>
+                        <td>{row.mine}</td>
+                        <td>{row.theirs}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </details>
           {/* The headline action stays outside the groups: it is the one
               control a visitor reaches for before anything else. */}
           <div className="studio-v2-alternate">
-            <button
-              type="button"
-              onClick={() =>
-                applySpec(
-                  createAlternateDesignSpec(spec),
-                  "A substantially different visual version is ready.",
-                )
-              }
-            >
+            <button type="button" onClick={createFreshVersion}>
               <MonitorSmartphone size={16} /> Show another version
             </button>
           </div>
@@ -1229,18 +1924,14 @@ export function StudioBuilder() {
             />
           </details>
           <details className="studio-v2-control-group">
-            <summary>Motion</summary>
+            <summary>Motion character</summary>
             <ChoiceRow
               label="Feel"
               value={activeBlueprint?.motion.family}
-              options={[
-                { value: "quiet", label: "None" },
-                { value: "editorial", label: "Subtle" },
-                { value: "luxury", label: "Premium" },
-                { value: "cinematic", label: "Cinematic" },
-                { value: "technical", label: "Technical" },
-                { value: "playful", label: "Playful" },
-              ]}
+              options={motionFamilies.map((value) => ({
+                value,
+                label: titleCase(value),
+              }))}
               onSelect={(value) =>
                 applyBlueprint(
                   {
@@ -1309,6 +2000,94 @@ export function StudioBuilder() {
                 applyMobile(
                   { decoration: value as "keep" | "simplified" | "hidden" },
                   "Mobile decoration updated.",
+                )
+              }
+            />
+          </details>
+          <details className="studio-v2-control-group" open>
+            <summary>Media</summary>
+            <p className="studio-v2-group-note">
+              Add a logo or your own images for this preview. Files stay in this
+              browser tab and are never uploaded or saved.
+            </p>
+            <div className="studio-v2-media">
+              <label className="studio-v2-media-slot">
+                <ImageIcon size={15} /> Logo
+                <input
+                  type="file"
+                  accept="image/*"
+                  data-testid="studio-media-logo"
+                  onChange={(event) => addMedia(event, "logo")}
+                />
+                {media.logo && (
+                  <img src={media.logo} alt="" aria-hidden="true" />
+                )}
+              </label>
+              <label className="studio-v2-media-slot">
+                <ImageIcon size={15} /> Hero image
+                <input
+                  type="file"
+                  accept="image/*"
+                  data-testid="studio-media-hero"
+                  onChange={(event) => addMedia(event, "hero")}
+                />
+                {media.hero && (
+                  <img src={media.hero} alt="" aria-hidden="true" />
+                )}
+              </label>
+              <label className="studio-v2-media-slot">
+                <ImageIcon size={15} /> Gallery images
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  data-testid="studio-media-gallery"
+                  onChange={(event) => addMedia(event, "gallery")}
+                />
+                <span>
+                  {media.gallery.length
+                    ? `${media.gallery.length} added`
+                    : "None yet"}
+                </span>
+              </label>
+            </div>
+            {(media.logo || media.hero || media.gallery.length > 0) && (
+              <button
+                type="button"
+                className="studio-v2-media-clear"
+                onClick={() => {
+                  clearMedia();
+                  setStatus(
+                    "Your uploaded images were removed from the preview.",
+                  );
+                }}
+              >
+                <Trash2 size={14} /> Remove my images
+              </button>
+            )}
+          </details>
+          <details className="studio-v2-control-group">
+            <summary>Motion</summary>
+            <p className="studio-v2-group-note">
+              Studio keeps motion purposeful: hierarchy and brand character, not
+              animation for its own sake. Movement is reduced automatically when
+              a visitor prefers less motion.
+            </p>
+            <ChoiceRow
+              label="Motion level"
+              value={identity?.motion.level}
+              options={motionLevels.map((level) => ({
+                value: level,
+                label: motionLabel(level),
+              }))}
+              onSelect={(value) =>
+                applyBlueprint(
+                  {
+                    motion: {
+                      family: motionFamilyForLevel(value as MotionLevel),
+                    },
+                  },
+                  `Motion set to ${motionLabel(value as MotionLevel).toLowerCase()}.`,
                 )
               }
             />

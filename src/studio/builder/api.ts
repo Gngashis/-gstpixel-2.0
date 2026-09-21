@@ -220,6 +220,7 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
               plan: fallbackPlan,
               summary: fallbackPlan.summary,
               unsupported: fallbackPlan.unsupported,
+              notes: result.notes,
               changed: result.changed,
               source: "fallback" as const,
             };
@@ -258,6 +259,7 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
               plan,
               summary: plan.summary,
               unsupported: plan.unsupported,
+              notes: result.notes,
               changed: result.changed,
               source: "ai",
             },

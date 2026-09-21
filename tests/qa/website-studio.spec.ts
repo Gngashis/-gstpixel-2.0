@@ -326,7 +326,9 @@ test.describe("Website Studio V2", () => {
 
     await tellStudio(page, "Add an About page.");
     await expect(
-      page.getByRole("button", { name: /^About\s+3$/ }),
+      page.getByTestId("studio-pages").getByRole("button", {
+        name: /^About\b/,
+      }),
     ).toBeVisible();
   });
 
@@ -488,7 +490,7 @@ test.describe("Website Studio V2", () => {
 
     await page.getByRole("button", { name: /Show another version/i }).click();
     await expect(
-      page.getByText("A substantially different visual version is ready."),
+      page.getByText(/designed completely differently/i),
     ).toBeVisible();
     expect(await preview.getAttribute("data-palette")).not.toBe(
       originalPalette,

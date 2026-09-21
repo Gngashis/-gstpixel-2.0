@@ -380,7 +380,7 @@ export const designSpecSchema = z
           .max(8),
       })
       .strict(),
-    pages: z.array(pageSchema).min(1).max(6),
+    pages: z.array(pageSchema).min(1).max(8),
     footer: z
       .object({
         variant: z.enum(["minimal", "editorial", "columns", "statement"]),
@@ -427,6 +427,11 @@ export const designSpecSchema = z
         fingerprint: z.string().max(80).default(""),
         /** Validated CreativeBlueprint, attached only in memory for the session. */
         blueprint: z.unknown().optional(),
+        /**
+         * Validated DesignDNA — the coherent design identity every page of the
+         * concept is rendered from. In-memory only, exactly like the blueprint.
+         */
+        designDna: z.unknown().optional(),
       })
       .strict(),
   })

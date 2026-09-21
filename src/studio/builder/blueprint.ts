@@ -22,6 +22,15 @@ import {
   domainsInText,
   extractLocationPhrase,
 } from "./language";
+import { designDnaFromBlueprint, type DesignDNA } from "./design-dna";
+import {
+  pageArchetype,
+  pageHeroTitle,
+  planPageSections,
+  planSitePages,
+  type PageArchetype,
+  type SitePageKind,
+} from "./site-pages";
 
 /**
  * CreativeBlueprint — the art-direction layer that sits between the visitor's
@@ -3670,6 +3679,7 @@ const navStyleMap: Record<NavigationFamily, DesignSpec["navigation"]["style"]> =
 export function blueprintToDesignSpec(
   blueprint: CreativeBlueprint,
   termsInput?: PromptTerms,
+  options: PlanOptions = {},
 ): DesignSpec {
   const terms: PromptTerms = termsInput ?? {
     prompt: blueprint.business.descriptor,
@@ -3693,22 +3703,40 @@ export function blueprintToDesignSpec(
         ? "reveal"
         : "drift",
   };
+  const variation = Math.max(0, Math.min(99, options.variation ?? 0));
+  const dna = designDnaFromBlueprint(blueprint);
   const sections = [heroPlanned, ...blueprint.sections].map((planned, index) =>
     buildSection(blueprint, profile, terms, planned, index),
   );
   const heroSection = sections[0]!;
-  const navItems = sections
-    .filter((section, index) => index > 0 && index <= 5)
-    .map((section) => ({
-      // Navigation labels have their own (short) limit: an eyebrow written for
-      // a section heading can easily be twice as long.
-      label: clampText(
-        section.content.eyebrow ||
-          section.content.title.split(" ").slice(0, 2).join(" "),
-        30,
-      ),
-      target: `#${section.id}`,
-    }));
+  /*
+   * The blueprint contains one business concept; the SiteBlueprint contains its
+   * pages. Secondary pages are planned from the business category, the
+   * visitor's own words and the creative direction, then composed with the same
+   * DesignDNA so every page reads as one brand.
+   */
+  const secondaryPages = planSitePages({
+    category: blueprint.business.category,
+    prompt: terms.prompt,
+    variation,
+  }).map((archetype, index) =>
+    buildPageFromArchetype(
+      blueprint,
+      profile,
+      terms,
+      archetype,
+      index,
+      variation,
+      dna,
+    ),
+  );
+  const navItems = [
+    { label: "Home", target: "/" },
+    ...secondaryPages.map((page) => ({
+      label: clampText(page.navigationLabel, 30),
+      target: page.slug,
+    })),
+  ].slice(0, 8);
   const siteCopy = buildSiteCopy(profile, terms, 0);
 
   return designSpecSchema.parse({
@@ -3803,6 +3831,7 @@ export function blueprintToDesignSpec(
         navigationLabel: "Home",
         sections,
       },
+      ...secondaryPages,
     ],
     footer: {
       variant:
@@ -3835,11 +3864,146 @@ export function blueprintToDesignSpec(
       conceptLabel: siteCopy.conceptLabel,
       revision: 1,
       promptSeed: terms.seed,
-      variation: termsInput ? 0 : 0,
+      variation,
       fingerprint: blueprint.fingerprint.id,
       blueprint,
+      designDna: dna,
     },
   });
+}
+
+/**
+ * Composes one secondary page of the SiteBlueprint.
+ *
+ * The page's section sequence comes from the page archetype, its section
+ * layouts come from the same DesignDNA as the rest of the site, and its hero
+ * uses a hero family the business category already owns — so a secondary page
+ * is a new page of the same brand, never a different template.
+ */
+function buildPageFromArchetype(
+  blueprint: CreativeBlueprint,
+  profile: Profile,
+  terms: PromptTerms,
+  archetype: PageArchetype,
+  pageIndex: number,
+  variation: number,
+  dna: DesignDNA,
+): DesignSpec["pages"][number] {
+  const bias = biases[blueprint.business.category] ?? biases.generic;
+  const seed = hashString(
+    `${blueprint.fingerprint.id}#${archetype.slug}#${variation}`,
+  );
+  const heroPool = bias.hero.filter(
+    (family) => family !== blueprint.hero.family,
+  );
+  const heroFamily = rotate(
+    heroPool.length > 0 ? heroPool : bias.hero,
+    seed,
+    pageIndex + variation,
+  );
+  const pagePlanned: PlannedSection[] = [
+    {
+      id: `${archetype.kind}-hero`,
+      type: "hero",
+      variant: heroFamily,
+      purpose: "introduce",
+      density: blueprint.direction.density === "rich" ? "balanced" : "airy",
+      treatment: "plain",
+      motion: blueprint.motion.family === "quiet" ? "reveal" : "drift",
+    },
+    ...planPageSections(archetype, { variation, dna }).map(
+      (step, index): PlannedSection => ({
+        id: `${archetype.kind}-${step.type}-${index + 1}`,
+        type: step.type,
+        variant: step.variant,
+        purpose: step.purpose as PlannedSection["purpose"],
+        density: step.density,
+        treatment:
+          step.purpose === "convert" || step.purpose === "prove"
+            ? "elevated"
+            : step.purpose === "showcase"
+              ? "plain"
+              : "outlined",
+        motion:
+          step.purpose === "convert" || index % 2 === 1 ? "reveal" : "quiet",
+      }),
+    ),
+  ];
+  /* Copy is resolved against the page's own section list, so a page with two
+     product shelves gets two different shelves rather than one repeated. */
+  const pageBlueprint: CreativeBlueprint = {
+    ...blueprint,
+    sections: pagePlanned,
+  };
+  const sections = pagePlanned.map((planned, index) =>
+    buildSection(pageBlueprint, profile, terms, planned, index),
+  );
+  const hero = sections[0]!;
+  hero.content.eyebrow = clampText(archetype.title, 70);
+  hero.content.title = clampText(
+    pageHeroTitle(archetype, displayName(blueprint.business.name)),
+    110,
+  );
+  hero.content.body = clampText(archetype.role, 420);
+  if (archetype.cta) {
+    hero.content.primaryCta = clampText(archetype.cta.primary, 50);
+    hero.content.secondaryCta = clampText(archetype.cta.secondary, 50);
+  }
+  const closing = sections.find((section) => section.type === "cta");
+  if (closing && archetype.cta) {
+    closing.content.primaryCta = clampText(archetype.cta.primary, 50);
+    if (!closing.content.secondaryCta)
+      closing.content.secondaryCta = clampText(archetype.cta.secondary, 50);
+  }
+  return {
+    slug: archetype.slug,
+    title: clampText(archetype.title, 70),
+    navigationLabel: clampText(archetype.navLabel, 30),
+    sections,
+  };
+}
+
+/**
+ * Builds one additional page of a live concept.
+ *
+ * Used when the visitor asks for a page in plain language ("add an FAQ page",
+ * "create a booking page"). The page is composed from the same blueprint and
+ * DesignDNA as the rest of the site, so it arrives as a real page of the same
+ * brand with business-specific copy instead of a generic placeholder template.
+ */
+export function buildPageForKind(
+  spec: DesignSpec,
+  kind: SitePageKind,
+  pageIndex = 0,
+): DesignSpec["pages"][number] {
+  const blueprint = blueprintFromSpec(spec);
+  const archetype = pageArchetype(kind);
+  const terms: PromptTerms = {
+    prompt: blueprint.business.descriptor,
+    seed: spec.metadata.promptSeed,
+    category: blueprint.business.category,
+    location: blueprint.business.location,
+    place: blueprint.business.location,
+    lead: blueprint.business.lead,
+    words: [],
+  };
+  return buildPageFromArchetype(
+    blueprint,
+    profiles[blueprint.business.category] ?? profiles.generic,
+    terms,
+    archetype,
+    pageIndex,
+    Math.max(0, Math.min(99, spec.metadata.variation)),
+    designDnaFromBlueprint(blueprint),
+  );
+}
+
+/** Brand names are curated in caps; prose should not shout. */
+function displayName(name: string): string {
+  if (/[a-z]/.test(name)) return name;
+  return name
+    .toLowerCase()
+    .replace(/\b[a-z]/g, (letter) => letter.toUpperCase());
 }
 
 /**
@@ -3852,14 +4016,7 @@ export function generateFallbackDesignSpec(
 ): DesignSpec {
   const terms = extractPromptTerms(prompt);
   const blueprint = planCreativeBlueprint(prompt, options);
-  const spec = blueprintToDesignSpec(blueprint, terms);
-  return designSpecSchema.parse({
-    ...spec,
-    metadata: {
-      ...spec.metadata,
-      variation: Math.max(0, Math.min(99, options.variation ?? 0)),
-    },
-  });
+  return blueprintToDesignSpec(blueprint, terms, options);
 }
 
 export function blueprintFromSpec(spec: DesignSpec): CreativeBlueprint {
@@ -4057,19 +4214,42 @@ function heroFamilyFromVariant(variant: string): HeroFamily {
  * "use a completely different hero" or "make this feel more exclusive"
  * restructures the composition without discarding edited text.
  */
-export function applyBlueprintToSpec(
+type RebuildOptions = {
+  preserveCopy?: boolean;
+  preservePresentation?: boolean;
+  /**
+   * Pages the visitor added by hand (an FAQ page, a booking page) survive a
+   * restyle. Without this, changing the typography would quietly delete work.
+   */
+  preserveExtraPages?: boolean;
+  variation?: number;
+  source?: DesignSpec["metadata"]["source"];
+  conceptLabel?: string;
+};
+
+/**
+ * Rebuilds the whole SiteBlueprint from a blueprint.
+ *
+ * Every page is regenerated from the same blueprint and DesignDNA, so the site
+ * keeps one identity; the visitor's own copy is then carried across per page
+ * (matched by section id, then by section type), and any page they added
+ * themselves is kept rather than dropped.
+ */
+function rebuildSiteSpec(
   spec: DesignSpec,
   blueprint: CreativeBlueprint,
-  options: { preserveCopy?: boolean; preservePresentation?: boolean } = {},
+  options: RebuildOptions = {},
 ): DesignSpec {
   const preserveCopy = options.preserveCopy ?? true;
   const preservePresentation = options.preservePresentation ?? false;
-  const previous = new Map<string, DesignSection>();
+  const preserveExtraPages = options.preserveExtraPages ?? true;
+  const variation = Math.max(
+    0,
+    Math.min(99, options.variation ?? spec.metadata.variation),
+  );
+  const previousBySlug = new Map<string, DesignSpec["pages"][number]>();
   for (const page of spec.pages) {
-    for (const section of page.sections) {
-      if (!previous.has(section.id)) previous.set(section.id, section);
-      if (!previous.has(section.type)) previous.set(section.type, section);
-    }
+    if (!previousBySlug.has(page.slug)) previousBySlug.set(page.slug, page);
   }
   const terms: PromptTerms = {
     prompt: blueprint.business.descriptor,
@@ -4080,18 +4260,18 @@ export function applyBlueprintToSpec(
     lead: blueprint.business.lead,
     words: [],
   };
-  const rebuilt = blueprintToDesignSpec(blueprint, terms);
-  const sections: DesignSection[] = rebuilt.pages[0]!.sections.map((fresh) => {
-    if (!preserveCopy) return fresh;
+  const rebuilt = blueprintToDesignSpec(blueprint, terms, { variation });
+
+  const carryCopy = (
+    fresh: DesignSection,
+    existingPage: DesignSpec["pages"][number] | undefined,
+  ): DesignSection => {
+    if (!preserveCopy || !existingPage) return fresh;
+    const byId = existingPage.sections.find((entry) => entry.id === fresh.id);
     const existing =
-      previous.get(fresh.id) ?? previous.get(fresh.type) ?? undefined;
+      byId ?? existingPage.sections.find((entry) => entry.type === fresh.type);
     if (!existing || existing.type !== fresh.type) return fresh;
-    if (!preservePresentation) {
-      return {
-        ...fresh,
-        content: existing.content,
-      };
-    }
+    if (!preservePresentation) return { ...fresh, content: existing.content };
     return {
       ...fresh,
       content: existing.content,
@@ -4101,28 +4281,70 @@ export function applyBlueprintToSpec(
       motion: existing.motion,
       tone: existing.tone,
     };
+  };
+
+  const pages: DesignSpec["pages"] = rebuilt.pages.map((freshPage) => ({
+    ...freshPage,
+    sections: freshPage.sections.map((fresh) =>
+      carryCopy(fresh, previousBySlug.get(freshPage.slug)),
+    ),
+  }));
+  if (preserveExtraPages) {
+    const known = new Set(pages.map((page) => page.slug));
+    for (const previous of spec.pages) {
+      if (!known.has(previous.slug) && pages.length < 8) pages.push(previous);
+    }
+  }
+
+  const previousNav = new Map(
+    spec.navigation.items.map((item) => [item.target, item] as const),
+  );
+  const navItems = rebuilt.navigation.items.map((item) => {
+    const existing = previousNav.get(item.target);
+    return existing ? { ...item, label: existing.label } : item;
   });
+  const reachable = new Set(navItems.map((item) => item.target));
+  const reachablePages = new Set(pages.map((page) => page.slug));
+  for (const item of spec.navigation.items) {
+    if (navItems.length >= 8) break;
+    if (reachable.has(item.target)) continue;
+    // Keep a nav entry the visitor added, but only while it still points at
+    // something the site actually contains.
+    if (item.target.startsWith("/") && !reachablePages.has(item.target))
+      continue;
+    navItems.push(item);
+    reachable.add(item.target);
+  }
 
   return designSpecSchema.parse({
     ...rebuilt,
-    navigation: {
-      ...rebuilt.navigation,
-      items: rebuilt.navigation.items.map((item, index) => {
-        const existing = spec.navigation.items[index];
-        return existing ? { ...item, label: existing.label } : item;
-      }),
-    },
-    pages: [{ ...rebuilt.pages[0]!, sections }],
+    navigation: { ...rebuilt.navigation, items: navItems.slice(0, 8) },
+    pages,
     metadata: {
-      source: "modified",
-      conceptLabel: rebuilt.metadata.conceptLabel,
+      source: options.source ?? "modified",
+      conceptLabel: options.conceptLabel ?? rebuilt.metadata.conceptLabel,
       revision: Math.min(999, spec.metadata.revision + 1),
       promptSeed: spec.metadata.promptSeed,
-      variation: Math.max(spec.metadata.variation, 0),
+      variation,
       fingerprint: blueprint.fingerprint.id,
       blueprint,
+      designDna: rebuilt.metadata.designDna,
     },
   });
+}
+
+/**
+ * Re-derives a spec from a (possibly changed) blueprint while preserving the
+ * visitor's own copy wherever the section still exists. This is how
+ * "use a completely different hero" or "make this feel more exclusive"
+ * restructures the composition without discarding edited text.
+ */
+export function applyBlueprintToSpec(
+  spec: DesignSpec,
+  blueprint: CreativeBlueprint,
+  options: { preserveCopy?: boolean; preservePresentation?: boolean } = {},
+): DesignSpec {
+  return rebuildSiteSpec(spec, blueprint, options);
 }
 
 /** "Show me a completely different version" — a new concept, not a recolour. */
@@ -4133,28 +4355,24 @@ export function createAlternateDesignSpec(
   const structural = options.structural ?? true;
   const blueprint = blueprintFromSpec(input);
   const next = varyBlueprint(blueprint, input.metadata.variation + 1);
-  const rebuilt = blueprintToDesignSpec(next, {
-    prompt: blueprint.business.descriptor,
-    seed: input.metadata.promptSeed,
-    category: next.business.category,
-    location: next.business.location,
-    place: next.business.location,
-    lead: next.business.lead,
-    words: [],
-  });
   if (!structural) {
-    return applyBlueprintToSpec(input, next);
+    return rebuildSiteSpec(input, next, {
+      variation: input.metadata.variation,
+    });
   }
-  return designSpecSchema.parse({
-    ...rebuilt,
-    metadata: {
-      ...rebuilt.metadata,
-      source: "modified",
-      revision: Math.min(999, input.metadata.revision + 1),
-      promptSeed: input.metadata.promptSeed,
-      variation: input.metadata.variation + 1,
-      conceptLabel: `New ${next.direction.concept} direction`,
-      blueprint: next,
-    },
+  return rebuildSiteSpec(input, next, {
+    variation: input.metadata.variation + 1,
+    preserveCopy: false,
+    preserveExtraPages: false,
+    conceptLabel: `New ${next.direction.concept} direction`,
   });
+}
+
+/** Rebuilds a spec into a specific creative direction without extra pages. */
+export function applyDirectionToSpec(
+  spec: DesignSpec,
+  blueprint: CreativeBlueprint,
+  variation: number,
+): DesignSpec {
+  return rebuildSiteSpec(spec, blueprint, { variation, source: "modified" });
 }

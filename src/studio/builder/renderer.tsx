@@ -26,6 +26,19 @@ import type { ComponentType, CSSProperties, KeyboardEvent } from "react";
 import type { ArtDirection } from "./blueprint";
 import type { DesignSection, DesignSpec } from "./domain";
 import { getHomePage } from "./domain";
+import {
+  designDnaClasses,
+  designDnaVariables,
+  readDesignDna,
+} from "./design-dna";
+import {
+  ComparisonTable,
+  EnquiryModule,
+  FaqAccordion,
+  FilterableGrid,
+  GalleryPreview,
+  TimelineStepper,
+} from "./interactions";
 
 /**
  * Deterministic React renderer.
@@ -44,6 +57,20 @@ type SectionProps = {
   index: number;
   art: ArtDirection;
   composition: string;
+  /** Object URLs of any images the visitor added for this session. */
+  media?: RenderMedia | undefined;
+};
+
+/**
+ * Session-only media.
+ *
+ * Optional by design: when a visitor adds a logo or an image the design uses
+ * it, and when they do not the existing art direction carries the concept.
+ */
+export type RenderMedia = {
+  logoUrl?: string | null;
+  heroUrl?: string | null;
+  galleryUrls?: readonly string[];
 };
 
 const kindIcons = {
@@ -237,15 +264,30 @@ function Artwork({
   art,
   index,
   kind,
+  image,
 }: {
   section: DesignSection;
   art: ArtDirection;
   index: number;
   kind: BusinessKind;
+  /** A visitor-provided image, when the section has one to use. */
+  image?: string | null | undefined;
 }) {
   const Icon = kindIcons[kind] ?? Sparkles;
   const label =
     section.content.note || section.content.eyebrow || "Website concept";
+  /* A supplied image becomes the artwork frame; the deterministic art
+     direction stays underneath as the treatment around it. */
+  if (image) {
+    return (
+      <div
+        className={`studio-v2-site-visual is-${section.visualTreatment.media} art-${art} art-shift-${index % 4} has-media`}
+      >
+        <img src={image} alt={label} />
+        <small className="studio-v2-site-visual-note">{label}</small>
+      </div>
+    );
+  }
   return (
     <div
       className={`studio-v2-site-visual is-${section.visualTreatment.media} art-${art} art-shift-${index % 4}`}
@@ -384,10 +426,17 @@ function HeroBody({
   composition,
   art,
   index,
+  media,
 }: SectionProps) {
   const showArt = section.visualTreatment.media !== "none";
   const artNode = showArt ? (
-    <Artwork section={section} art={art} index={index} kind={businessKind} />
+    <Artwork
+      section={section}
+      art={art}
+      index={index}
+      kind={businessKind}
+      image={media?.heroUrl ?? null}
+    />
   ) : null;
 
   switch (composition) {
@@ -584,11 +633,61 @@ function HeroBody({
 }
 
 function SectionBody(props: SectionProps) {
-  const { section, businessKind, composition, art, index } = props;
+  const { section, businessKind, composition, art, index, media } = props;
   const items = section.content.items;
+  /* Visitor-supplied images are placed where they belong: gallery imagery in
+     gallery sections, a hero image in the opening content section. */
+  const galleryImages = media?.galleryUrls ?? [];
+  const sectionImage =
+    section.type === "gallery" && galleryImages.length > 0
+      ? galleryImages[index % galleryImages.length]
+      : index <= 1 && section.type !== "gallery"
+        ? (media?.heroUrl ?? null)
+        : null;
   const artNode = (
-    <Artwork section={section} art={art} index={index} kind={businessKind} />
+    <Artwork
+      section={section}
+      art={art}
+      index={index}
+      kind={businessKind}
+      image={sectionImage}
+    />
   );
+
+  const interaction = (() => {
+    switch (composition) {
+      case "product-grid":
+        return <FilterableGrid items={items} layout="product" />;
+      case "card-grid":
+        return <FilterableGrid items={items} layout="card" />;
+      case "rail":
+        return <FilterableGrid items={items} layout="rail" />;
+      case "table":
+        return <ComparisonTable items={items} label={section.content.title} />;
+      case "faq":
+        return <FaqAccordion items={items} label={section.content.title} />;
+      case "timeline":
+        return <TimelineStepper items={items} />;
+      case "mosaic":
+        return <GalleryPreview items={items} layout="mosaic" />;
+      case "gallery-grid":
+        return <GalleryPreview items={items} layout="grid" />;
+      case "framed-series":
+        return <GalleryPreview items={items} layout="framed" />;
+      case "strip":
+        return <GalleryPreview items={items} layout="strip" />;
+      default:
+        return null;
+    }
+  })();
+  if (interaction) {
+    return (
+      <>
+        <Heading section={section} />
+        {interaction}
+      </>
+    );
+  }
 
   switch (composition) {
     case "narrative":
@@ -1124,6 +1223,12 @@ function SectionBody(props: SectionProps) {
             </div>
             <Actions section={section} />
           </div>
+          <EnquiryModule
+            businessName={section.content.eyebrow || "our team"}
+            primaryCta={section.content.primaryCta}
+            secondaryCta={section.content.secondaryCta}
+            body=""
+          />
         </>
       );
     case "cta-band":
@@ -1182,6 +1287,12 @@ function SectionBody(props: SectionProps) {
             </div>
           </div>
           <Actions section={section} />
+          <EnquiryModule
+            businessName={section.content.eyebrow || "our team"}
+            primaryCta={section.content.primaryCta}
+            secondaryCta={section.content.secondaryCta}
+            body=""
+          />
         </>
       );
     case "contact-location":
@@ -1218,6 +1329,12 @@ function SectionBody(props: SectionProps) {
               <Actions section={section} />
             </div>
           </div>
+          <EnquiryModule
+            businessName={section.content.eyebrow || "our team"}
+            primaryCta={section.content.primaryCta}
+            secondaryCta={section.content.secondaryCta}
+            body=""
+          />
         </>
       );
     default:
@@ -1279,15 +1396,23 @@ export function WebsiteRenderer({
   pageSlug = "/",
   selectedSectionId,
   onSelectSection,
+  onNavigatePage,
+  media,
 }: {
   pageSlug?: string;
   spec: DesignSpec;
   selectedSectionId?: string | null;
-  onSelectSection?: (sectionId: string) => void;
+  onSelectSection?: ((sectionId: string) => void) | undefined;
+  /** Lets the visitor move between generated pages inside the Studio. */
+  onNavigatePage?: ((pageSlug: string) => void) | undefined;
+  media?: RenderMedia | undefined;
 }) {
   const page =
     spec.pages.find((entry) => entry.slug === pageSlug) ?? getHomePage(spec);
   const baseArt = readArtDirection(spec);
+  /* The DesignDNA is read back from the concept, so every page and every
+     preview viewport renders from one identity. */
+  const dna = readDesignDna(spec);
   const style = {
     "--preview-density":
       spec.theme.spacing === "expansive"
@@ -1295,25 +1420,50 @@ export function WebsiteRenderer({
         : spec.theme.spacing === "compact"
           ? "0.82"
           : "1",
+    ...designDnaVariables(dna),
   } as CSSProperties;
 
   return (
     <article
-      className={`studio-v2-site palette-${spec.theme.palette} mood-${spec.theme.mood} type-${spec.theme.typography} radius-${spec.theme.radius} surface-${spec.theme.surface} heading-${spec.theme.headingScale} body-${spec.theme.bodyScale} buttons-${spec.theme.buttonStyle} rhythm-${spec.theme.rhythm} composition-${spec.theme.composition} mobile-density-${spec.responsive.mobileDensity}${spec.responsive.overrides.simplified ? " mobile-simplified" : ""} mobile-hero-${spec.responsive.overrides.heroHeight} mobile-heading-${spec.responsive.overrides.headingScale} mobile-nav-${spec.responsive.overrides.navigation} mobile-decor-${spec.responsive.overrides.decoration ?? "keep"}`}
+      className={`studio-v2-site palette-${spec.theme.palette} mood-${spec.theme.mood} type-${spec.theme.typography} radius-${spec.theme.radius} surface-${spec.theme.surface} heading-${spec.theme.headingScale} body-${spec.theme.bodyScale} buttons-${spec.theme.buttonStyle} rhythm-${spec.theme.rhythm} composition-${spec.theme.composition} mobile-density-${spec.responsive.mobileDensity}${spec.responsive.overrides.simplified ? " mobile-simplified" : ""} mobile-hero-${spec.responsive.overrides.heroHeight} mobile-heading-${spec.responsive.overrides.headingScale} mobile-nav-${spec.responsive.overrides.navigation} mobile-decor-${spec.responsive.overrides.decoration ?? "keep"} ${designDnaClasses(dna)}`}
       data-testid="studio-preview"
       data-palette={spec.theme.palette}
       data-mood={spec.theme.mood}
       data-composition={spec.theme.composition}
       data-fingerprint={spec.metadata.fingerprint}
+      data-motion-level={dna.motion.level}
+      data-page={page.slug}
       style={style}
       aria-label={`${spec.site.name} generated website preview`}
     >
       <header className={`studio-v2-site-nav nav-${spec.navigation.style}`}>
-        <strong>{spec.site.name}</strong>
+        <strong>
+          {media?.logoUrl && (
+            <img
+              className="studio-v2-site-logo"
+              src={media.logoUrl}
+              alt=""
+              aria-hidden="true"
+            />
+          )}
+          {spec.site.name}
+        </strong>
         <nav aria-label="Generated website navigation">
-          {spec.navigation.items.map((item) => (
-            <span key={`${item.label}-${item.target}`}>{item.label}</span>
-          ))}
+          {spec.navigation.items.map((item) =>
+            onNavigatePage && item.target.startsWith("/") ? (
+              <button
+                key={`${item.label}-${item.target}`}
+                type="button"
+                className={item.target === page.slug ? "is-active" : undefined}
+                aria-current={item.target === page.slug ? "page" : undefined}
+                onClick={() => onNavigatePage(item.target)}
+              >
+                {item.label}
+              </button>
+            ) : (
+              <span key={`${item.label}-${item.target}`}>{item.label}</span>
+            ),
+          )}
         </nav>
         <b>{spec.navigation.ctaLabel}</b>
       </header>
@@ -1324,6 +1474,7 @@ export function WebsiteRenderer({
             index,
             art: artForSection(baseArt, index),
             composition: compositionFor(section),
+            media,
           };
           return (
             <div

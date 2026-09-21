@@ -5115,3 +5115,837 @@
   --site-h1-max: 2.4rem;
   --site-h1-measure: 20ch;
 }
+
+/* ------------------------------------------------------------------ *
+ * Studio V3 — pages, design identity, directions, versions, media,
+ * interactive component families and the formalised motion engine.
+ * ------------------------------------------------------------------ */
+
+/* Preview widths: 768 (tablet), 430 and 390 (phones). */
+.studio-v2-canvas.is-768 {
+  max-width: 48rem;
+}
+
+.studio-v2-canvas.is-430 {
+  max-width: 26.875rem;
+}
+
+.studio-v2-canvas.is-390 {
+  max-width: 24.375rem;
+}
+
+.studio-v2-canvas.is-mobile .studio-v2-site-nav nav button,
+.studio-v2-canvas.is-mobile .studio-v2-site-nav nav span {
+  font-size: 0.5rem;
+}
+
+/* Generated-site navigation is now the site's page list. */
+.studio-v2-site-nav nav button,
+.studio-v2-site-nav nav span {
+  padding: 0;
+  color: inherit;
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: default;
+}
+
+.studio-v2-site-nav nav button {
+  cursor: pointer;
+  border-bottom: 1px solid transparent;
+}
+
+.studio-v2-site-nav nav button:hover,
+.studio-v2-site-nav nav button:focus-visible {
+  color: var(--site-text);
+  border-bottom-color: var(--site-accent);
+}
+
+.studio-v2-site-nav nav button.is-active {
+  color: var(--site-text);
+  border-bottom-color: var(--site-text);
+}
+
+.studio-v2-site-logo {
+  width: 1.5rem;
+  height: 1.5rem;
+  object-fit: contain;
+  border-radius: calc(0.25rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-site-nav strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Visitor-supplied imagery inside the generated site. */
+.studio-v2-site-visual.has-media {
+  padding: 0;
+  overflow: hidden;
+  border-radius: calc(0.75rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-site-visual.has-media img {
+  width: 100%;
+  height: 100%;
+  min-height: 12rem;
+  object-fit: cover;
+}
+
+/* Design identity chips. */
+.studio-v2-identity {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+  margin-bottom: 0.9rem;
+  background: rgb(255 255 255 / 5%);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.75rem;
+}
+
+.studio-v2-identity small {
+  color: rgb(255 255 255 / 52%);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.studio-v2-identity div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+.studio-v2-identity span {
+  padding: 0.22rem 0.5rem;
+  color: rgb(255 255 255 / 74%);
+  font-size: 0.55rem;
+  background: rgb(255 255 255 / 7%);
+  border-radius: 999px;
+}
+
+.studio-v2-group-note {
+  margin: 0 0 0.75rem;
+  color: rgb(255 255 255 / 50%);
+  font-size: 0.6rem;
+  line-height: 1.6;
+}
+
+/* Creative directions. */
+.studio-v2-direction-list {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.studio-v2-direction-list article {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  background: rgb(255 255 255 / 4%);
+  border: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0.7rem;
+}
+
+.studio-v2-direction-list article.is-previewing {
+  border-color: rgb(255 255 255 / 45%);
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 20%) inset;
+}
+
+.studio-v2-direction-list article > small {
+  color: rgb(255 255 255 / 45%);
+  font-size: 0.55rem;
+  line-height: 1.5;
+}
+
+.studio-v2-direction-list article > strong {
+  color: #fff;
+  font-size: 0.78rem;
+}
+
+.studio-v2-direction-list article > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.studio-v2-direction-list article > div span {
+  padding: 0.18rem 0.42rem;
+  color: rgb(255 255 255 / 62%);
+  font-size: 0.5rem;
+  background: rgb(255 255 255 / 7%);
+  border-radius: 999px;
+}
+
+.studio-v2-direction-list article > button,
+.studio-v2-direction-more,
+.studio-v2-version-actions button,
+.studio-v2-media-clear,
+.studio-v2-add-page > button {
+  justify-self: start;
+  padding: 0.42rem 0.7rem;
+  color: rgb(255 255 255 / 85%);
+  font-size: 0.58rem;
+  background: rgb(255 255 255 / 9%);
+  border: 1px solid rgb(255 255 255 / 16%);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.studio-v2-direction-more,
+.studio-v2-version-actions button,
+.studio-v2-media-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.studio-v2-direction-list article > button:hover,
+.studio-v2-direction-more:hover,
+.studio-v2-version-actions button:hover,
+.studio-v2-media-clear:hover,
+.studio-v2-add-page > button:hover {
+  background: rgb(255 255 255 / 16%);
+}
+
+.studio-v2-direction-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 1rem;
+  margin-bottom: 0.75rem;
+  color: rgb(255 255 255 / 78%);
+  font-size: 0.62rem;
+  line-height: 1.55;
+  background: rgb(255 255 255 / 6%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 0.7rem;
+}
+
+.studio-v2-direction-banner strong {
+  display: block;
+  color: #fff;
+  font-size: 0.7rem;
+}
+
+.studio-v2-direction-banner div {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.studio-v2-direction-banner button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.42rem 0.7rem;
+  color: #111317;
+  font-size: 0.58rem;
+  background: #fff;
+  border: 0;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.studio-v2-direction-banner button + button {
+  color: rgb(255 255 255 / 82%);
+  background: rgb(255 255 255 / 10%);
+}
+
+/* Session versions. */
+.studio-v2-version-list {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+
+.studio-v2-version-list > div {
+  display: flex;
+  gap: 0.3rem;
+  align-items: stretch;
+  padding: 0.3rem;
+  background: rgb(255 255 255 / 4%);
+  border: 1px solid rgb(255 255 255 / 9%);
+  border-radius: 0.6rem;
+}
+
+.studio-v2-version-list > div.is-active {
+  border-color: rgb(255 255 255 / 42%);
+}
+
+.studio-v2-version-list > div > button:first-child {
+  display: grid;
+  flex: 1;
+  gap: 0.15rem;
+  padding: 0.35rem 0.45rem;
+  color: inherit;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.studio-v2-version-list strong {
+  color: #fff;
+  font-size: 0.63rem;
+}
+
+.studio-v2-version-list small {
+  color: rgb(255 255 255 / 48%);
+  font-size: 0.53rem;
+}
+
+.studio-v2-version-list > div > button:not(:first-child) {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.45rem;
+  color: rgb(255 255 255 / 66%);
+  font-size: 0.53rem;
+  background: rgb(255 255 255 / 7%);
+  border: 0;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+
+.studio-v2-version-actions {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.studio-v2-compare {
+  margin-top: 0.75rem;
+  overflow-x: auto;
+}
+
+.studio-v2-compare small {
+  color: rgb(255 255 255 / 52%);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-compare table {
+  width: 100%;
+  margin-top: 0.4rem;
+  font-size: 0.55rem;
+  border-collapse: collapse;
+}
+
+.studio-v2-compare th,
+.studio-v2-compare td {
+  padding: 0.35rem 0.4rem;
+  color: rgb(255 255 255 / 74%);
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid rgb(255 255 255 / 10%);
+}
+
+.studio-v2-compare thead th {
+  color: rgb(255 255 255 / 50%);
+  font-weight: 500;
+}
+
+/* Pages. */
+.studio-v2-add-page {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.6rem 0.75rem 0.75rem;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+}
+
+.studio-v2-add-page label {
+  color: rgb(255 255 255 / 46%);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-add-page > div {
+  display: flex;
+  gap: 0.35rem;
+}
+
+.studio-v2-add-page select {
+  flex: 1;
+  padding: 0.4rem 0.5rem;
+  color: #fff;
+  font-size: 0.6rem;
+  background: rgb(255 255 255 / 8%);
+  border: 1px solid rgb(255 255 255 / 14%);
+  border-radius: 0.5rem;
+}
+
+.studio-v2-add-page > div button {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.6rem;
+  color: #fff;
+  background: rgb(255 255 255 / 12%);
+  border: 1px solid rgb(255 255 255 / 18%);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.studio-v2-remove-page {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  color: rgb(255 255 255 / 62%);
+  font-size: 0.55rem;
+  background: rgb(255 120 120 / 10%);
+  border: 1px solid rgb(255 120 120 / 26%);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+/* Session-only media. */
+.studio-v2-media {
+  display: grid;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.studio-v2-media-slot {
+  display: flex;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.5rem 0.6rem;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.58rem;
+  background: rgb(255 255 255 / 5%);
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: 0.6rem;
+  cursor: pointer;
+}
+
+.studio-v2-media-slot input {
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  color: rgb(255 255 255 / 55%);
+  font-size: 0.53rem;
+}
+
+.studio-v2-media-slot img {
+  width: 1.6rem;
+  height: 1.6rem;
+  object-fit: contain;
+  border-radius: 0.35rem;
+}
+
+.studio-v2-media-clear {
+  margin-top: 0.6rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Interactive component families
+ * ------------------------------------------------------------------ */
+
+.studio-v2-interactive {
+  margin-top: 1.6rem;
+}
+
+.studio-v2-site-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  margin-bottom: 1.1rem;
+}
+
+.studio-v2-site-filters-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--site-muted);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.studio-v2-site-filters button {
+  padding: 0.32rem 0.7rem;
+  color: var(--site-muted);
+  font-size: 0.55rem;
+  background: transparent;
+  border: 1px solid var(--site-line);
+  border-radius: calc(999px * var(--dna-radius-scale, 1));
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.studio-v2-site-filters button:hover,
+.studio-v2-site-filters button:focus-visible {
+  color: var(--site-text);
+}
+
+.studio-v2-site-filters button.is-active {
+  color: var(--site-bg);
+  background: var(--site-text);
+  border-color: var(--site-text);
+}
+
+.studio-v2-interactive-empty {
+  margin: 0.9rem 0 0;
+  color: var(--site-muted);
+  font-size: 0.58rem;
+  line-height: 1.7;
+}
+
+.studio-v2-interactive.is-comparison .studio-v2-site-compare-pickers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  color: var(--site-muted);
+  font-size: 0.55rem;
+}
+
+.studio-v2-site-compare-pickers select {
+  flex: 1;
+  min-width: 8rem;
+  padding: 0.42rem 0.55rem;
+  color: var(--site-text);
+  font-size: 0.58rem;
+  background: transparent;
+  border: 1px solid var(--site-line);
+  border-radius: calc(0.4rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-interactive-figure {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.studio-v2-interactive-figure:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 3px;
+}
+
+.studio-v2-interactive-lightbox {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 1rem;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  background: color-mix(in srgb, var(--site-text) 5%, transparent);
+  border: 1px solid var(--site-line);
+  border-radius: calc(0.7rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-interactive-lightbox-art {
+  min-height: 11rem;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--site-accent) 26%, transparent),
+    color-mix(in srgb, var(--site-text) 8%, transparent)
+  );
+  border-radius: calc(0.5rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-interactive-lightbox-body {
+  display: grid;
+  align-content: start;
+  gap: 0.45rem;
+}
+
+.studio-v2-interactive-lightbox-body small {
+  color: var(--site-accent);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-interactive-lightbox-body strong {
+  font-size: 1rem;
+}
+
+.studio-v2-interactive-lightbox-body p {
+  margin: 0;
+  color: var(--site-muted);
+  font-size: 0.6rem;
+  line-height: 1.7;
+}
+
+.studio-v2-interactive-lightbox-controls {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+.studio-v2-interactive-lightbox-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  color: var(--site-text);
+  background: transparent;
+  border: 1px solid var(--site-line);
+  border-radius: calc(0.4rem * var(--dna-radius-scale, 1));
+  cursor: pointer;
+}
+
+.studio-v2-interactive-lightbox-controls button:hover {
+  border-color: var(--site-text);
+}
+
+.studio-v2-site-timeline.is-stepper {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  list-style: none;
+  border: 0;
+}
+
+.studio-v2-site-timeline.is-stepper li {
+  padding: 0;
+  border: 0;
+}
+
+.studio-v2-site-timeline.is-stepper button {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.2rem 0.6rem;
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: calc(0.5rem * var(--dna-radius-scale, 1));
+  cursor: pointer;
+}
+
+.studio-v2-site-timeline.is-stepper button.is-active {
+  background: color-mix(in srgb, var(--site-text) 6%, transparent);
+  border-color: var(--site-line);
+}
+
+.studio-v2-site-timeline.is-stepper small {
+  grid-column: 2;
+  color: var(--site-muted);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-site-timeline.is-stepper strong {
+  grid-column: 2;
+  font-size: 0.72rem;
+}
+
+.studio-v2-site-timeline.is-stepper .studio-v2-site-timeline-dot {
+  grid-row: 1 / span 2;
+  align-self: center;
+}
+
+.studio-v2-interactive-step-detail {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem;
+  margin-top: 0.8rem;
+  background: color-mix(in srgb, var(--site-text) 5%, transparent);
+  border: 1px solid var(--site-line);
+  border-radius: calc(0.6rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-interactive-step-detail small {
+  color: var(--site-accent);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-interactive-step-detail p {
+  margin: 0;
+  color: var(--site-muted);
+  font-size: 0.6rem;
+  line-height: 1.7;
+}
+
+.studio-v2-site-faq.is-accordion {
+  border-top: 1px solid var(--site-line);
+}
+
+.studio-v2-site-faq.is-accordion > div {
+  border-bottom: 1px solid var(--site-line);
+}
+
+.studio-v2-site-faq.is-accordion h3 {
+  margin: 0;
+}
+
+.studio-v2-site-faq.is-accordion button {
+  display: flex;
+  width: 100%;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  color: var(--site-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.studio-v2-site-faq.is-accordion button i {
+  font-style: normal;
+  font-size: 0.9rem;
+  opacity: 0.6;
+}
+
+.studio-v2-site-faq.is-accordion button:focus-visible {
+  outline: 2px solid var(--site-accent);
+  outline-offset: 3px;
+}
+
+.studio-v2-site-faq.is-accordion p {
+  margin: 0 0 1rem;
+  max-width: 46rem;
+  color: var(--site-muted);
+  font-size: 0.63rem;
+  line-height: 1.75;
+}
+
+.studio-v2-site-faq.is-accordion small {
+  display: block;
+  margin-bottom: 1rem;
+  color: var(--site-accent);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-interactive.is-enquiry {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1.2rem;
+  margin-top: 1.6rem;
+  background: color-mix(in srgb, var(--site-text) 5%, transparent);
+  border: 1px solid var(--site-line);
+  border-radius: calc(0.8rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-interactive.is-enquiry > small {
+  color: var(--site-accent);
+  font-size: 0.5rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.studio-v2-interactive.is-enquiry > strong {
+  font-size: 1rem;
+}
+
+.studio-v2-interactive.is-enquiry > p {
+  margin: 0;
+  color: var(--site-muted);
+  font-size: 0.6rem;
+  line-height: 1.7;
+}
+
+.studio-v2-interactive.is-enquiry form {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.3rem;
+}
+
+.studio-v2-interactive.is-enquiry label {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.studio-v2-interactive.is-enquiry label span {
+  color: var(--site-muted);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.studio-v2-interactive.is-enquiry input,
+.studio-v2-interactive.is-enquiry textarea {
+  padding: 0.5rem 0.6rem;
+  color: var(--site-text);
+  font: inherit;
+  font-size: 0.62rem;
+  background: transparent;
+  border: 1px solid var(--site-line);
+  border-radius: calc(0.45rem * var(--dna-radius-scale, 1));
+}
+
+.studio-v2-interactive-enquiry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.studio-v2-interactive-enquiry-actions button {
+  padding: 0.6rem 1rem;
+  color: var(--site-bg);
+  font-size: 0.58rem;
+  background: var(--site-text);
+  border: 0;
+  border-radius: calc(0.45rem * var(--dna-radius-scale, 1));
+  cursor: pointer;
+}
+
+.studio-v2-interactive-secondary {
+  color: var(--site-muted);
+  font-size: 0.55rem;
+}
+
+/* ------------------------------------------------------------------ *
+ * Motion engine
+ * ------------------------------------------------------------------ */
+
+/*
+ * Motion levels are formalised as NONE / SUBTLE / PREMIUM / CINEMATIC.
+ * Animated properties are limited to transform and opacity so the browser can
+ * keep animation work on the compositor.
+ */
+.studio-v2-site [class*="motion-"] {
+  transition-duration: calc(0.5s * var(--dna-motion-scale, 1));
+}
+
+.studio-v2-site .dna-motion-none .studio-v2-section,
+.studio-v2-site.dna-motion-none .studio-v2-section {
+  transition: none;
+}
+
+.studio-v2-site.dna-motion-none [class*="motion-"] {
+  transition-duration: 0s;
+  animation: none;
+}
+
+.studio-v2-site.dna-motion-subtle [class*="motion-"] {
+  transition-duration: 0.32s;
+}
+
+.studio-v2-site.dna-motion-cinematic .studio-v2-section.motion-drift {
+  transform: translateY(-0.18rem);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .studio-v2-site,
+  .studio-v2-site * {
+    transition-duration: 0.001s !important;
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+  }
+}
