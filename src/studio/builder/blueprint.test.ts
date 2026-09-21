@@ -321,6 +321,96 @@ describe("CreativeBlueprint generation", () => {
   });
 });
 
+describe("generated copy hygiene", () => {
+  /**
+   * Owner QA found broken-looking headings when a description did not supply a
+   * clean descriptor — an optional slot could empty out and leave a lowercase
+   * fragment ("work, built to be inspected") or a pronoun ("A I Run method").
+   * Every visitor-facing string is checked across colloquial, typo'd and
+   * long-form prompts so those cases cannot come back.
+   */
+  const colloquialPrompts = [
+    "create me a site that sells clother locally for jaigaon",
+    "create me a website that sells health supplements specifically protein nutritions and multivitamins",
+    "I run a small accounting practice in Siliguri offering tax filing and GST help",
+    "Create an architecture and construction company website with projects and consultation.",
+    "Create a luxury jewellery business website showing the collection and visiting details.",
+    "Create a salon and beauty studio website with services and booking.",
+    "Create a logistics and transport company website with fleet and coverage details.",
+    "Create a website for a primary school with admissions information and facilities.",
+  ];
+
+  function collectStrings(
+    value: unknown,
+    path: string,
+    out: Array<[string, string]>,
+  ) {
+    if (typeof value === "string") {
+      out.push([path, value]);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item, index) =>
+        collectStrings(item, `${path}[${index}]`, out),
+      );
+      return;
+    }
+    if (value && typeof value === "object") {
+      for (const [key, item] of Object.entries(value)) {
+        collectStrings(item, `${path}.${key}`, out);
+      }
+    }
+  }
+
+  it("never ships a broken heading, fragment or placeholder", () => {
+    for (const prompt of colloquialPrompts) {
+      const spec = generateFallbackDesignSpec(prompt);
+      const strings: Array<[string, string]> = [];
+      for (const [index, section] of spec.pages[0]!.sections.entries()) {
+        collectStrings(
+          (section as unknown as { content: unknown }).content,
+          `${index}:${section.type}`,
+          strings,
+        );
+      }
+      expect(strings.length).toBeGreaterThan(0);
+      for (const [path, text] of strings) {
+        const context = `${prompt} → ${path} → ${text}`;
+        expect(text, context).not.toMatch(/^[a-z]/);
+        expect(text, context).not.toMatch(/\s{2,}/);
+        expect(text, context).not.toMatch(/\s+[,.;:!?]/);
+        expect(text, context).not.toMatch(/\b(undefined|null|NaN)\b/);
+        // A pronoun in adjectival position ("A I Run method") is the specific
+        // artifact an unfiltered descriptor produced.
+        expect(text, context).not.toMatch(/\b(A|The|An)\s+(I|we|our|my|me)\b/);
+        /* A slot that emptied out at the head of a line can strand its
+           preposition ("Everything for, sorted the way people shop."). Only the
+           sentence-initial shape is asserted: a preposition before a comma is
+           legitimate English elsewhere ("every piece room to be looked at,"). */
+        expect(text, context).not.toMatch(
+          /^(A|An|The|Everything|Every|For|With|Around|From|Of|To|In|On)\b[^.!?]{0,40}\b(for|with|from|of|to|in|on|around)\s*[,.;:]/i,
+        );
+      }
+    }
+  });
+
+  it("keeps colloquial descriptions grammatical in every business bank", () => {
+    const subjects = colloquialPrompts.map((prompt) => {
+      const spec = generateFallbackDesignSpec(prompt);
+      return [
+        spec.pages[0]!.sections[0]!.content,
+        spec.site.descriptor,
+      ] as const;
+    });
+    for (const [hero, descriptor] of subjects) {
+      const title = (hero as { title?: string }).title ?? "";
+      expect(title.length).toBeGreaterThan(8);
+      expect(title).not.toMatch(/\b(A|The|An)\s+(I|we|our|my|me)\b/);
+      expect(descriptor.length).toBeGreaterThan(8);
+    }
+  });
+});
+
 describe("CreativeBlueprint patches", () => {
   it("merges a valid AI patch and re-validates the result", () => {
     const blueprint = planCreativeBlueprint(diversityPrompts[7]!.prompt);

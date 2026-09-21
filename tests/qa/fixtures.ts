@@ -207,16 +207,56 @@ export async function waitForHydration(page: Page) {
   await page.waitForFunction(() => "__TSR_ROUTER__" in window, undefined, {
     timeout: 10000,
   });
-  // On a cold Vite dependency-optimization load, the router marker can appear
-  // immediately before React commits its delegated event listeners. Waiting for
-  // two browser frames lets that commit complete without relying on a fixed
-  // timing delay, preserving the documented hydration guard for real clicks.
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
-      }),
-  );
+  /* The router marker appears when the client *starts* hydrating, which is still
+     too early to click: React overwrites the SSR markup with its own tree in a
+     later commit, and anything typed into a controlled input before that commit
+     is wiped by it. Under load (several QC browsers on one dev server) hydration
+     can take far longer than a couple of frames, so frame-counting is not a
+     readiness signal.
+
+     React attaches its bookkeeping keys (`__reactFiber$…`, `__reactProps$…`) to
+     DOM nodes as it hydrates, so the presence of one of those keys on a node
+     inside the page is a real "the app accepts input now" signal. It is a
+     best-effort probe: on timeout the suite continues, so a page without React
+     markers fails its own assertions rather than hanging here. */
+  await page
+    .waitForFunction(
+      () => {
+        const roots = Array.from(
+          document.querySelectorAll(
+            "main, form, header, button, input, textarea",
+          ),
+        ).slice(0, 400);
+        const hasReactKey = (node: Element) =>
+          Object.keys(node).some((key) => key.startsWith("__react"));
+        return roots.some(hasReactKey);
+      },
+      undefined,
+      { timeout: 15000 },
+    )
+    .catch(() => undefined);
+}
+
+/**
+ * Fill a controlled input and prove the value survived a React commit.
+ *
+ * A `fill` that lands during the hydration commit is silently discarded: React
+ * renders its own (empty) tree over the SSR value. Re-typing until the value
+ * sticks turns that race into a retry instead of a mysterious timeout later.
+ */
+export async function fillStable(page: Page, locator: Locator, value: string) {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    await locator.fill(value);
+    try {
+      await expect(locator).toHaveValue(value, { timeout: 4000 });
+      return;
+    } catch (error) {
+      lastError = error;
+      await waitForHydration(page);
+    }
+  }
+  throw lastError;
 }
 
 /** Apply reduced-motion emulation and neutralize CSS animations/transitions. */

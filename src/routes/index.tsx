@@ -37,6 +37,12 @@ import {
   FounderSection,
 } from "@/components/founder-experience";
 import { setStudioIntakePrompt } from "@/studio/intake";
+import {
+  detectBusinessIdeas,
+  STUDIO_PROMPT_MAX,
+  STUDIO_PROMPT_MIN,
+  type BusinessIdea,
+} from "@/studio/builder/language";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -72,44 +78,79 @@ export const Route = createFileRoute("/")({
 /**
  * Homepage quick-start into Website Studio.
  *
- * One plain-language field. On submit the description is handed to Studio
- * through an in-memory channel (never the URL, never storage) and the visitor
- * lands directly in the Studio generation flow.
+ * A multi-line field that grows with the description, so a real paragraph fits
+ * instead of being clipped by a single-line input. On submit the description is
+ * handed to Studio through an in-memory channel (never the URL, never storage).
+ *
+ * If the description names clearly different businesses, the visitor is asked
+ * which one to build rather than being given one blurred website. Ordinary
+ * multi-service businesses never trigger the question.
  */
 function StudioQuickStart() {
   const navigate = useNavigate();
   /* The field is uncontrolled and read from the DOM on submit: whatever the
-     visitor typed before React finished hydrating stays in the input instead
+     visitor typed before React finished hydrating stays in the field instead
      of being reset to the server-rendered empty state. */
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const [error, setError] = useState("");
+  const [length, setLength] = useState(0);
+  const [ideas, setIdeas] = useState<BusinessIdea[]>([]);
+
+  /* Auto-grow within limits: one line at rest, taller as the description
+     grows, then scrolling instead of pushing the whole hero down. */
+  const resize = () => {
+    const field = inputRef.current;
+    if (!field) return;
+    field.style.height = "auto";
+    field.style.height = `${Math.min(field.scrollHeight, 168)}px`;
+  };
+
+  const go = (prompt: string) => {
+    setStudioIntakePrompt(prompt);
+    void navigate({ to: "/website-studio" });
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     const prompt = (inputRef.current?.value ?? "").replace(/\s+/g, " ").trim();
-    if (prompt.length < 10) {
+    if (prompt.length < STUDIO_PROMPT_MIN) {
       setError(
         "Tell us a little more about your business — one sentence is enough.",
       );
       return;
     }
-    setStudioIntakePrompt(prompt);
-    void navigate({ to: "/website-studio" });
+    const detected = detectBusinessIdeas(prompt);
+    if (detected.length > 1) {
+      setError("");
+      setIdeas(detected);
+      return;
+    }
+    go(prompt);
   };
 
   return (
     <form className="hero-studio" onSubmit={submit} noValidate>
       <label htmlFor="hero-studio-prompt">Describe your business</label>
       <div className="hero-studio-row">
-        <input
+        <textarea
           id="hero-studio-prompt"
           ref={inputRef}
-          type="text"
-          onChange={() => {
+          rows={1}
+          onChange={(event) => {
+            setLength(event.target.value.length);
             if (error) setError("");
+            if (ideas.length) setIdeas([]);
+            resize();
+          }}
+          onKeyDown={(event) => {
+            // Enter submits; Shift+Enter starts a new line.
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              submit(event);
+            }
           }}
           placeholder="Example: I run a gym in Jaigaon and need a modern website for memberships and personal training."
-          maxLength={300}
+          maxLength={STUDIO_PROMPT_MAX}
           autoComplete="off"
           enterKeyHint="go"
         />
@@ -118,8 +159,47 @@ function StudioQuickStart() {
         </button>
       </div>
       <p className="hero-studio-note">
-        Free instant concept · No sign-up · Used for this session only
+        <span>
+          Free instant concept · No sign-up · Used for this session only
+        </span>
+        {length >= STUDIO_PROMPT_MAX * 0.6 && (
+          <span className="hero-studio-count" aria-live="polite">
+            {length}/{STUDIO_PROMPT_MAX}
+          </span>
+        )}
       </p>
+      {ideas.length > 1 && (
+        <div
+          className="hero-studio-choices"
+          role="group"
+          aria-labelledby="hero-studio-choices-title"
+        >
+          <p id="hero-studio-choices-title">
+            We found more than one business idea. Which one would you like to
+            build?
+          </p>
+          <div className="hero-studio-choice-list">
+            {ideas.map((idea) => (
+              <button
+                key={idea.domain}
+                type="button"
+                className="tactile"
+                onClick={() => go(idea.prompt)}
+              >
+                {idea.label}
+                <ArrowRight size={14} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className="hero-studio-choice-all"
+            onClick={() => go((inputRef.current?.value ?? "").trim())}
+          >
+            Use my full description instead
+          </button>
+        </div>
+      )}
       {error && (
         <p className="hero-studio-error" role="alert">
           {error}

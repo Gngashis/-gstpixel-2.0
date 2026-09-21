@@ -146,6 +146,8 @@ const addSectionOperation = z
       .regex(/^\/[a-z0-9\-/]*$/)
       .default("/"),
     sectionType: z.enum(sectionTypes).exclude(["hero"]),
+    /** Optional layout variant, so "add a FAQ section" lands as a FAQ. */
+    variant: z.string().min(1).max(40).optional(),
     afterSectionId: z
       .string()
       .regex(/^[a-z][a-z0-9-]{1,48}$/)
@@ -194,6 +196,78 @@ const setMobileOperation = z
     headingScale: z.enum(["compact", "balanced"]).optional(),
     navigation: z.enum(["minimal", "standard"]).optional(),
     density: z.enum(["compact", "balanced"]).optional(),
+    decoration: z.enum(["keep", "simplified", "hidden"]).optional(),
+  })
+  .strict();
+
+/** A single piece of list content the visitor asked for. */
+const changeListItemSchema = z
+  .object({
+    title: z.string().min(1).max(60),
+    body: z.string().max(180).optional(),
+    meta: z.string().max(28).optional(),
+  })
+  .strict();
+
+/**
+ * CONTENT — "create a list of multivitamin items and protein supplements",
+ * "add a list of features". Writes real, visitor-named items into a section
+ * instead of silently ignoring the request.
+ */
+const addListItemsOperation = z
+  .object({
+    type: z.literal("addListItems"),
+    target: sectionTargetSchema,
+    heading: z.string().min(1).max(110).optional(),
+    items: z.array(changeListItemSchema).min(1).max(6),
+    mode: z.enum(["replace", "append"]).default("replace"),
+  })
+  .strict();
+
+/**
+ * COMMERCE — "add a product section for whey protein", "add categories",
+ * "add sample products". Products are always clearly marked samples: the
+ * Studio never invents prices, stock or specifications.
+ */
+const addProductsOperation = z
+  .object({
+    type: z.literal("addProducts"),
+    pageSlug: z
+      .string()
+      .regex(/^\/[a-z0-9\-/]*$/)
+      .default("/"),
+    kind: z.enum(["products", "categories"]),
+    subject: z.string().min(1).max(40).optional(),
+    afterSectionType: z.enum(sectionTypes).optional(),
+    /** When present, products are added to this existing section. */
+    target: sectionTargetSchema.optional(),
+  })
+  .strict();
+
+/**
+ * MEDIA — "add an image area", "add an illustration area", "add a logo or
+ * emblem area". Maps to supported artwork rather than refusing the request.
+ */
+const addMediaAreaOperation = z
+  .object({
+    type: z.literal("addMediaArea"),
+    pageSlug: z
+      .string()
+      .regex(/^\/[a-z0-9\-/]*$/)
+      .default("/"),
+    mediaKind: z.enum(["image", "illustration", "emblem"]),
+    /** What the visitor asked for, e.g. "lion" in a lion logo request. */
+    subject: z.string().min(1).max(40).optional(),
+    afterSectionType: z.enum(sectionTypes).optional(),
+  })
+  .strict();
+
+/** STRUCTURE — "replace this section with a gallery". */
+const replaceSectionOperation = z
+  .object({
+    type: z.literal("replaceSection"),
+    target: sectionTargetSchema,
+    sectionType: z.enum(sectionTypes).exclude(["hero"]),
   })
   .strict();
 
@@ -274,6 +348,10 @@ export const studioChangeOperationSchema = z.discriminatedUnion("type", [
   restoreThemeOperation,
   setCreativeDirectionOperation,
   regenerateVariationOperation,
+  addListItemsOperation,
+  addProductsOperation,
+  addMediaAreaOperation,
+  replaceSectionOperation,
 ]);
 
 export const studioChangePlanSchema = z
@@ -446,6 +524,123 @@ function quotedText(instruction: string) {
   return instruction.match(/["“]([^"”]{1,420})["”]/)?.[1]?.trim();
 }
 
+/**
+ * Words that describe the artefact or the request itself, never the subject of
+ * a logo. "create a huge original lion logo" leaves "lion".
+ */
+const logoNoise = new Set([
+  "a",
+  "an",
+  "and",
+  "awesome",
+  "beautiful",
+  "big",
+  "brand",
+  "branding",
+  "clean",
+  "company",
+  "cool",
+  "create",
+  "created",
+  "custom",
+  "design",
+  "designed",
+  "for",
+  "fresh",
+  "generate",
+  "generated",
+  "give",
+  "great",
+  "huge",
+  "icon",
+  "iconic",
+  "large",
+  "logo",
+  "make",
+  "me",
+  "modern",
+  "monogram",
+  "my",
+  "need",
+  "new",
+  "nice",
+  "original",
+  "our",
+  "own",
+  "professional",
+  "simple",
+  "small",
+  "some",
+  "the",
+  "unique",
+  "us",
+  "want",
+  "with",
+  "wordmark",
+]);
+
+/** The subject of a logo or artwork request, if the visitor named one. */
+function artworkSubject(instruction: string): string | undefined {
+  const motif = instruction.match(
+    /([A-Za-z][A-Za-z0-9'/-]*(?:\s+[A-Za-z][A-Za-z0-9'/-]*){0,3})\s+(?:logo|emblem|monogram|wordmark|icon)\b/i,
+  )?.[1];
+  if (!motif) return undefined;
+  const kept = motif
+    .split(/\s+/)
+    .filter((word) => !logoNoise.has(word.toLowerCase()))
+    .slice(-3)
+    .join(" ");
+  return kept.length > 1 ? kept : undefined;
+}
+
+/**
+ * Turn "a list of multivitamin items and protein supplements" into clean list
+ * items the renderer can show, without inventing content the visitor did not
+ * ask for.
+ */
+function requestedListItems(
+  instruction: string,
+): { title: string; body?: string; meta?: string }[] {
+  const quoted = quotedText(instruction);
+  const source = (quoted ?? instruction)
+    .replace(
+      /^.*?\b(?:list of|list with|list:|items like|such as|including)\s+/i,
+      "",
+    )
+    .replace(/\b(?:section|please|in the site|on the page)\b.*$/i, "")
+    .trim();
+  const parts = source
+    .split(/\s*(?:,|;|\band\b|\bplus\b|\/)\s*/i)
+    .map((part) => part.replace(/^\s*and\s+/i, "").trim())
+    .filter((part) => part.length > 1 && part.length <= 60)
+    .slice(0, 6);
+  return parts.map((part) => ({
+    title: `${part[0]!.toUpperCase()}${part.slice(1)}`,
+    body: "Editable content — replace this with the real detail.",
+    meta: "List item",
+  }));
+}
+
+/** The product name in "add a product section for whey protein". */
+function productSubject(instruction: string): string | undefined {
+  const quoted = quotedText(instruction);
+  if (quoted) return quoted.slice(0, 40);
+  const match = instruction.match(
+    /\b(?:for|of|with|about|selling|sells|sell)\s+([A-Za-z0-9][A-Za-z0-9 '&/-]{2,38})$/i,
+  )?.[1];
+  if (!match) return undefined;
+  const cleaned = match
+    .replace(/\b(?:section|page|please|products?|items?)\b.*$/i, "")
+    .replace(/[.?!]+$/, "")
+    .trim();
+  return cleaned.length > 1 ? cleaned : undefined;
+}
+
+/** Section types already present on the page being edited. */
+function pageSectionTypes(context: StudioChangeContext): SectionType[] {
+  return pageFor(context).sections.map((section) => section.type);
+}
+
 function operationLabel(operation: StudioChangeOperation): string {
   switch (operation.type) {
     case "setTheme":
@@ -478,6 +673,18 @@ function operationLabel(operation: StudioChangeOperation): string {
       return "shifted the creative direction";
     case "regenerateVariation":
       return "built a different version of the whole site";
+    case "addListItems":
+      return `added the list you asked for to the ${operation.target.sectionType ?? "selected"} section`;
+    case "addProducts":
+      return operation.kind === "categories"
+        ? "added a category section"
+        : "added a product section";
+    case "addMediaArea":
+      return operation.mediaKind === "emblem"
+        ? "added a logo and emblem area"
+        : `added an ${operation.mediaKind} area`;
+    case "replaceSection":
+      return `replaced the section with a ${operation.sectionType} section`;
   }
   return "updated the website";
 }
@@ -1108,6 +1315,220 @@ export function planStudioChange(
     }
   }
 
+  /* ------------------------------------------------------------------
+     MEDIA, ARTWORK AND LOGO REQUESTS
+
+     A visitor asking for an original logo gets a supported outcome plus a
+     clear statement about what needs a real image source — never the generic
+     "could not map this request" message.
+     ------------------------------------------------------------------ */
+  const mentionsArtwork =
+    /\b(?:logo|emblem|monogram|wordmark|illustration|artwork|image|photo|picture|visual)\b/.test(
+      value,
+    );
+  const wantsArtworkCreated =
+    /\b(?:create|make|generate|design|add|need|want|include|give|build)\b/.test(
+      value,
+    ) && mentionsArtwork;
+  const aboutSizing =
+    /\b(?:bigger|smaller|larger|resize|move|position|top|centre|center|bottom)\b/.test(
+      value,
+    ) && !/\b(?:create|generate|original|new|custom)\b/.test(value);
+
+  if (wantsArtworkCreated && !aboutSizing) {
+    const subject = artworkSubject(instruction);
+    const kind = /\b(?:logo|emblem|monogram|wordmark|icon)\b/.test(value)
+      ? "emblem"
+      : /\b(?:illustration|artwork|drawing)\b/.test(value)
+        ? "illustration"
+        : "image";
+    operations.push({
+      type: "addMediaArea",
+      pageSlug: context.activePageSlug,
+      mediaKind: kind,
+      ...(subject ? { subject } : {}),
+    });
+    if (kind === "emblem") {
+      unsupported.push(
+        subject
+          ? `Custom logo artwork ("${subject}") needs a real image source or upload; a typed emblem area was added in its place.`
+          : "Custom logo artwork needs a real image source or upload; an emblem placeholder area was added instead.",
+      );
+    } else {
+      unsupported.push(
+        /\b(?:original|custom|unique|generate|create)\b/.test(value)
+          ? "Generated photography and illustration need an image source or generator; an art-directed media area was added instead."
+          : "Image upload is not available yet; the layout and art direction for the media area were prepared.",
+      );
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     CONTENT AND COMMERCE
+     ------------------------------------------------------------------ */
+  const wantsCategories =
+    /\b(?:product )?categor(?:y|ies)\b/.test(value) &&
+    /\b(?:add|create|include|need|want|show|build|make)\b/.test(value);
+  const wantsProducts =
+    /\b(?:products?|product grid|shop|store|checkout|catalogue|catalog|shelf|shelves)\b/.test(
+      value,
+    ) &&
+    /\b(?:add|create|include|need|want|show|build|make|selling|sells|sell)\b/.test(
+      value,
+    );
+
+  if (wantsCategories || wantsProducts) {
+    const subject = productSubject(instruction);
+    const onPage = pageSectionTypes(context);
+    operations.push({
+      type: "addProducts",
+      pageSlug: context.activePageSlug,
+      kind: wantsCategories ? "categories" : "products",
+      ...(subject ? { subject } : {}),
+      ...(onPage.includes("listings")
+        ? {
+            target: targetFor(
+              "listings",
+              context,
+              selected?.type === "listings",
+            ),
+          }
+        : {}),
+    });
+  }
+
+  const wantsList =
+    /\b(?:list|bullet|checklist|items)\b/.test(value) &&
+    /\b(?:add|create|make|include|need|want|give|build)\b/.test(value);
+  if (wantsList && !wantsProducts && !wantsCategories) {
+    const items = requestedListItems(instruction);
+    const productish =
+      /\b(?:supplement|protein|vitamin|nutrition|product|package|gear|stock|menu)\b/.test(
+        value,
+      );
+    const onPage = pageSectionTypes(context);
+    const targetType: Exclude<SectionType, "hero"> =
+      namedSection && namedSection !== "hero"
+        ? namedSection
+        : productish
+          ? "listings"
+          : "features";
+    if (productish && !onPage.includes("listings")) {
+      operations.push({
+        type: "addProducts",
+        pageSlug: context.activePageSlug,
+        kind: "products",
+        ...(items[0] ? { subject: items[0].title } : {}),
+      });
+    } else if (onPage.includes(targetType) && items.length) {
+      operations.push({
+        type: "addListItems",
+        target: targetFor(targetType, context, selected?.type === targetType),
+        items: items.slice(0, 6),
+        mode: "replace",
+      });
+    } else {
+      operations.push({
+        type: "addSection",
+        pageSlug: context.activePageSlug,
+        sectionType: targetType,
+      });
+    }
+  }
+
+  /* FAQ sections land as an actual FAQ, not a generic feature grid. */
+  if (
+    /\b(?:faq|frequently asked|questions?)\b/.test(value) &&
+    /\b(?:add|create|include|need|want|make)\b/.test(value)
+  ) {
+    operations.push({
+      type: "addSection",
+      pageSlug: context.activePageSlug,
+      sectionType: "features",
+      variant: "faq-list",
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     STRUCTURE
+     ------------------------------------------------------------------ */
+  const replaceMatch = value.match(
+    /replace (?:the |this )?(hero|about|services?|gallery|features?|listings?|testimonials?|contact|cta) (?:section )?with (?:a |an )?(hero|about|services?|gallery|features?|listings?|testimonials?|contact|cta)/,
+  );
+  if (replaceMatch) {
+    const fromType = sectionTypeFromText(replaceMatch[1]!);
+    const toType = sectionTypeFromText(replaceMatch[2]!);
+    if (fromType && toType && toType !== "hero") {
+      operations.push({
+        type: "replaceSection",
+        target: targetFor(fromType, context, fromType === selected?.type),
+        sectionType: toType,
+      });
+    }
+  }
+
+  /* A completely different hero is a real hero replacement, not a recolour. */
+  if (
+    /\bhero\b/.test(value) &&
+    /(?:replace (?:this |the )?hero|completely different hero|totally different hero|entirely different hero|new hero|another hero|different hero)/.test(
+      value,
+    ) &&
+    !/\b(?:keep|preserve|don't change|do not change|same|shorter|taller|bigger|smaller|darker|brighter)\b/.test(
+      value,
+    )
+  ) {
+    operations.push({
+      type: "alternate",
+      target: "section",
+      section: targetFor("hero", context, true),
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     MOBILE SIMPLIFICATION
+     ------------------------------------------------------------------ */
+  /* Mobile adjustments share one operation: two setMobile entries would
+     report the same work twice in the change summary. */
+  const mobileOperation = operations.find(
+    (operation) => operation.type === "setMobile",
+  ) as Extract<StudioChangeOperation, { type: "setMobile" }> | undefined;
+  const adjustMobile = (
+    patch: Partial<Extract<StudioChangeOperation, { type: "setMobile" }>>,
+  ) => {
+    if (mobileOperation) {
+      Object.assign(mobileOperation, patch);
+      return;
+    }
+    operations.push({ type: "setMobile", ...patch });
+  };
+
+  if (
+    /\b(?:decoration|decorative|effects?|animations?|artwork|ornaments?)\b/.test(
+      value,
+    ) &&
+    /\b(?:hide|remove|reduce|simplify|less|drop|turn off|disable)\b/.test(value)
+  ) {
+    adjustMobile({
+      simplified: true,
+      decoration: /\b(?:hide|remove|drop|turn off|disable)\b/.test(value)
+        ? "hidden"
+        : "simplified",
+    });
+  }
+  if (
+    /\b(?:reduce|lower|less)\b/.test(value) &&
+    /\b(?:density|crowded|busy|dense)\b/.test(value)
+  ) {
+    adjustMobile({ simplified: true, density: "compact" });
+  }
+  if (
+    /\b(?:mobile)\b/.test(value) &&
+    /\b(?:navigation|menu|nav)\b/.test(value) &&
+    /\b(?:change|different|simplify|simpler|minimal)\b/.test(value)
+  ) {
+    adjustMobile({ navigation: "minimal" });
+  }
+
   const addMatch = value.match(
     /add (?:a |an )?(gallery|contact|services?|features?|testimonials?|about)(?: section)?(?: after (services?|about|gallery|features?|contact))?/,
   );
@@ -1366,6 +1787,84 @@ function pageTemplate(
   return page;
 }
 
+/**
+ * Sample commerce content.
+ *
+ * Everything is labelled as a sample so a visitor never mistakes placeholder
+ * copy for a real product, price or claim. The subject the visitor named is
+ * used verbatim so the section obviously answers what they asked for.
+ */
+function sampleCommerceItems(
+  kind: "products" | "categories",
+  subject?: string,
+): DesignSection["content"]["items"] {
+  const named = subject?.replace(/\s+/g, " ").trim() ?? "";
+  const titled = named ? `${named[0]!.toUpperCase()}${named.slice(1)}` : "";
+  if (kind === "categories") {
+    return [
+      {
+        title: titled || "Protein powders",
+        body: "Sample category — add your real category and what it covers.",
+        meta: "Category",
+        accent: "01",
+      },
+      {
+        title: "Multivitamins",
+        body: "Sample category for daily and targeted formulas.",
+        meta: "Category",
+        accent: "02",
+      },
+      {
+        title: "Everyday nutrition",
+        body: "Sample category for minerals, omega and general supplements.",
+        meta: "Category",
+        accent: "03",
+      },
+    ];
+  }
+  return [
+    {
+      title: titled ? `${titled} — sample item` : "Sample product",
+      body: "Replace this with your real product name, size and price.",
+      meta: "Sample item",
+      accent: "01",
+    },
+    {
+      title: "Sample product",
+      body: "A second product entry so the grid reads as a real shelf.",
+      meta: "Sample item",
+      accent: "02",
+    },
+    {
+      title: "Sample product",
+      body: "Add brand, flavour, weight and label details from your own packaging.",
+      meta: "Sample item",
+      accent: "03",
+    },
+  ];
+}
+
+/** Adds a section just before the page's closing action section. */
+function insertSectionBeforeClose(
+  spec: DesignSpec,
+  pageSlug: string,
+  added: DesignSection,
+  afterSectionType?: SectionType,
+) {
+  const page =
+    spec.pages.find((entry) => entry.slug === pageSlug) ?? getHomePage(spec);
+  if (afterSectionType) {
+    const found = page.sections.findIndex(
+      (section) => section.type === afterSectionType,
+    );
+    if (found >= 0) {
+      page.sections.splice(found + 1, 0, added);
+      return;
+    }
+  }
+  page.sections.splice(Math.max(1, page.sections.length - 1), 0, added);
+}
+
 export function applyStudioChangePlan(
   context: StudioChangeContext,
   planInput: StudioChangePlan,
@@ -1457,6 +1956,14 @@ export function applyStudioChangePlan(
           spec.pages.find((entry) => entry.slug === operation.pageSlug) ??
           getHomePage(spec);
         const added = createSectionForType(operation.sectionType, spec);
+        if (
+          operation.variant &&
+          sectionVariantRegistry[operation.sectionType].includes(
+            operation.variant as never,
+          )
+        ) {
+          added.variant = operation.variant;
+        }
         let index = Math.max(1, page.sections.length - 1);
         if (operation.afterSectionId) {
           const found = page.sections.findIndex(
@@ -1570,7 +2077,135 @@ export function applyStudioChangePlan(
             ? { headingScale: operation.headingScale }
             : {}),
           ...(operation.navigation ? { navigation: operation.navigation } : {}),
+          ...(operation.decoration ? { decoration: operation.decoration } : {}),
         });
+        markChanged();
+        break;
+      }
+      case "addListItems": {
+        const resolved = resolveSection(spec, operation.target);
+        if (!resolved) break;
+        const items = operation.items.map((item, position) => ({
+          title: item.title,
+          body: item.body ?? "",
+          meta: item.meta ?? "",
+          accent: `0${position + 1}`.slice(-2),
+        }));
+        const existing =
+          operation.mode === "append" ? resolved.section.content.items : [];
+        resolved.section.content.items = [...existing, ...items].slice(0, 8);
+        if (operation.heading)
+          resolved.section.content.title = operation.heading;
+        markChanged();
+        break;
+      }
+      case "addProducts": {
+        const items = sampleCommerceItems(operation.kind, operation.subject);
+        const existing = operation.target
+          ? resolveSection(spec, operation.target)
+          : null;
+        if (existing) {
+          existing.section.content.items = [
+            ...existing.section.content.items,
+            ...items,
+          ].slice(0, 8);
+          if (operation.subject)
+            existing.section.content.title = operation.subject;
+          markChanged();
+          break;
+        }
+        const added = createSectionForType("listings", spec);
+        added.variant =
+          operation.kind === "categories" ? "index-list" : "product-grid";
+        added.content.eyebrow =
+          operation.kind === "categories" ? "Categories" : "Products";
+        added.content.title =
+          operation.subject ??
+          (operation.kind === "categories"
+            ? "Shop by category."
+            : "The product range.");
+        added.content.items = items;
+        insertSectionBeforeClose(
+          spec,
+          operation.pageSlug,
+          added,
+          operation.afterSectionType,
+        );
+        markChanged();
+        break;
+      }
+      case "addMediaArea": {
+        const added =
+          operation.mediaKind === "emblem"
+            ? createSectionForType("features", spec)
+            : createSectionForType("gallery", spec);
+        if (operation.mediaKind === "emblem") {
+          added.variant = "icon-list";
+          added.content.eyebrow = "Brand";
+          added.content.title = operation.subject
+            ? `${operation.subject} emblem — placeholder`
+            : "Wordmark, emblem and icon set.";
+          added.content.note =
+            "Emblem placeholder — a custom logo needs an image source or upload.";
+          added.content.items = [
+            {
+              title: "Wordmark",
+              body: "Your business name set as a considered typographic mark.",
+              meta: "Placeholder",
+              accent: "01",
+            },
+            {
+              title: "Emblem",
+              body: "Reserved for the real emblem artwork once the file is supplied.",
+              meta: "Placeholder",
+              accent: "02",
+            },
+            {
+              title: "Icon set",
+              body: "A consistent icon language for services and features.",
+              meta: "Placeholder",
+              accent: "03",
+            },
+          ];
+        } else {
+          added.variant =
+            operation.mediaKind === "illustration"
+              ? "art-collage"
+              : "editorial-grid";
+          added.visualTreatment.media =
+            operation.mediaKind === "illustration" ? "abstract" : "mosaic";
+          added.content.eyebrow =
+            operation.mediaKind === "illustration" ? "Illustration" : "Images";
+          added.content.title =
+            operation.mediaKind === "illustration"
+              ? "An illustration-led area."
+              : "An image-led area.";
+          added.content.note =
+            operation.mediaKind === "illustration"
+              ? "Abstract artwork language — ready for commissioned illustration."
+              : "Art-directed image area — ready for your own photography.";
+        }
+        insertSectionBeforeClose(
+          spec,
+          operation.pageSlug,
+          added,
+          operation.afterSectionType,
+        );
+        markChanged();
+        break;
+      }
+      case "replaceSection": {
+        const resolved = resolveSection(spec, operation.target);
+        if (!resolved || resolved.index === 0) break;
+        const replacement = createSectionForType(operation.sectionType, spec);
+        // The replacement keeps the section slot, anchor and the copy the
+        // visitor may have already written.
+        replacement.id = resolved.section.id;
+        if (resolved.section.content.title)
+          replacement.content.title = resolved.section.content.title;
+        if (resolved.section.content.body)
+          replacement.content.body = resolved.section.content.body;
+        resolved.page.sections.splice(resolved.index, 1, replacement);
         markChanged();
         break;
       }

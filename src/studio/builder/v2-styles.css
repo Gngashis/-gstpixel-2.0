@@ -4636,3 +4636,482 @@
   }
 }
 
+
+/* ==================================================================
+   Typography safety guards
+
+   Headline sizes used to be expressed in vw, which measures the browser
+   window rather than the preview frame: inside the Studio's desktop canvas
+   (about half the window) the same clamp rendered roughly twice as large as
+   it should and filled the canvas.
+
+   The preview frame is now a query container and every headline is sized in
+   cqi with a hard maximum and a measure, so no composition can push an
+   oversized, clipped or single-word-per-line headline onto the page — at
+   390px, 430px, 768px or on a wide desktop.
+   ================================================================== */
+.studio-v2-preview-scroll {
+  container-type: inline-size;
+}
+
+.studio-v2-site {
+  /* Baseline caps: an ordinary hero headline. */
+  --site-h1-fluid: 7cqi;
+  --site-h1-max: 4.4rem;
+  --site-h1-measure: 16ch;
+  --site-h1-leading: 1;
+  --site-h2-fluid: 4.4cqi;
+  --site-h2-max: 2.9rem;
+  --site-h2-measure: 24ch;
+  overflow-wrap: break-word;
+}
+
+/* Expressive type stays expressive — it is capped, not flattened. */
+.studio-v2-site.heading-expressive {
+  --site-h1-fluid: 8.2cqi;
+  --site-h1-max: 5.2rem;
+  --site-h1-measure: 13ch;
+  --site-h1-leading: 0.94;
+  --site-h2-max: 3.4rem;
+}
+
+.studio-v2-site.heading-compact {
+  --site-h1-fluid: 5.2cqi;
+  --site-h1-max: 3.4rem;
+  --site-h2-max: 2.3rem;
+}
+
+/* Composition-specific maximums: a poster hero may run larger than a
+   professional split hero, and an editorial hero needs a wider measure. */
+.studio-v2-site .studio-v2-section.composition-hero-poster-brutalist,
+.studio-v2-site .studio-v2-section.variant-bold-typographic {
+  --site-h1-fluid: 8.6cqi;
+  --site-h1-max: 5rem;
+  --site-h1-measure: 11ch;
+}
+
+.studio-v2-site .studio-v2-section.composition-hero-editorial-typography {
+  --site-h1-fluid: 7.6cqi;
+  --site-h1-max: 4.9rem;
+  --site-h1-measure: 14ch;
+}
+
+.studio-v2-site .studio-v2-section.composition-hero-centered-luxury {
+  --site-h1-max: 4.4rem;
+  --site-h1-measure: 18ch;
+}
+
+.studio-v2-site .studio-v2-section.composition-hero-minimal-professional,
+.studio-v2-site .studio-v2-section.composition-hero-technical-grid,
+.studio-v2-site .studio-v2-section.composition-hero-split-composition {
+  --site-h1-max: 3.9rem;
+  --site-h1-measure: 18ch;
+}
+
+/* The guard itself. Four class-level selectors so it wins over every
+   family, variant and canvas rule regardless of source order. */
+.studio-v2-canvas .studio-v2-site .studio-v2-section.studio-v2-site-hero h1 {
+  max-width: min(100%, var(--site-h1-measure));
+  min-width: 0;
+  font-size: clamp(
+    2.05rem,
+    var(--site-h1-fluid, 7cqi),
+    var(--site-h1-max)
+  );
+  line-height: var(--site-h1-leading, 1);
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+.studio-v2-canvas .studio-v2-site .studio-v2-site-heading h2 {
+  max-width: min(100%, var(--site-h2-measure));
+  min-width: 0;
+  font-size: clamp(1.55rem, var(--site-h2-fluid, 4.4cqi), var(--site-h2-max));
+  line-height: 1.06;
+  text-wrap: balance;
+  overflow-wrap: break-word;
+  hyphens: none;
+}
+
+/* Mobile preview: the frame is a real phone width, so the headline is sized
+   for reading rather than for impact. */
+.studio-v2-canvas.is-mobile .studio-v2-site {
+  --site-h1-fluid: 9.4cqi;
+  --site-h1-max: 2.6rem;
+  --site-h1-measure: 20ch;
+  --site-h1-leading: 1.08;
+  --site-h2-fluid: 6.4cqi;
+  --site-h2-max: 1.85rem;
+  --site-h2-measure: 26ch;
+}
+
+.studio-v2-canvas.is-mobile .studio-v2-site.heading-expressive {
+  --site-h1-max: 2.95rem;
+  --site-h1-measure: 16ch;
+}
+
+.studio-v2-canvas.is-mobile .studio-v2-site .studio-v2-section.studio-v2-site-hero h1 {
+  max-width: min(100%, var(--site-h1-measure));
+  font-size: clamp(1.85rem, var(--site-h1-fluid, 9.4cqi), var(--site-h1-max));
+  line-height: var(--site-h1-leading, 1.08);
+}
+
+.studio-v2-canvas.is-mobile .studio-v2-site .studio-v2-site-heading h2 {
+  font-size: clamp(1.4rem, var(--site-h2-fluid, 6.4cqi), var(--site-h2-max));
+}
+
+/* ==================================================================
+   Mobile decoration control
+
+   "Make the mobile version simpler" should visibly remove decorative
+   layers instead of only tightening spacing. Handled on the mobile
+   preview so desktop art direction is untouched.
+   ================================================================== */
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.mobile-decor-hidden
+  :is(
+    .studio-v2-site-visual,
+    .studio-v2-change-sweep,
+    .art-blob,
+    .art-halo,
+    .art-seed,
+    .art-shaft,
+    .art-grain,
+    .studio-v2-site-hero-marker
+  ) {
+  display: none !important;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.mobile-decor-simplified
+  :is(
+    .art-blob.is-two,
+    .art-blob.is-three,
+    .art-halo.is-outer,
+    .art-shaft.is-second,
+    .art-grain
+  ) {
+  display: none !important;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.mobile-decor-simplified
+  .studio-v2-site-hero-overlay {
+  background: none;
+}
+
+/* ==================================================================
+   Premium design library + grouped click controls
+
+   Both surfaces are built for a normal business owner: one obvious
+   action per row, thumb-sized targets, and a mobile layout that never
+   scrolls sideways.
+   ================================================================== */
+.studio-v2-landing-modes {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.studio-v2-landing-modes button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.9rem;
+  padding: 0 1rem;
+  color: rgb(255 255 255 / 72%);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgb(0 0 0 / 24%);
+  border: 1px solid var(--v2-line);
+  border-radius: 999px;
+  transition:
+    color 0.2s,
+    border-color 0.2s,
+    background 0.2s;
+}
+
+.studio-v2-landing-modes button.is-active {
+  color: white;
+  border-color: color-mix(in oklab, var(--primary) 60%, transparent);
+  background: color-mix(in oklab, var(--primary) 16%, transparent);
+}
+
+.studio-v2-landing-modes button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 80%, white);
+  outline-offset: 2px;
+}
+
+.studio-v2-library {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.4rem);
+  border: 1px solid color-mix(in oklab, var(--primary) 20%, var(--v2-line));
+  border-radius: 1.25rem;
+  background: linear-gradient(
+    145deg,
+    color-mix(in oklab, #171b20 92%, transparent),
+    color-mix(in oklab, #0d0f12 92%, transparent)
+  );
+}
+
+.studio-v2-library-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.studio-v2-library-tabs button {
+  min-height: 2.35rem;
+  padding: 0 0.8rem;
+  color: rgb(255 255 255 / 68%);
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: rgb(0 0 0 / 22%);
+  border: 1px solid var(--v2-line);
+  border-radius: 999px;
+}
+
+.studio-v2-library-tabs button.is-active {
+  color: #0b0d10;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.studio-v2-library-note {
+  margin: 0;
+  color: rgb(255 255 255 / 62%);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.studio-v2-library-grid {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+}
+
+.studio-v2-library-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+  background: rgb(0 0 0 / 26%);
+  border: 1px solid var(--v2-line);
+  border-radius: 0.9rem;
+  transition:
+    border-color 0.2s,
+    transform 0.2s;
+}
+
+.studio-v2-library-card:hover {
+  border-color: color-mix(in oklab, var(--primary) 55%, transparent);
+  transform: translateY(-2px);
+}
+
+.studio-v2-library-card:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 80%, white);
+  outline-offset: 2px;
+}
+
+.studio-v2-library-thumb {
+  display: grid;
+  grid-template-columns: 1.6fr 1fr;
+  grid-template-rows: 1fr 0.6fr;
+  gap: 0.35rem;
+  height: 6.4rem;
+  padding: 0.5rem;
+  background: var(--site-bg, #14161a);
+  border-radius: 0.6rem;
+}
+
+.studio-v2-library-thumb i {
+  display: block;
+  background: color-mix(in oklab, var(--site-accent, #c5e955) 34%, transparent);
+  border-radius: 0.35rem;
+}
+
+.studio-v2-library-thumb i:first-child {
+  grid-row: span 2;
+  background: color-mix(in oklab, var(--site-text, #f1f3e9) 26%, transparent);
+}
+
+.studio-v2-library-body {
+  display: grid;
+  gap: 0.28rem;
+}
+
+.studio-v2-library-body small {
+  color: var(--primary);
+  font: 600 0.6rem/1 var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.studio-v2-library-body strong {
+  color: white;
+  font-size: 0.98rem;
+}
+
+.studio-v2-library-body > span {
+  color: rgb(255 255 255 / 62%);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.studio-v2-library-body em {
+  color: rgb(255 255 255 / 46%);
+  font: normal 0.68rem/1.4 var(--font-mono);
+}
+
+.studio-v2-control-group {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--v2-line);
+}
+
+.studio-v2-control-group > summary {
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  list-style: none;
+}
+
+.studio-v2-control-group > summary::after {
+  content: "+";
+  float: right;
+  color: var(--primary);
+}
+
+.studio-v2-control-group[open] > summary::after {
+  content: "–";
+}
+
+.studio-v2-control-group > *:not(summary) {
+  margin-top: 0.75rem;
+}
+
+.studio-v2-choice {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.studio-v2-choice > small {
+  color: rgb(255 255 255 / 58%);
+  font: 600 0.62rem/1 var(--font-mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.studio-v2-choice > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.studio-v2-choice button {
+  min-height: 2.3rem;
+  padding: 0 0.7rem;
+  color: rgb(255 255 255 / 74%);
+  font-size: 0.74rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  cursor: pointer;
+  background: rgb(255 255 255 / 5%);
+  border: 1px solid var(--v2-line);
+  border-radius: 0.5rem;
+}
+
+.studio-v2-choice button.is-active {
+  color: #0b0d10;
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.studio-v2-choice button:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 80%, white);
+  outline-offset: 1px;
+}
+
+@media (max-width: 60rem) {
+  .studio-v2-library-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .studio-v2-choice button {
+    min-height: 2.6rem;
+  }
+}
+
+/* A long headline is not a bigger headline.
+
+   Headline length is known at render time, so it is asserted as a class
+   rather than guessed in CSS: a considered-length headline steps down one
+   size, and a long one steps down again while widening its measure. Without
+   this, a 100-character heading rendered at poster scale filled the entire
+   frame with type. */
+.studio-v2-canvas
+  .studio-v2-site
+  .studio-v2-section.headline-considered
+  h1 {
+  --site-h1-fluid: 7.4cqi;
+  --site-h1-max: 3.9rem;
+  --site-h1-measure: 20ch;
+  --site-h1-leading: 1.06;
+}
+
+.studio-v2-canvas .studio-v2-site .studio-v2-section.headline-long h1 {
+  --site-h1-fluid: 6.6cqi;
+  --site-h1-max: 3.25rem;
+  --site-h1-measure: 24ch;
+  --site-h1-leading: 1.14;
+  /* A long headline may also go smaller than the standard floor, because the
+     floor exists to keep short headlines impactful. */
+  font-size: clamp(1.8rem, var(--site-h1-fluid, 6.6cqi), var(--site-h1-max));
+}
+
+.studio-v2-canvas
+  .studio-v2-site
+  .studio-v2-section.headline-considered
+  .studio-v2-site-heading
+  h2 {
+  --site-h2-max: 2.5rem;
+  --site-h2-measure: 26ch;
+}
+
+.studio-v2-canvas
+  .studio-v2-site
+  .studio-v2-section.headline-long
+  .studio-v2-site-heading
+  h2 {
+  --site-h2-max: 2.15rem;
+  --site-h2-measure: 30ch;
+  line-height: 1.16;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site
+  .studio-v2-section.headline-long
+  h1 {
+  --site-h1-max: 2.15rem;
+  --site-h1-measure: 24ch;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site
+  .studio-v2-section.headline-considered
+  h1 {
+  --site-h1-max: 2.4rem;
+  --site-h1-measure: 20ch;
+}

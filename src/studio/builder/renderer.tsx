@@ -1250,9 +1250,18 @@ function SectionShell({
   section: DesignSection;
   props: Omit<SectionProps, "section">;
 }) {
+  /* Long headings get their own class so the type guards can scale them down
+     instead of letting a 100-character headline fill the whole frame. */
+  const titleLength = section.content.title.length;
+  const headlineClass =
+    titleLength > 64
+      ? " headline-long"
+      : titleLength > 42
+        ? " headline-considered"
+        : "";
   return (
     <section
-      className={`studio-v2-section studio-v2-site-${section.type} composition-${props.composition} variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
+      className={`studio-v2-section studio-v2-site-${section.type} composition-${props.composition} variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}${headlineClass}`}
       id={section.id}
       data-composition={props.composition}
     >
@@ -1290,7 +1299,7 @@ export function WebsiteRenderer({
 
   return (
     <article
-      className={`studio-v2-site palette-${spec.theme.palette} mood-${spec.theme.mood} type-${spec.theme.typography} radius-${spec.theme.radius} surface-${spec.theme.surface} heading-${spec.theme.headingScale} body-${spec.theme.bodyScale} buttons-${spec.theme.buttonStyle} rhythm-${spec.theme.rhythm} composition-${spec.theme.composition} mobile-density-${spec.responsive.mobileDensity}${spec.responsive.overrides.simplified ? " mobile-simplified" : ""} mobile-hero-${spec.responsive.overrides.heroHeight} mobile-heading-${spec.responsive.overrides.headingScale} mobile-nav-${spec.responsive.overrides.navigation}`}
+      className={`studio-v2-site palette-${spec.theme.palette} mood-${spec.theme.mood} type-${spec.theme.typography} radius-${spec.theme.radius} surface-${spec.theme.surface} heading-${spec.theme.headingScale} body-${spec.theme.bodyScale} buttons-${spec.theme.buttonStyle} rhythm-${spec.theme.rhythm} composition-${spec.theme.composition} mobile-density-${spec.responsive.mobileDensity}${spec.responsive.overrides.simplified ? " mobile-simplified" : ""} mobile-hero-${spec.responsive.overrides.heroHeight} mobile-heading-${spec.responsive.overrides.headingScale} mobile-nav-${spec.responsive.overrides.navigation} mobile-decor-${spec.responsive.overrides.decoration ?? "keep"}`}
       data-testid="studio-preview"
       data-palette={spec.theme.palette}
       data-mood={spec.theme.mood}

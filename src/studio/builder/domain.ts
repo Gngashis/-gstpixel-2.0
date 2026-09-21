@@ -398,6 +398,10 @@ export const designSpecSchema = z
             heroHeight: z.enum(["compact", "balanced"]),
             headingScale: z.enum(["compact", "balanced"]),
             navigation: z.enum(["minimal", "standard"]),
+            /** How much decorative artwork survives on a phone screen. */
+            decoration: z
+              .enum(["keep", "simplified", "hidden"])
+              .default("keep"),
           })
           .strict()
           .default({
@@ -405,6 +409,7 @@ export const designSpecSchema = z
             heroHeight: "balanced",
             headingScale: "balanced",
             navigation: "standard",
+            decoration: "keep",
           }),
       })
       .strict(),

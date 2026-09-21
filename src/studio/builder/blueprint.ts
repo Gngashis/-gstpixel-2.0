@@ -17,6 +17,11 @@ import {
   profiles,
   type Profile,
 } from "./blueprint-copy";
+import {
+  canonicalBusinessText,
+  domainsInText,
+  extractLocationPhrase,
+} from "./language";
 
 /**
  * CreativeBlueprint — the art-direction layer that sits between the visitor's
@@ -40,6 +45,9 @@ export const businessCategories = [
   "food",
   "retail",
   "fashion",
+  "jewellery",
+  "supplements",
+  "construction",
   "professional",
   "technology",
   "creative",
@@ -603,6 +611,51 @@ const stopWords = new Set([
   "would",
   "you",
   "your",
+  /*
+   * Verb and framing forms are dropped everywhere, not just at the edges. A
+   * visitor writes "a website that sells health supplements", so the lead must
+   * never become the verb phrase "Sells Health": it would land inside adjectival
+   * copy ("Everything for Sells Health, sorted the way people shop."). Keeping
+   * these out of the candidate words protects headings, brand names and section
+   * titles in every business bank at once.
+   */
+  "build",
+  "builds",
+  "building",
+  "based",
+  "help",
+  "helping",
+  "helps",
+  "launch",
+  "launches",
+  "launching",
+  "located",
+  "make",
+  "makes",
+  "making",
+  "manage",
+  "managing",
+  "need",
+  "needs",
+  "offering",
+  "offerings",
+  "offers",
+  "operate",
+  "operates",
+  "operating",
+  "provide",
+  "provides",
+  "providing",
+  "run",
+  "running",
+  "runs",
+  "sell",
+  "selling",
+  "sells",
+  "sold",
+  "serves",
+  "serving",
+  "wants",
 ]);
 
 const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
@@ -700,11 +753,26 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
     ],
   ],
   [
+    "jewellery",
+    [
+      "jewellery",
+      "jewelry",
+      "gold jewellery",
+      "gold shop",
+      "gemstone",
+      "bullion",
+      "ornaments",
+      "bridal set",
+      "silverware shop",
+    ],
+  ],
+  [
     "fashion",
     [
       "fashion",
       "streetwear",
       "clothing",
+      "clothes",
       "apparel",
       "couture",
       "boutique label",
@@ -759,6 +827,22 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
     ],
   ],
   [
+    "supplements",
+    [
+      "supplement",
+      "supplements",
+      "protein",
+      "whey",
+      "multivitamin",
+      "vitamin",
+      "nutrition",
+      "nutraceutical",
+      "health drink",
+      "mass gainer",
+      "dietary supplement",
+    ],
+  ],
+  [
     "healthcare",
     [
       "clinic",
@@ -786,6 +870,26 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
       "learning",
       "university",
       "preschool",
+    ],
+  ],
+  [
+    "construction",
+    [
+      "construction",
+      "contractor",
+      "contractors",
+      "builder",
+      "builders",
+      "architecture",
+      "architect",
+      "interior work",
+      "interior design",
+      "renovation",
+      "fabrication",
+      "plumbing",
+      "civil work",
+      "structural work",
+      "turnkey project",
     ],
   ],
   [
@@ -944,24 +1048,109 @@ export type PromptTerms = {
   words: string[];
 };
 
-function detectCategory(value: string): BusinessCategory {
-  const padded = ` ${value} `;
-  for (const [category, keywords] of categoryKeywords) {
-    if (keywords.some((keyword) => padded.includes(keyword))) return category;
+/** Business categories that the phrase lexicon can name directly. */
+const knownCategories = new Set<string>(businessCategories);
+
+const keywordRegexCache = new Map<string, RegExp>();
+
+/**
+ * Whole-word keyword test. Substring matching used to make "ai" match inside
+ * "Jaigaon" and "product" match inside "production", which misclassified real
+ * descriptions.
+ */
+function keywordRegex(keyword: string): RegExp | null {
+  const trimmed = keyword.trim();
+  if (!trimmed) return null;
+  let regex = keywordRegexCache.get(trimmed);
+  if (!regex) {
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    regex = new RegExp(`\\b${escaped}\\b`);
+    keywordRegexCache.set(trimmed, regex);
   }
+  return regex;
+}
+
+function hasKeyword(text: string, keyword: string): boolean {
+  return keywordRegex(keyword)?.test(text) ?? false;
+}
+
+/**
+ * Bounded, word-safe text for schema fields. Descriptions can now be long, so
+ * every derived string is clamped rather than risking a validation failure.
+ */
+function clampText(value: string, max: number): string {
+  const clean = value.replace(/\s+/g, " ").trim();
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const boundary = cut.lastIndexOf(" ");
+  return `${(boundary > max * 0.6 ? cut.slice(0, boundary) : cut).trimEnd()}…`;
+}
+
+/**
+ * Business categories are read from canonicalised text, so a description with
+ * typos or colloquial wording ("sells clother locally") still resolves to the
+ * right industry instead of falling through to the generic bank.
+ */
+function detectCategory(value: string): BusinessCategory {
+  const canonical = canonicalBusinessText(value);
+  const padded = ` ${canonical} `;
+  /*
+   * Score every category instead of stopping at the first keyword hit. A
+   * description like "a gym with a supplement counter" names more than one
+   * domain; the category with the strongest and earliest signal is the one the
+   * visitor actually leads with.
+   */
+  let best: { category: BusinessCategory; score: number; at: number } | null =
+    null;
+  for (const [category, keywords] of categoryKeywords) {
+    let score = 0;
+    let at = Number.POSITIVE_INFINITY;
+    for (const keyword of keywords) {
+      const regex = keywordRegex(keyword);
+      if (!regex) continue;
+      const index = padded.search(regex);
+      if (index < 0) continue;
+      score += 1;
+      if (index < at) at = index;
+    }
+    if (score === 0) continue;
+    if (!best || score > best.score || (score === best.score && at < best.at)) {
+      best = { category, score, at };
+    }
+  }
+  /*
+   * A shop is a shop first. When a description of a clothing or jewellery
+   * *business* also names selling, a shop, a store or local custom, the retail
+   * structure is the honest answer: it carries collections, new arrivals,
+   * visiting details and local delivery, which a brand campaign page does not.
+   */
+  const sellingLocally =
+    /\b(?:shop|store|sell|sells|selling|showroom|outlet|retail|local|locally|nearby|wholesale|distributor)\b/.test(
+      canonical,
+    );
+  if (
+    best &&
+    sellingLocally &&
+    (best.category === "fashion" || best.category === "jewellery")
+  ) {
+    return best.category === "jewellery" ? "jewellery" : "retail";
+  }
+  if (best) return best.category;
   if (/\b(resort|hotel|stay|rooms)\b/.test(padded)) return "hospitality";
   if (/\b(menu|coffee|food|dish|dining)\b/.test(padded)) return "food";
   if (/\b(shop|product|sell)\b/.test(padded)) return "retail";
   if (/\b(agency|studio|brand)\b/.test(padded)) return "creative";
+  // Phrase-level fallback: multi-word signals the keyword scan cannot see.
+  for (const domain of domainsInText(value)) {
+    if (knownCategories.has(domain)) return domain as BusinessCategory;
+  }
   return "generic";
 }
 
 function detectLocation(prompt: string): { location: string; place: string } {
-  const match = prompt.match(
-    /\b(?:in|near|at|around)\s+([A-Z][A-Za-z'-]+(?:\s+[A-Z][A-Za-z'-]+){0,2})/,
-  );
-  if (!match?.[1]) return { location: "", place: "" };
-  return { location: `near ${match[1]}`, place: match[1] };
+  // Shared with the language layer so "in Jaigaon and also" never becomes a
+  // place name.
+  return extractLocationPhrase(prompt);
 }
 
 function extractLead(prompt: string, category: BusinessCategory): string {
@@ -982,9 +1171,10 @@ function extractLead(prompt: string, category: BusinessCategory): string {
 export function extractPromptTerms(prompt: string): PromptTerms {
   const normalized = prompt.replace(/\s+/g, " ").trim();
   const value = normalized.toLowerCase();
+  const canonical = canonicalBusinessText(normalized);
   const category = detectCategory(value);
   const { location, place } = detectLocation(normalized);
-  const lead = extractLead(normalized, category);
+  const lead = extractLead(canonical, category);
   return {
     prompt: normalized,
     seed: hashString(value),
@@ -992,7 +1182,7 @@ export function extractPromptTerms(prompt: string): PromptTerms {
     location,
     place,
     lead,
-    words: normalized
+    words: canonical
       .split(/[^A-Za-z'-]+/)
       .filter((word) => word.length > 2 && !stopWords.has(word.toLowerCase())),
   };
@@ -1164,6 +1354,83 @@ const biases: Record<BusinessCategory, Bias> = {
     motion: "playful",
     cta: "purchase",
     environment: "dark",
+  },
+  supplements: {
+    kind: "wellness",
+    hero: [
+      "commerce-product",
+      "split-composition",
+      "minimal-professional",
+      "technical-grid",
+    ],
+    nav: ["utility-bar", "compact-professional", "floating-capsule"],
+    composition: ["modular-bento", "index-driven", "asymmetric-grid"],
+    art: ["geometric-composition", "grid-technical", "organic-halo"],
+    typography: ["grotesk-modern", "humanist-warm", "geometric-technical"],
+    palette: ["paper-ink", "stone-sage", "cobalt-cream", "graphite-lime"],
+    mood: "modern",
+    intensity: "considered",
+    premium: "refined",
+    balance: "commercial",
+    shape: "soft",
+    surface: "soft",
+    whitespace: "even",
+    motion: "quiet",
+    cta: "purchase",
+    environment: "light",
+  },
+  construction: {
+    kind: "realestate",
+    hero: [
+      "asymmetric-story",
+      "technical-grid",
+      "layered-spatial",
+      "minimal-professional",
+    ],
+    nav: ["compact-professional", "utility-bar", "editorial-split"],
+    composition: ["asymmetric-grid", "technical-grid", "split-dual"],
+    art: ["geometric-composition", "monolith", "grid-technical"],
+    typography: ["geometric-technical", "grotesk-modern", "condensed-poster"],
+    palette: ["charcoal-amber", "graphite-lime", "stone-sage", "paper-ink"],
+    mood: "modern",
+    intensity: "considered",
+    premium: "refined",
+    balance: "hybrid",
+    shape: "sharp",
+    surface: "matte",
+    whitespace: "even",
+    motion: "technical",
+    cta: "consultation",
+    environment: "light",
+  },
+  jewellery: {
+    kind: "retail",
+    hero: [
+      "centered-luxury",
+      "commerce-product",
+      "editorial-typography",
+      "split-composition",
+    ],
+    nav: ["minimal-centered", "utility-bar", "floating-capsule"],
+    composition: ["centered-symmetric", "index-driven", "modular-bento"],
+    art: ["light-shafts", "monolith", "framed-print", "organic-halo"],
+    typography: ["editorial-serif", "expressive-display", "humanist-warm"],
+    palette: [
+      "midnight-champagne",
+      "ivory-terracotta",
+      "plum-brass",
+      "paper-ink",
+    ],
+    mood: "luxury",
+    intensity: "expressive",
+    premium: "luxury",
+    balance: "commercial",
+    shape: "soft",
+    surface: "layered",
+    whitespace: "spacious",
+    motion: "luxury",
+    cta: "enquiry",
+    environment: "tinted",
   },
   professional: {
     kind: "professional",
@@ -1700,13 +1967,13 @@ const sequences: Record<BusinessCategory, PlannedStep[]> = {
   retail: [
     {
       type: "listings",
-      purpose: "showcase",
-      variants: ["product-grid", "collection-rail", "image-showcase"],
+      purpose: "orient",
+      variants: ["collection-rail", "index-list", "product-grid"],
     },
     {
-      type: "features",
-      purpose: "explain",
-      variants: ["visual-blocks", "bento-grid", "capability-grid"],
+      type: "listings",
+      purpose: "showcase",
+      variants: ["product-grid", "premium-listing", "image-showcase"],
     },
     {
       type: "about",
@@ -1719,14 +1986,19 @@ const sequences: Record<BusinessCategory, PlannedStep[]> = {
       variants: ["bento-mosaic", "editorial-grid", "framed-print-series"],
     },
     {
+      type: "features",
+      purpose: "inform",
+      variants: ["icon-list", "visual-blocks", "trust-band"],
+    },
+    {
       type: "cta",
       purpose: "convert",
       variants: ["split", "conversion-band", "booking-band"],
     },
     {
       type: "contact",
-      purpose: "inform",
-      variants: ["concise", "detailed", "map-led"],
+      purpose: "invite",
+      variants: ["location-composition", "map-led", "concise"],
     },
   ],
   fashion: [
@@ -1927,7 +2199,7 @@ const sequences: Record<BusinessCategory, PlannedStep[]> = {
     {
       type: "services",
       purpose: "explain",
-      variants: ["service-index", "capability-columns", "editorial-list"],
+      variants: ["capability-columns", "service-index", "editorial-list"],
     },
     {
       type: "features",
@@ -1942,12 +2214,138 @@ const sequences: Record<BusinessCategory, PlannedStep[]> = {
     {
       type: "features",
       purpose: "inform",
-      variants: ["faq-list", "process-timeline"],
+      variants: ["process-timeline", "faq-list"],
+    },
+    {
+      type: "cta",
+      purpose: "convert",
+      variants: ["booking-band", "split", "conversion-band"],
     },
     {
       type: "contact",
       purpose: "convert",
-      variants: ["booking-enquiry", "detailed", "location-composition"],
+      variants: ["booking-enquiry", "concise", "map-led"],
+    },
+  ],
+  supplements: [
+    {
+      type: "listings",
+      purpose: "orient",
+      variants: ["index-list", "collection-rail", "product-grid"],
+    },
+    {
+      type: "listings",
+      purpose: "showcase",
+      variants: ["product-grid", "premium-listing", "image-showcase"],
+    },
+    {
+      type: "listings",
+      purpose: "showcase",
+      variants: ["product-grid", "collection-rail", "image-showcase"],
+    },
+    {
+      type: "listings",
+      purpose: "showcase",
+      variants: ["featured-item", "premium-listing", "product-grid"],
+    },
+    {
+      type: "features",
+      purpose: "explain",
+      variants: ["bento-grid", "capability-grid", "structured-editorial"],
+    },
+    {
+      type: "features",
+      purpose: "prove",
+      variants: ["trust-band", "faq-list", "comparison-table"],
+    },
+    {
+      type: "cta",
+      purpose: "convert",
+      variants: ["conversion-band", "split", "minimal"],
+    },
+    {
+      type: "contact",
+      purpose: "invite",
+      variants: ["concise", "detailed", "map-led"],
+    },
+  ],
+  construction: [
+    {
+      type: "listings",
+      purpose: "showcase",
+      variants: ["image-showcase", "premium-listing", "collection-rail"],
+    },
+    {
+      type: "services",
+      purpose: "explain",
+      variants: ["capability-columns", "service-index", "editorial-list"],
+    },
+    {
+      type: "features",
+      purpose: "prove",
+      variants: ["capability-grid", "bento-grid", "stats-band"],
+    },
+    {
+      type: "features",
+      purpose: "inform",
+      variants: ["process-timeline", "numbered-features", "faq-list"],
+    },
+    {
+      type: "features",
+      purpose: "prove",
+      variants: ["trust-band", "stats-band", "comparison-table"],
+    },
+    {
+      type: "about",
+      purpose: "establish",
+      variants: ["founder-story", "editorial-narrative", "split-media-story"],
+    },
+    {
+      type: "cta",
+      purpose: "convert",
+      variants: ["split", "conversion-band", "minimal"],
+    },
+    {
+      type: "contact",
+      purpose: "convert",
+      variants: ["booking-enquiry", "detailed", "concise"],
+    },
+  ],
+  jewellery: [
+    {
+      type: "listings",
+      purpose: "orient",
+      variants: ["collection-rail", "index-list", "product-grid"],
+    },
+    {
+      type: "listings",
+      purpose: "showcase",
+      variants: ["premium-listing", "featured-item", "product-grid"],
+    },
+    {
+      type: "about",
+      purpose: "establish",
+      variants: ["editorial-story", "image-led-story", "editorial-narrative"],
+    },
+    {
+      type: "gallery",
+      purpose: "showcase",
+      variants: ["art-collage", "editorial-grid", "bento-mosaic"],
+    },
+    {
+      type: "features",
+      purpose: "prove",
+      variants: ["trust-band", "faq-list", "icon-list"],
+    },
+    {
+      type: "cta",
+      purpose: "convert",
+      variants: ["statement-cta", "conversion-band", "split"],
+    },
+    {
+      type: "contact",
+      purpose: "invite",
+      variants: ["concierge-panel", "detailed", "map-led"],
     },
   ],
   education: [
@@ -2720,9 +3118,9 @@ export function planCreativeBlueprint(
     business: {
       category: terms.category,
       kind: bias.kind,
-      name: siteCopy.name,
-      descriptor: siteCopy.descriptor,
-      location: terms.place,
+      name: clampText(siteCopy.name, 60),
+      descriptor: clampText(siteCopy.descriptor, 140),
+      location: clampText(terms.place, 60),
       offer: siteCopy.offer,
       audience: siteCopy.audience,
       intent: siteCopy.intent,
@@ -3302,9 +3700,13 @@ export function blueprintToDesignSpec(
   const navItems = sections
     .filter((section, index) => index > 0 && index <= 5)
     .map((section) => ({
-      label:
+      // Navigation labels have their own (short) limit: an eyebrow written for
+      // a section heading can easily be twice as long.
+      label: clampText(
         section.content.eyebrow ||
-        section.content.title.split(" ").slice(0, 2).join(" "),
+          section.content.title.split(" ").slice(0, 2).join(" "),
+        30,
+      ),
       target: `#${section.id}`,
     }));
   const siteCopy = buildSiteCopy(profile, terms, 0);

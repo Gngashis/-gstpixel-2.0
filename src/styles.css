@@ -521,13 +521,20 @@ a {
   gap: 0.5rem;
 }
 
-.hero-studio-row input {
+/* A real description needs more than one line. The field starts at one line,
+   grows with what is typed, then scrolls at a sensible maximum height. */
+.hero-studio-row textarea {
   flex: 1 1 auto;
   min-width: 0;
   min-height: 3rem;
-  padding: 0 0.9rem;
+  max-height: 10.5rem;
+  padding: 0.75rem 0.9rem;
   color: var(--ink-foreground);
+  font-family: inherit;
   font-size: 0.92rem;
+  line-height: 1.5;
+  resize: none;
+  overflow-y: auto;
   background: color-mix(in oklab, var(--ink) 42%, transparent);
   border: 1px solid color-mix(in oklab, var(--primary) 18%, var(--ink-line));
   border-radius: 0.5rem;
@@ -537,11 +544,11 @@ a {
     box-shadow 180ms var(--easing-standard);
 }
 
-.hero-studio-row input::placeholder {
+.hero-studio-row textarea::placeholder {
   color: color-mix(in oklab, var(--ink-muted) 72%, transparent);
 }
 
-.hero-studio-row input:focus-visible {
+.hero-studio-row textarea:focus-visible {
   border-color: color-mix(in oklab, var(--primary) 65%, transparent);
   box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 22%, transparent);
 }
@@ -579,9 +586,83 @@ a {
 }
 
 .hero-studio-note {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.35rem;
   color: var(--ink-muted);
   font-size: 0.72rem;
   line-height: 1.5;
+}
+
+.hero-studio-count {
+  font: 600 0.68rem var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* Compact clarification when one description names several businesses. */
+.hero-studio-choices {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  background: color-mix(in oklab, var(--ink) 30%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 22%, var(--ink-line));
+  border-radius: 0.6rem;
+}
+
+.hero-studio-choices > p {
+  margin: 0;
+  color: color-mix(in oklab, var(--primary) 78%, white);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.hero-studio-choice-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.hero-studio-choice-list button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.75rem;
+  padding: 0 0.9rem;
+  color: var(--ink-foreground);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  background: color-mix(in oklab, var(--material-polymer) 66%, transparent);
+  border: 1px solid color-mix(in oklab, var(--primary) 34%, transparent);
+  border-radius: 0.5rem;
+}
+
+.hero-studio-choice-list button:hover {
+  border-color: color-mix(in oklab, var(--primary) 60%, transparent);
+}
+
+.hero-studio-choice-list button:focus-visible,
+.hero-studio-choice-all:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 80%, white);
+  outline-offset: 2px;
+}
+
+.hero-studio-choice-all {
+  /* Secondary, but still a real touch target: a bare underlined link is far
+     too small to tap on a phone. */
+  display: inline-flex;
+  justify-self: start;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: 0 0.25rem;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: 0;
 }
 
 .hero-studio-error {
@@ -3873,9 +3954,15 @@ a {
     flex-direction: column;
   }
 
-  .hero-studio-row input {
+  .hero-studio-row textarea {
     min-height: 3.1rem;
     font-size: 1rem;
+  }
+
+  .hero-studio-choice-list button {
+    width: 100%;
+    min-height: 3rem;
+    justify-content: space-between;
   }
 
   .hero-studio-row button {

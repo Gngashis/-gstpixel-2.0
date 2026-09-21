@@ -25,9 +25,23 @@ import { useReducedMotion } from "@/lib/motion";
 import { buildStudioWhatsappHref } from "../contact";
 import { consumeStudioIntakePrompt } from "../intake";
 import {
+  applyBlueprintPatch,
+  applyBlueprintToSpec,
+  blueprintFromSpec,
+  compositionFamilies,
   createAlternateDesignSpec,
   generateFallbackDesignSpec,
+  heroFamilies,
+  motionFamilies,
+  type CreativeBlueprintPatch,
 } from "./blueprint";
+import {
+  designCategories,
+  designPresetSpec,
+  listDesignPresets,
+  type DesignCategory,
+  type DesignPreset,
+} from "./design-library";
 import {
   createSectionForType,
   getHomePage,
@@ -36,6 +50,7 @@ import {
   parseDesignSpec,
   removeSection,
   sectionVariantRegistry,
+  typographyIds,
   updatePalette,
   updateSectionCopy,
   updateSectionVariant,
@@ -102,6 +117,55 @@ const paletteLabels: Record<PaletteId, string> = {
   "clay-indigo": "Clay & indigo",
   "slate-coral": "Slate & coral",
 };
+
+const typographyLabels: Record<(typeof typographyIds)[number], string> = {
+  "editorial-serif": "Editorial serif",
+  "modern-grotesk": "Modern sans",
+  humanist: "Humanist warm",
+  "high-contrast": "High contrast",
+  "geometric-technical": "Geometric technical",
+  "mono-technical": "Technical mono",
+  "expressive-display": "Expressive display",
+  "condensed-poster": "Condensed poster",
+};
+
+/** Mutually exclusive option row used by the click controls. */
+function ChoiceRow({
+  label,
+  value,
+  options,
+  onSelect,
+}: {
+  label: string;
+  value: string | undefined;
+  options: readonly { value: string; label: string }[];
+  onSelect: (value: string) => void;
+}) {
+  return (
+    <div className="studio-v2-choice" role="group" aria-label={label}>
+      <small>{label}</small>
+      <div>
+        {options.map((option) => (
+          <button
+            key={option.value}
+            type="button"
+            className={value === option.value ? "is-active" : undefined}
+            aria-pressed={value === option.value}
+            onClick={() => onSelect(option.value)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const titleCase = (value: string) =>
+  value
+    .split("-")
+    .map((part) => `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`)
+    .join(" ");
 
 type Viewport = "desktop" | "mobile";
 type BuilderPhase = "landing" | "generating" | "editing";
@@ -181,8 +245,15 @@ export function StudioBuilder() {
   );
   const [addType, setAddType] =
     useState<Exclude<SectionType, "hero">>("gallery");
+  const [landingMode, setLandingMode] = useState<"describe" | "browse">(
+    "describe",
+  );
+  const [libraryCategory, setLibraryCategory] = useState<
+    DesignCategory | "All"
+  >("All");
   const reducedMotion = useReducedMotion();
   const controllerRef = useRef<AbortController | null>(null);
+  const unmountAbortRef = useRef<number | undefined>(undefined);
   const canvasRef = useRef<HTMLDivElement>(null);
   /* A description carried from the homepage quick-start lives only in module
      memory and is consumed here, once, on mount. */
@@ -191,16 +262,25 @@ export function StudioBuilder() {
      once, even when passive effects reconnect during navigation churn. */
   const intakeStartedRef = useRef(false);
 
-  /* Abort in-flight generation when Studio truly unmounts. The abort is
-     deferred a tick because React briefly disconnects and reconnects passive
-     effects while a client-side navigation settles; a reconnect cancels the
-     pending abort, while a real unmount (which never reconnects) still lands
-     it. Without this, the churn cleanup aborts a generation that is already
-     running. */
+  /* Abort in-flight work when Studio truly unmounts.
+
+     The abort is deferred because React disconnects and reconnects passive
+     effects during navigation and Suspense churn: a real unmount runs cleanup
+     and never reconnects, while churn runs cleanup and then setup again. The
+     pending abort must therefore be cancelled by the *reconnect*, which is what
+     the ref below does — a reconnect re-runs this effect and clears the timer.
+     Without the cancel, the cleanup's timer fires into a live generation and
+     strands the visitor on the progress screen. */
   useEffect(() => {
-    let abortTimer: number | undefined;
+    if (unmountAbortRef.current !== undefined) {
+      window.clearTimeout(unmountAbortRef.current);
+      unmountAbortRef.current = undefined;
+    }
     return () => {
-      abortTimer = window.setTimeout(() => controllerRef.current?.abort(), 50);
+      unmountAbortRef.current = window.setTimeout(() => {
+        unmountAbortRef.current = undefined;
+        controllerRef.current?.abort();
+      }, 250);
     };
   }, []);
 
@@ -209,6 +289,12 @@ export function StudioBuilder() {
       spec?.pages.find((page) => page.slug === activePageSlug) ??
       (spec ? getHomePage(spec) : null),
     [spec, activePageSlug],
+  );
+  /* The click controls read their current values from the same reconstructed
+     blueprint the patch is applied to, so the panel always shows the truth. */
+  const activeBlueprint = useMemo(
+    () => (spec ? blueprintFromSpec(spec) : null),
+    [spec],
   );
   const selectedSection =
     activePage?.sections.find((section) => section.id === selectedSectionId) ??
@@ -222,6 +308,17 @@ export function StudioBuilder() {
         block: "start",
       });
     });
+  };
+
+  /* An aborted generation must never leave the visitor staring at a progress
+     screen that will never finish. Only the newest request may restore the UI,
+     so a request that was deliberately superseded by a newer one is skipped. */
+  const abandonGeneration = (controller: AbortController) => {
+    if (controllerRef.current !== controller) return;
+    controllerRef.current = null;
+    setPhase("landing");
+    setGenerationStep(0);
+    setStatus("Generation stopped. Describe your business again to restart.");
   };
 
   const generate = async (event?: FormEvent, override?: string) => {
@@ -248,14 +345,14 @@ export function StudioBuilder() {
       await new Promise((resolve) =>
         setTimeout(resolve, reducedMotion ? 45 : 135),
       );
-      if (controller.signal.aborted) return;
+      if (controller.signal.aborted) return abandonGeneration(controller);
       setGenerationStep(index);
     }
     const serverResult = await Promise.race([
       serverPromise,
       new Promise<null>((resolve) => setTimeout(() => resolve(null), 350)),
     ]);
-    if (controller.signal.aborted) return;
+    if (controller.signal.aborted) return abandonGeneration(controller);
     const next = serverResult?.spec ?? fallback;
     setSpec(next);
     setHistory([]);
@@ -299,6 +396,70 @@ export function StudioBuilder() {
     window.setTimeout(() => setIsChanging(false), reducedMotion ? 20 : 520);
   };
 
+  /* ------------------------------------------------------------------
+     Click controls
+
+     Two small, validated entry points back every control below: a creative
+     blueprint patch (hero family, composition, motion…) and a theme field on
+     the design spec (typography, buttons, corners…). Both go through the same
+     parsers the AI path uses, so a click can never produce an invalid site.
+     ------------------------------------------------------------------ */
+  const applyBlueprint = (patch: CreativeBlueprintPatch, message: string) => {
+    if (!spec) return;
+    applySpec(
+      applyBlueprintToSpec(
+        spec,
+        applyBlueprintPatch(blueprintFromSpec(spec), patch),
+      ),
+      message,
+    );
+  };
+
+  const applyTheme = (patch: Partial<DesignSpec["theme"]>, message: string) => {
+    if (!spec) return;
+    applySpec(
+      parseDesignSpec({ ...spec, theme: { ...spec.theme, ...patch } }),
+      message,
+    );
+  };
+
+  const applyMobile = (
+    patch: Partial<DesignSpec["responsive"]["overrides"]> & {
+      mobileDensity?: DesignSpec["responsive"]["mobileDensity"];
+    },
+    message: string,
+  ) => {
+    if (!spec) return;
+    const { mobileDensity, ...overrides } = patch;
+    applySpec(
+      parseDesignSpec({
+        ...spec,
+        responsive: {
+          ...spec.responsive,
+          ...(mobileDensity ? { mobileDensity } : {}),
+          overrides: { ...spec.responsive.overrides, ...overrides },
+        },
+      }),
+      message,
+    );
+  };
+
+  /** Loads a curated design from the library. No model call, no storage. */
+  const startFromPreset = (entry: DesignPreset) => {
+    const next = designPresetSpec(entry);
+    setSpec(next);
+    setHistory([]);
+    setFuture([]);
+    setConversation([]);
+    setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
+    setActivePageSlug("/");
+    setPhase("editing");
+    setStatus(
+      `“${entry.name}” loaded — a curated ${entry.category.toLowerCase()} direction. Refine it in plain language or with the controls.`,
+    );
+    revealCanvas();
+  };
+
   const submitInstruction = async (event: FormEvent) => {
     event.preventDefault();
     if (!spec || isChanging) return;
@@ -324,10 +485,18 @@ export function StudioBuilder() {
     };
     const fallbackPlan = planStudioChange(value, context);
     const fallbackResult = applyStudioChangePlan(context, fallbackPlan);
+    /* An aborted change must release the composer: leaving `isChanging` set
+       would disable Apply for the rest of the session. */
+    const abandonChange = () => {
+      if (controllerRef.current !== controller) return;
+      controllerRef.current = null;
+      setIsChanging(false);
+      setIntelligenceStage("idle");
+    };
     await new Promise((resolve) =>
       setTimeout(resolve, reducedMotion ? 10 : 140),
     );
-    if (controller.signal.aborted) return;
+    if (controller.signal.aborted) return abandonChange();
     setIntelligenceStage("planning");
     setStatus("Planning coordinated changes…");
     const serverResult = await Promise.race([
@@ -350,7 +519,7 @@ export function StudioBuilder() {
         setTimeout(() => resolve(null), reducedMotion ? 250 : 8_000),
       ),
     ]);
-    if (controller.signal.aborted) return;
+    if (controller.signal.aborted) return abandonChange();
     setIntelligenceStage("applying");
     setStatus("Applying the design plan…");
     const nextSpec = serverResult?.spec ?? fallbackResult.spec;
@@ -454,7 +623,91 @@ export function StudioBuilder() {
               should include.
             </span>
           </div>
-          <form className="studio-v2-composer" onSubmit={generate}>
+          <div className="studio-v2-landing-modes" role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={landingMode === "describe"}
+              className={landingMode === "describe" ? "is-active" : undefined}
+              onClick={() => setLandingMode("describe")}
+            >
+              <WandSparkles size={15} /> Generate from my business
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={landingMode === "browse"}
+              className={landingMode === "browse" ? "is-active" : undefined}
+              onClick={() => setLandingMode("browse")}
+            >
+              <Layers3 size={15} /> Browse premium designs
+            </button>
+          </div>
+          {landingMode === "browse" && (
+            <section
+              className="studio-v2-library"
+              aria-label="Premium design library"
+            >
+              <div
+                className="studio-v2-library-tabs"
+                role="group"
+                aria-label="Design categories"
+              >
+                {(["All", ...designCategories] as const).map((category) => (
+                  <button
+                    key={category}
+                    type="button"
+                    className={
+                      libraryCategory === category ? "is-active" : undefined
+                    }
+                    aria-pressed={libraryCategory === category}
+                    onClick={() => setLibraryCategory(category)}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+              <p className="studio-v2-library-note">
+                Curated directions built from the same design system as your own
+                description. Pick one to open it in the Studio and shape it
+                further.
+              </p>
+              <div className="studio-v2-library-grid">
+                {listDesignPresets(libraryCategory).map((entry) => (
+                  <button
+                    key={entry.id}
+                    type="button"
+                    className="studio-v2-library-card"
+                    data-testid={`design-preset-${entry.id}`}
+                    onClick={() => startFromPreset(entry)}
+                  >
+                    <span
+                      className={`studio-v2-library-thumb palette-${entry.grammar.palette}`}
+                      aria-hidden="true"
+                    >
+                      <i />
+                      <i />
+                      <i />
+                    </span>
+                    <span className="studio-v2-library-body">
+                      <small>{entry.category}</small>
+                      <strong>{entry.name}</strong>
+                      <span>{entry.summary}</span>
+                      <em>
+                        {titleCase(entry.grammar.hero)} ·
+                        {` ${titleCase(entry.grammar.composition)}`}
+                      </em>
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
+          <form
+            className="studio-v2-composer"
+            onSubmit={generate}
+            hidden={landingMode === "browse"}
+          >
             <label htmlFor="studio-v2-prompt">
               Describe the website you want
             </label>
@@ -798,32 +1051,12 @@ export function StudioBuilder() {
           <div className="studio-v2-panel-title">
             <Palette size={16} />
             <span>
-              <small>Design</small>
-              <strong>Look & section</strong>
+              <small>Customise</small>
+              <strong>Style, layout, mobile</strong>
             </span>
           </div>
-          <fieldset className="studio-v2-palette-control">
-            <legend>Palette</legend>
-            <div>
-              {paletteIds.map((palette) => (
-                <button
-                  key={palette}
-                  type="button"
-                  className={`palette-${palette}${spec.theme.palette === palette ? " is-active" : ""}`}
-                  aria-label={paletteLabels[palette]}
-                  aria-pressed={spec.theme.palette === palette}
-                  onClick={() =>
-                    applySpec(
-                      updatePalette(spec, palette),
-                      `Palette changed to ${paletteLabels[palette]}.`,
-                    )
-                  }
-                >
-                  <span />
-                </button>
-              ))}
-            </div>
-          </fieldset>
+          {/* The headline action stays outside the groups: it is the one
+              control a visitor reaches for before anything else. */}
           <div className="studio-v2-alternate">
             <button
               type="button"
@@ -837,117 +1070,363 @@ export function StudioBuilder() {
               <MonitorSmartphone size={16} /> Show another version
             </button>
           </div>
-          {selectedSection ? (
-            <div className="studio-v2-section-properties">
+          <details className="studio-v2-control-group" open>
+            <summary>Style</summary>
+            <fieldset className="studio-v2-palette-control">
+              <legend>Palette</legend>
               <div>
-                <small>Selected section</small>
-                <strong>
-                  {selectedSection.content.eyebrow || selectedSection.type}
-                </strong>
-                <span>{selectedSection.type}</span>
-              </div>
-              <label>
-                Layout variant
-                <select
-                  value={selectedSection.variant}
-                  onChange={(event) =>
-                    applySpec(
-                      updateSectionVariant(
-                        spec,
-                        selectedSection.id,
-                        event.target.value,
-                      ),
-                      "Section layout changed.",
-                    )
-                  }
-                >
-                  {sectionVariantRegistry[selectedSection.type].map(
-                    (variant) => (
-                      <option key={variant} value={variant}>
-                        {variant.replaceAll("-", " ")}
-                      </option>
-                    ),
-                  )}
-                </select>
-                <ChevronDown size={14} />
-              </label>
-              <label>
-                Heading
-                <input
-                  value={selectedSection.content.title}
-                  onChange={(event) => {
-                    try {
+                {paletteIds.map((palette) => (
+                  <button
+                    key={palette}
+                    type="button"
+                    className={`palette-${palette}${spec.theme.palette === palette ? " is-active" : ""}`}
+                    aria-label={paletteLabels[palette]}
+                    aria-pressed={spec.theme.palette === palette}
+                    onClick={() =>
                       applySpec(
-                        updateSectionCopy(
+                        updatePalette(spec, palette),
+                        `Palette changed to ${paletteLabels[palette]}.`,
+                      )
+                    }
+                  >
+                    <span />
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <ChoiceRow
+              label="Typography"
+              value={spec.theme.typography}
+              options={typographyIds.map((value) => ({
+                value,
+                label: typographyLabels[value],
+              }))}
+              onSelect={(value) =>
+                applyTheme(
+                  { typography: value as DesignSpec["theme"]["typography"] },
+                  "Typography changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Buttons"
+              value={spec.theme.buttonStyle}
+              options={[
+                { value: "sharp", label: "Sharp" },
+                { value: "subtle", label: "Subtle" },
+                { value: "rounded", label: "Rounded" },
+                { value: "pill", label: "Pill" },
+              ]}
+              onSelect={(value) =>
+                applyTheme(
+                  { buttonStyle: value as DesignSpec["theme"]["buttonStyle"] },
+                  "Button style changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Corners"
+              value={spec.theme.radius}
+              options={[
+                { value: "sharp", label: "Square" },
+                { value: "subtle", label: "Subtle" },
+                { value: "rounded", label: "Rounded" },
+              ]}
+              onSelect={(value) =>
+                applyTheme(
+                  { radius: value as DesignSpec["theme"]["radius"] },
+                  "Corner style changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Surface"
+              value={spec.theme.surface}
+              options={[
+                { value: "matte", label: "Matte" },
+                { value: "paper", label: "Paper" },
+                { value: "soft", label: "Soft" },
+                { value: "glass", label: "Glass" },
+                { value: "layered", label: "Layered" },
+                { value: "grain", label: "Grain" },
+                { value: "void", label: "Deep" },
+              ]}
+              onSelect={(value) =>
+                applyTheme(
+                  { surface: value as DesignSpec["theme"]["surface"] },
+                  "Surface treatment changed.",
+                )
+              }
+            />
+          </details>
+          <details className="studio-v2-control-group">
+            <summary>Layout</summary>
+            <ChoiceRow
+              label="Hero style"
+              value={activeBlueprint?.hero.family}
+              options={heroFamilies.map((value) => ({
+                value,
+                label: titleCase(value),
+              }))}
+              onSelect={(value) =>
+                applyBlueprint(
+                  { hero: { family: value as (typeof heroFamilies)[number] } },
+                  `Hero changed to ${titleCase(value)}.`,
+                )
+              }
+            />
+            <ChoiceRow
+              label="Composition"
+              value={activeBlueprint?.layout.composition}
+              options={compositionFamilies.map((value) => ({
+                value,
+                label: titleCase(value),
+              }))}
+              onSelect={(value) =>
+                applyBlueprint(
+                  {
+                    layout: {
+                      composition:
+                        value as (typeof compositionFamilies)[number],
+                    },
+                  },
+                  `Composition changed to ${titleCase(value)}.`,
+                )
+              }
+            />
+            <ChoiceRow
+              label="Density"
+              value={activeBlueprint?.direction.density}
+              options={[
+                { value: "sparse", label: "Airy" },
+                { value: "measured", label: "Balanced" },
+                { value: "rich", label: "Rich" },
+              ]}
+              onSelect={(value) =>
+                applyBlueprint(
+                  {
+                    direction: {
+                      density: value as "sparse" | "measured" | "rich",
+                    },
+                  },
+                  "Content density changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Alignment"
+              value={activeBlueprint?.layout.alignment}
+              options={[
+                { value: "left", label: "Left" },
+                { value: "center", label: "Centred" },
+              ]}
+              onSelect={(value) =>
+                applyBlueprint(
+                  { layout: { alignment: value as "left" | "center" } },
+                  "Alignment changed.",
+                )
+              }
+            />
+          </details>
+          <details className="studio-v2-control-group">
+            <summary>Motion</summary>
+            <ChoiceRow
+              label="Feel"
+              value={activeBlueprint?.motion.family}
+              options={[
+                { value: "quiet", label: "None" },
+                { value: "editorial", label: "Subtle" },
+                { value: "luxury", label: "Premium" },
+                { value: "cinematic", label: "Cinematic" },
+                { value: "technical", label: "Technical" },
+                { value: "playful", label: "Playful" },
+              ]}
+              onSelect={(value) =>
+                applyBlueprint(
+                  {
+                    motion: {
+                      family: value as (typeof motionFamilies)[number],
+                    },
+                  },
+                  `Motion set to ${titleCase(value)}.`,
+                )
+              }
+            />
+          </details>
+          <details className="studio-v2-control-group">
+            <summary>Mobile</summary>
+            <ChoiceRow
+              label="Mobile hero"
+              value={spec.responsive.overrides.heroHeight}
+              options={[
+                { value: "balanced", label: "Full" },
+                { value: "compact", label: "Compact" },
+              ]}
+              onSelect={(value) =>
+                applyMobile(
+                  { heroHeight: value as "compact" | "balanced" },
+                  "Mobile hero changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Mobile density"
+              value={spec.responsive.mobileDensity}
+              options={[
+                { value: "balanced", label: "Comfortable" },
+                { value: "compact", label: "Tight" },
+              ]}
+              onSelect={(value) =>
+                applyMobile(
+                  { mobileDensity: value as "compact" | "balanced" },
+                  "Mobile density changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Mobile menu"
+              value={spec.responsive.overrides.navigation}
+              options={[
+                { value: "standard", label: "Standard" },
+                { value: "minimal", label: "Minimal" },
+              ]}
+              onSelect={(value) =>
+                applyMobile(
+                  { navigation: value as "minimal" | "standard" },
+                  "Mobile navigation changed.",
+                )
+              }
+            />
+            <ChoiceRow
+              label="Decoration on mobile"
+              value={spec.responsive.overrides.decoration}
+              options={[
+                { value: "keep", label: "Keep" },
+                { value: "simplified", label: "Simplify" },
+                { value: "hidden", label: "Hide" },
+              ]}
+              onSelect={(value) =>
+                applyMobile(
+                  { decoration: value as "keep" | "simplified" | "hidden" },
+                  "Mobile decoration updated.",
+                )
+              }
+            />
+          </details>
+          <details className="studio-v2-control-group" open>
+            <summary>Sections</summary>
+            {selectedSection ? (
+              <div className="studio-v2-section-properties">
+                <div>
+                  <small>Selected section</small>
+                  <strong>
+                    {selectedSection.content.eyebrow || selectedSection.type}
+                  </strong>
+                  <span>{selectedSection.type}</span>
+                </div>
+                <label>
+                  Layout variant
+                  <select
+                    value={selectedSection.variant}
+                    onChange={(event) =>
+                      applySpec(
+                        updateSectionVariant(
                           spec,
                           selectedSection.id,
-                          "title",
                           event.target.value,
                         ),
-                        "Section heading updated.",
-                      );
-                    } catch {
-                      /* wait for valid text */
+                        "Section layout changed.",
+                      )
                     }
-                  }}
-                  maxLength={110}
-                />
-              </label>
-              <div className="studio-v2-section-actions">
-                <button
-                  type="button"
-                  onClick={() =>
-                    applySpec(
-                      moveSection(spec, selectedSection.id, -1),
-                      "Section moved up.",
-                    )
-                  }
-                  disabled={
-                    activePage.sections.findIndex(
-                      (entry) => entry.id === selectedSection.id,
-                    ) <= 1
-                  }
-                >
-                  <ArrowUp size={15} /> Up
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    applySpec(
-                      moveSection(spec, selectedSection.id, 1),
-                      "Section moved down.",
-                    )
-                  }
-                  disabled={
-                    activePage.sections.findIndex(
-                      (entry) => entry.id === selectedSection.id,
-                    ) ===
-                    activePage.sections.length - 1
-                  }
-                >
-                  <ArrowDown size={15} /> Down
-                </button>
-                <button
-                  type="button"
-                  className="is-danger"
-                  onClick={() => {
-                    applySpec(
-                      removeSection(spec, selectedSection.id),
-                      "Section removed.",
-                    );
-                    setSelectedSectionId(activePage.sections[0]?.id ?? null);
-                  }}
-                  disabled={selectedSection.type === "hero"}
-                >
-                  <Trash2 size={15} /> Remove
-                </button>
+                  >
+                    {sectionVariantRegistry[selectedSection.type].map(
+                      (variant) => (
+                        <option key={variant} value={variant}>
+                          {variant.replaceAll("-", " ")}
+                        </option>
+                      ),
+                    )}
+                  </select>
+                  <ChevronDown size={14} />
+                </label>
+                <label>
+                  Heading
+                  <input
+                    value={selectedSection.content.title}
+                    onChange={(event) => {
+                      try {
+                        applySpec(
+                          updateSectionCopy(
+                            spec,
+                            selectedSection.id,
+                            "title",
+                            event.target.value,
+                          ),
+                          "Section heading updated.",
+                        );
+                      } catch {
+                        /* wait for valid text */
+                      }
+                    }}
+                    maxLength={110}
+                  />
+                </label>
+                <div className="studio-v2-section-actions">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      applySpec(
+                        moveSection(spec, selectedSection.id, -1),
+                        "Section moved up.",
+                      )
+                    }
+                    disabled={
+                      activePage.sections.findIndex(
+                        (entry) => entry.id === selectedSection.id,
+                      ) <= 1
+                    }
+                  >
+                    <ArrowUp size={15} /> Up
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      applySpec(
+                        moveSection(spec, selectedSection.id, 1),
+                        "Section moved down.",
+                      )
+                    }
+                    disabled={
+                      activePage.sections.findIndex(
+                        (entry) => entry.id === selectedSection.id,
+                      ) ===
+                      activePage.sections.length - 1
+                    }
+                  >
+                    <ArrowDown size={15} /> Down
+                  </button>
+                  <button
+                    type="button"
+                    className="is-danger"
+                    onClick={() => {
+                      applySpec(
+                        removeSection(spec, selectedSection.id),
+                        "Section removed.",
+                      );
+                      setSelectedSectionId(activePage.sections[0]?.id ?? null);
+                    }}
+                    disabled={selectedSection.type === "hero"}
+                  >
+                    <Trash2 size={15} /> Remove
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <p className="studio-v2-empty-property">
-              Select a section in the website to adjust it.
-            </p>
-          )}
+            ) : (
+              <p className="studio-v2-empty-property">
+                Select a section in the website to adjust it.
+              </p>
+            )}
+          </details>
           <a
             className="studio-v2-owner-cta"
             href={buildStudioWhatsappHref()}

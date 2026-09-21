@@ -5,6 +5,7 @@ import { STUDIO_WHATSAPP_MESSAGE } from "../../src/studio/contact";
 import {
   checkOverflow,
   expect,
+  fillStable,
   reduceMotion,
   safeGoto,
   test,
@@ -34,11 +35,21 @@ async function generateWebsite(
   page: Parameters<typeof safeGoto>[0],
   prompt = resortPrompt,
 ) {
-  await page.getByLabel("Describe the website you want").fill(prompt);
+  await fillStable(
+    page,
+    page.getByLabel("Describe the website you want"),
+    prompt,
+  );
   await page.getByRole("button", { name: /Generate website/i }).click();
-  await expect(page.getByText("Preparing your website")).toBeVisible();
+  // The progress screen lasts a few hundred milliseconds by design (it is only
+  // wait art, not a real build), which is shorter than Playwright's polling
+  // interval, so this helper waits for the durable outcome. The progress screen
+  // itself is asserted deterministically below, in
+  // "shows live generation progress while a build runs".
   await expect(page.getByTestId("studio-preview")).toBeVisible({
-    timeout: 10_000,
+    // Generous on purpose: with many QC browsers sharing one dev server the
+    // first on-demand module transform can take several times the solo runtime.
+    timeout: 30_000,
   });
 }
 
@@ -69,7 +80,9 @@ test.describe("Website Studio V2", () => {
 
     const input = page.getByLabel("Describe your business");
     await expect(input).toBeVisible();
-    await input.fill(
+    await fillStable(
+      page,
+      input,
       "I run a gym in Jaigaon and need a modern website for memberships and personal training.",
     );
     await page.getByRole("button", { name: /Create my website/i }).click();
@@ -180,6 +193,56 @@ test.describe("Website Studio V2", () => {
         "Website generated with Studio’s resilient design system.",
       ),
     ).toBeVisible();
+    expect(errors).toHaveLength(0);
+  });
+
+  test("shows live generation progress while a build runs", async ({
+    page,
+  }) => {
+    const errors = await openStudio(page);
+
+    // The progress screen is intentionally brief, so race-free coverage means
+    // recording it with a MutationObserver rather than polling for it after the
+    // fact. The probe captures the first frame of the generating phase, which is
+    // where the five-step checklist renders — proof that a visitor never faces
+    // a blank canvas while a website is being composed.
+    await page.evaluate(() => {
+      const probe: { seen: boolean; steps: string[] } = {
+        seen: false,
+        steps: [],
+      };
+      (window as unknown as { __studioProgressProbe?: unknown })[
+        "__studioProgressProbe"
+      ] = probe;
+      const observer = new MutationObserver(() => {
+        const screen = document.querySelector(".studio-v2-shell.is-generating");
+        if (!screen) return;
+        probe.seen = true;
+        probe.steps = Array.from(screen.querySelectorAll("ol li")).map((item) =>
+          (item.textContent ?? "").replace(/\s+/g, " ").trim(),
+        );
+        if (probe.steps.length >= 5) observer.disconnect();
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    });
+
+    await generateWebsite(page);
+
+    const probe = await page.evaluate(
+      () =>
+        (
+          window as unknown as {
+            __studioProgressProbe?: { seen: boolean; steps: string[] };
+          }
+        )["__studioProgressProbe"],
+    );
+    expect(probe?.seen).toBe(true);
+    const progress = (probe?.steps ?? []).join(" | ");
+    expect(progress).toContain("Understanding your business");
+    expect(progress).toContain("Creating visual direction");
+    expect(progress).toContain("Building your sections");
+    expect(progress).toContain("Refining typography");
+    expect(progress).toContain("Preparing your website");
     expect(errors).toHaveLength(0);
   });
 

@@ -20,7 +20,17 @@ import type {
 
 type Pair = { title: string; body: string; meta?: string; accent?: string };
 
+/** An additional listings bank, used when a business needs several shelves. */
+type ListingBank = {
+  eyebrow?: string;
+  title: string;
+  body: string;
+  items: Pair[];
+};
+
 export type Profile = {
+  /** Extra listings sections (categories, ranges, featured) after the first. */
+  listingBanks?: ListingBank[];
   kind: string;
   defaultNames: string[];
   nouns: string[];
@@ -445,7 +455,7 @@ const food: Profile = {
 
 const retail: Profile = {
   kind: "retail",
-  defaultNames: ["FIELD OBJECTS", "THE STORE ROOM"],
+  defaultNames: ["THE STORE ROOM", "LOCAL GOODS"],
   nouns: ["Store", "Objects", "Supply"],
   offer: "Collections",
   offerNoun: "collection",
@@ -465,7 +475,7 @@ const retail: Profile = {
   ],
   about: {
     title: "A range with a reason behind it.",
-    body: "The story explains what the store chooses and why, with space for the verified sourcing, materials and people later.",
+    body: "The story explains what the store chooses and why, how the shop serves its neighbourhood, and leaves space for verified sourcing, materials and people later.",
   },
   offering: {
     title: "Collections grouped the way shoppers think.",
@@ -489,8 +499,9 @@ const retail: Profile = {
     ],
   },
   listing: {
-    title: "The range, brought into focus.",
-    body: "Grid, rail or index — the catalogue adapts to how the collection is best browsed.",
+    eyebrow: "Collections",
+    title: "The range, grouped the way people shop.",
+    body: "Categories first, so a visitor finds their section without scrolling the whole store.",
     items: [
       {
         title: "Featured piece",
@@ -509,6 +520,30 @@ const retail: Profile = {
       },
     ],
   },
+  listingBanks: [
+    {
+      eyebrow: "Featured & new arrivals",
+      title: "What the shop is putting forward.",
+      body: "A second shelf for new arrivals, offers or the pieces you want seen first.",
+      items: [
+        {
+          title: "New arrival",
+          body: "Sample entry — replace with a product you have just added.",
+          meta: "Sample item",
+        },
+        {
+          title: "Best seller",
+          body: "Sample entry for the product customers ask for most.",
+          meta: "Sample item",
+        },
+        {
+          title: "Gift pick",
+          body: "Sample entry for a product that works as a gift.",
+          meta: "Sample item",
+        },
+      ],
+    },
+  ],
   feature: {
     title: "Details that decide a purchase.",
     items: [
@@ -518,14 +553,19 @@ const retail: Profile = {
         meta: "Details",
       },
       {
+        title: "Visiting the shop",
+        body: "Timings, parking and how to find the store locally.",
+        meta: "Local",
+      },
+      {
+        title: "Local delivery or pickup",
+        body: "Where the shop delivers and how collection works — stated once you confirm it.",
+        meta: "Delivery",
+      },
+      {
         title: "Straight answers",
         body: "No invented stock levels or delivery promises.",
         meta: "Orders",
-      },
-      {
-        title: "Easy next step",
-        body: "One obvious route to enquire or order.",
-        meta: "Checkout",
       },
     ],
   },
@@ -552,13 +592,13 @@ const retail: Profile = {
   },
   cta: {
     title: "Ready to order or still deciding?",
-    body: "Send a short note about what you need and the right option comes back to you.",
+    body: "Send a short note about what you need — or visit the shop and ask in person.",
     label: "Enquire about an order",
     secondary: "Explore the collection",
   },
   contact: {
-    title: "Questions about an item?",
-    body: "Add verified store details, delivery areas and contact information here.",
+    title: "Find the shop, or ask about an item.",
+    body: "Add the verified store address, opening hours, delivery area and contact details here.",
   },
   statement: "Objects chosen to be used.",
   concept: "Product-led storefront",
@@ -2495,12 +2535,542 @@ const generic: Profile = {
   concept: "Clarity-first business concept",
 };
 
+const supplements: Profile = {
+  kind: "wellness",
+  defaultNames: ["PROTEIN POINT", "NUTRIVEDA"],
+  nouns: ["Nutrition", "Supplements"],
+  offer: "Supplements & nutrition",
+  offerNoun: "supplement ranges",
+  audience: "people comparing protein, vitamins and everyday nutrition",
+  intent: "find the right range and order without guesswork",
+  personality: "clear, modern and health-conscious",
+  priorities: ["Categories", "Protein", "Multivitamins", "Ordering"],
+  eyebrow: "Protein · multivitamins · everyday nutrition",
+  heroTitles: [
+    "{lead} ranges, sorted the way people shop.",
+    "Supplements that explain themselves.",
+    "A {lead} range, organised properly.",
+  ],
+  heroBodies: [
+    "A supplement store concept with category navigation, protein and multivitamin shelves, and product information that leaves the health claims to your own verified labels.",
+    "Every range is presented with clear categories and ingredient space, so shoppers compare products instead of deciphering jargon.",
+  ],
+  about: {
+    title: "A range people can actually navigate.",
+    body: "Categories come first, then the product shelves. Manufacturer details, certifications and serving guidance stay as clearly marked placeholders until you supply your own verified information.",
+  },
+  offering: {
+    eyebrow: "Ranges",
+    title: "Three shelves that cover most shoppers.",
+    body: "A compact index of what the store actually stocks — editable the moment your real catalogue is ready.",
+    items: [
+      {
+        title: "Protein",
+        body: "Whey, isolate and plant protein entries with space for flavour and size.",
+        meta: "Strength & recovery",
+      },
+      {
+        title: "Multivitamins",
+        body: "Daily and targeted formulas, presented by what they are rather than what they promise.",
+        meta: "Everyday",
+      },
+      {
+        title: "Everyday wellness",
+        body: "Omega, minerals, electrolytes and general nutrition staples.",
+        meta: "Essentials",
+      },
+    ],
+  },
+  listing: {
+    eyebrow: "Shop by category",
+    title: "Start with the category, not a wall of products.",
+    body: "Sample category entries — replace them with your real product names and weights.",
+    items: [
+      {
+        title: "Protein powders",
+        body: "Sample entry for whey, isolate or plant protein products.",
+        meta: "Sample item",
+      },
+      {
+        title: "Multivitamins",
+        body: "Sample entry for daily and targeted multivitamin products.",
+        meta: "Sample item",
+      },
+      {
+        title: "General nutrition",
+        body: "Sample entry for omega, minerals and everyday supplements.",
+        meta: "Sample item",
+      },
+    ],
+  },
+  listingBanks: [
+    {
+      eyebrow: "Protein range",
+      title: "Protein, shelf by shelf.",
+      body: "Sample protein entries with space for weight, flavour and label details from your own packaging.",
+      items: [
+        {
+          title: "Whey protein",
+          body: "Sample product entry — add your real brand, weight and flavour.",
+          meta: "Sample item",
+        },
+        {
+          title: "Plant protein",
+          body: "Sample product entry for plant-based options.",
+          meta: "Sample item",
+        },
+        {
+          title: "Mass gainer",
+          body: "Sample product entry for higher-calorie nutrition products.",
+          meta: "Sample item",
+        },
+      ],
+    },
+    {
+      eyebrow: "Multivitamins",
+      title: "Daily formulas, plainly listed.",
+      body: "Sample multivitamin entries. Ingredient and dosage text is added from your verified product labels.",
+      items: [
+        {
+          title: "Daily multivitamin",
+          body: "Sample entry for an everyday multivitamin product.",
+          meta: "Sample item",
+        },
+        {
+          title: "Vitamin C & D",
+          body: "Sample entry for single-vitamin products.",
+          meta: "Sample item",
+        },
+        {
+          title: "Mineral support",
+          body: "Sample entry for calcium, zinc or magnesium products.",
+          meta: "Sample item",
+        },
+      ],
+    },
+    {
+      eyebrow: "Featured",
+      title: "What the shop puts forward this month.",
+      body: "A featured shelf for the products you want shoppers to notice first.",
+      items: [
+        {
+          title: "Featured product",
+          body: "Sample featured entry — swap in your own best seller.",
+          meta: "Sample item",
+        },
+        {
+          title: "Bundle idea",
+          body: "Sample entry for a combined protein and multivitamin purchase.",
+          meta: "Sample item",
+        },
+        {
+          title: "New arrival",
+          body: "Sample entry for a recently added product.",
+          meta: "Sample item",
+        },
+      ],
+    },
+  ],
+  feature: {
+    title: "Product information that stays honest.",
+    items: [
+      {
+        title: "Categories before products",
+        body: "Shoppers narrow down by range, then compare items in detail.",
+        meta: "Navigation",
+      },
+      {
+        title: "Label space",
+        body: "Ingredient, serving and manufacturer fields ready for your own verified text.",
+        meta: "Information",
+      },
+      {
+        title: "No invented claims",
+        body: "Nothing about health outcomes, certifications or stock levels is stated until you provide it.",
+        meta: "Trust",
+      },
+    ],
+  },
+  scenes: [
+    "Clean product shelf",
+    "Protein range detail",
+    "Vitamin display",
+    "Counter and consultation desk",
+  ],
+  process: {
+    title: "From browsing to ordering.",
+    items: [
+      {
+        title: "Choose a category",
+        body: "Protein, multivitamins or general nutrition.",
+        meta: "Step 01",
+      },
+      {
+        title: "Compare products",
+        body: "Each entry holds the details that matter for a decision.",
+        meta: "Step 02",
+      },
+      {
+        title: "Order or ask",
+        body: "Enquiry and ordering routes, ready for your real checkout or chat details.",
+        meta: "Step 03",
+      },
+    ],
+  },
+  cta: {
+    title: "Ask about a product.",
+    body: "Send a question about a range and the store replies with real availability and pricing.",
+    label: "Ask about a product",
+    secondary: "Browse the ranges",
+  },
+  contact: {
+    title: "Visit the store or message the team.",
+    body: "Place for the verified shop address, timings, delivery area and direct contact details.",
+  },
+  statement: "Nutrition, clearly organised.",
+  concept: "Nutrition commerce concept",
+};
+
+const construction: Profile = {
+  kind: "realestate",
+  defaultNames: ["GROUNDWORKS", "STONE & SPAN"],
+  nouns: ["Works", "Projects"],
+  offer: "Construction & interiors",
+  offerNoun: "projects",
+  audience: "homeowners and businesses planning a build, renovation or fit-out",
+  intent: "judge capability, understand the process and request a site visit",
+  personality: "precise, practical and accountable",
+  priorities: ["Projects", "Capabilities", "Process", "Consultation"],
+  eyebrow: "Build · renovate · fit out",
+  heroTitles: [
+    "Work, built to be inspected and explained.",
+    "Plans, drawings and a site you can walk through.",
+    "Construction that shows its working.",
+  ],
+  heroBodies: [
+    "A project-led concept that puts completed work, capabilities and the build sequence in one place — with room for your real drawings, approvals and site photographs.",
+    "The website leads with proof of capability, then makes the consultation step straightforward for a serious enquiry.",
+  ],
+  about: {
+    title: "Built by people who stay on the site.",
+    body: "The story covers how a project is run: drawings, materials, sequencing and who is accountable at each stage. Verified licences, registrations and completed-project history are added from your own records.",
+  },
+  offering: {
+    eyebrow: "Services",
+    title: "From groundwork to handover.",
+    body: "A clear service index so a visitor knows immediately whether their project is in scope.",
+    items: [
+      {
+        title: "New construction",
+        body: "Ground-up builds for homes, shops and commercial spaces.",
+        meta: "Build",
+      },
+      {
+        title: "Renovation & repair",
+        body: "Structural repairs, extensions and reworking existing spaces.",
+        meta: "Renovate",
+      },
+      {
+        title: "Interiors & fit-out",
+        body: "Interior work carried through from drawing to finish.",
+        meta: "Fit out",
+      },
+    ],
+  },
+  listing: {
+    eyebrow: "Selected projects",
+    title: "Work presented the way a client checks it.",
+    body: "Sample project entries — replace with your own sites, scope and photography.",
+    items: [
+      {
+        title: "Sample project",
+        body: "Entry for a completed build with scope, area and duration.",
+        meta: "Sample project",
+      },
+      {
+        title: "Sample project",
+        body: "Entry for a commercial or mixed-use build.",
+        meta: "Sample project",
+      },
+      {
+        title: "Sample project",
+        body: "Entry for a renovation or fit-out.",
+        meta: "Sample project",
+      },
+    ],
+  },
+  listingBanks: [
+    {
+      eyebrow: "Capability",
+      title: "What the team can take on directly.",
+      body: "Scope items stated as capabilities rather than promises about timelines or budgets.",
+      items: [
+        {
+          title: "Site & groundwork",
+          body: "Levels, foundations and preparation before the structure goes up.",
+          meta: "Stage 01",
+        },
+        {
+          title: "Structure",
+          body: "RCC, frame and masonry work carried out to drawing.",
+          meta: "Stage 02",
+        },
+        {
+          title: "Finishing",
+          body: "Flooring, plumbing, electrical and finishing trades.",
+          meta: "Stage 03",
+        },
+      ],
+    },
+    {
+      eyebrow: "Proof",
+      title: "Details a serious client asks for.",
+      body: "Areas for the documents and specifications that support a tender or quotation.",
+      items: [
+        {
+          title: "Drawings & specifications",
+          body: "Space for plans, BOQs and technical notes.",
+          meta: "Documents",
+        },
+        {
+          title: "Approvals",
+          body: "Placeholder for the registration and approval details you supply.",
+          meta: "Compliance",
+        },
+        {
+          title: "Site supervision",
+          body: "How work is supervised and reported during the project.",
+          meta: "Delivery",
+        },
+      ],
+    },
+  ],
+  feature: {
+    title: "Capability presented without exaggeration.",
+    items: [
+      {
+        title: "Scope stated plainly",
+        body: "Visitors can tell quickly whether their project is in scope.",
+        meta: "Clarity",
+      },
+      {
+        title: "Documents in reach",
+        body: "A place for drawings, specifications and approval details.",
+        meta: "Trust",
+      },
+      {
+        title: "One route to a site visit",
+        body: "A single, obvious consultation action instead of scattered phone numbers.",
+        meta: "Enquiry",
+      },
+    ],
+  },
+  scenes: [
+    "Site under construction",
+    "Structural detail",
+    "Finished interior",
+    "Materials and plans",
+  ],
+  process: {
+    title: "From drawing to handover.",
+    items: [
+      {
+        title: "Site discussion",
+        body: "Requirements, site conditions and scope are reviewed.",
+        meta: "Step 01",
+      },
+      {
+        title: "Quotation & drawings",
+        body: "A written scope with the technical detail attached.",
+        meta: "Step 02",
+      },
+      {
+        title: "Execution",
+        body: "Work proceeds in stages with reporting along the way.",
+        meta: "Step 03",
+      },
+      {
+        title: "Handover",
+        body: "Completion, snag list and documentation.",
+        meta: "Step 04",
+      },
+    ],
+  },
+  cta: {
+    title: "Request a site visit.",
+    body: "Share the site, the scope and the stage you are at — the team responds with next steps.",
+    label: "Request a site visit",
+    secondary: "See the capabilities",
+  },
+  contact: {
+    title: "Talk to the site team.",
+    body: "Place for verified office address, working hours, service area and direct contact details.",
+  },
+  statement: "Measured work, clear reporting.",
+  concept: "Precision construction concept",
+};
+
+const jewellery: Profile = {
+  kind: "retail",
+  defaultNames: ["AURELIA JEWELS", "GOLD LEAF"],
+  nouns: ["Collections", "Pieces"],
+  offer: "Fine jewellery",
+  offerNoun: "collections",
+  audience: "people choosing jewellery for a wedding, a gift or a milestone",
+  intent: "browse collections and begin a private enquiry",
+  personality: "warm, precise and quietly luxurious",
+  priorities: ["Collections", "Craft", "Trust", "Enquiry"],
+  eyebrow: "Collections · craft · private viewings",
+  heroTitles: [
+    "Pieces chosen slowly, kept for a long time.",
+    "A {lead} collection shown in proper detail.",
+    "Where the making matters as much as the shine.",
+  ],
+  heroBodies: [
+    "A jewellery concept built around close detail, collection browsing and a calm enquiry path — with hallmark and certification information left to your own verified documents.",
+    "The design gives every piece room to be looked at, then makes a private viewing easy to arrange.",
+  ],
+  about: {
+    title: "Craft shown close up.",
+    body: "The narrative covers materials, making and finishing, with reserved space for your verified hallmarking, certification and family history rather than invented heritage.",
+  },
+  offering: {
+    eyebrow: "What the house does",
+    title: "Collections, custom work and care.",
+    body: "A short index of the services a jewellery business is actually asked for.",
+    items: [
+      {
+        title: "Collections",
+        body: "Ready-made pieces grouped by occasion and metal.",
+        meta: "Browse",
+      },
+      {
+        title: "Custom & bridal",
+        body: "Made-to-order work, designed from a brief and a sketch.",
+        meta: "Commission",
+      },
+      {
+        title: "Repair & resizing",
+        body: "Cleaning, resizing and restoration of pieces already owned.",
+        meta: "Care",
+      },
+    ],
+  },
+  listing: {
+    eyebrow: "Collections",
+    title: "Organised the way people actually shop.",
+    body: "Sample collection entries — replace with your real collection names.",
+    items: [
+      {
+        title: "Bridal collection",
+        body: "Sample entry for wedding sets and bridal pieces.",
+        meta: "Sample item",
+      },
+      {
+        title: "Everyday gold",
+        body: "Sample entry for lighter, daily-wear pieces.",
+        meta: "Sample item",
+      },
+      {
+        title: "Stone & diamond",
+        body: "Sample entry for stone-set pieces.",
+        meta: "Sample item",
+      },
+    ],
+  },
+  listingBanks: [
+    {
+      eyebrow: "Featured pieces",
+      title: "A closer look at the work.",
+      body: "Sample piece entries with room for metal, weight and stone details from your own records.",
+      items: [
+        {
+          title: "Sample piece",
+          body: "Entry for a signature necklace or set.",
+          meta: "Sample item",
+        },
+        {
+          title: "Sample piece",
+          body: "Entry for a ring or pair of earrings.",
+          meta: "Sample item",
+        },
+        {
+          title: "Sample piece",
+          body: "Entry for a commissioned or made-to-order piece.",
+          meta: "Sample item",
+        },
+      ],
+    },
+  ],
+  feature: {
+    title: "Trust, handled carefully.",
+    items: [
+      {
+        title: "Detail before selling",
+        body: "Metal, finish and dimensions are shown as fields rather than vague praise.",
+        meta: "Detail",
+      },
+      {
+        title: "Hallmark & certification",
+        body: "Reserved space for the certification you supply — nothing is claimed by default.",
+        meta: "Assurance",
+      },
+      {
+        title: "Private viewings",
+        body: "An appointment route for visitors who prefer a calmer conversation.",
+        meta: "Service",
+      },
+    ],
+  },
+  scenes: [
+    "Detail of a finished piece",
+    "Workbench and tools",
+    "Bridal set",
+    "Showroom counter",
+  ],
+  process: {
+    title: "From enquiry to collection.",
+    items: [
+      {
+        title: "Share the occasion",
+        body: "Wedding, gift, repair or commission.",
+        meta: "Step 01",
+      },
+      {
+        title: "View options",
+        body: "Collections or a design conversation for custom work.",
+        meta: "Step 02",
+      },
+      {
+        title: "Finalise",
+        body: "Pricing, certification and delivery confirmed directly.",
+        meta: "Step 03",
+      },
+    ],
+  },
+  cta: {
+    title: "Book a private viewing.",
+    body: "Tell the house what you are looking for and arrange a time to see it properly.",
+    label: "Book a private viewing",
+    secondary: "Browse the collections",
+  },
+  contact: {
+    title: "Visit the showroom.",
+    body: "Place for verified address, timings, and the contact details for appointments.",
+  },
+  statement: "Considered pieces, properly shown.",
+  concept: "Fine jewellery concept",
+};
+
 export const profiles: Record<BusinessCategory, Profile> = {
   hospitality,
   travel,
   food,
   retail,
   fashion,
+  jewellery,
+  supplements,
+  construction,
   professional,
   technology,
   creative,
@@ -2603,6 +3173,52 @@ const leadNoise = new Set([
   "we",
   "our",
   "my",
+  /*
+   * Pronouns and framing nouns leak in from conversational openings
+   * ("create me a site that sells health supplements" → "Me Health",
+   * "I run a small practice" → "I Small"). They are never a business
+   * descriptor, and an adjectival slot makes them ungrammatical.
+   */
+  "me",
+  "us",
+  "you",
+  "your",
+  "it",
+  "its",
+  "they",
+  "them",
+  "their",
+  "he",
+  "she",
+  "her",
+  "him",
+  "his",
+  "one",
+  "thing",
+  "things",
+  "business",
+  "businesses",
+  "company",
+  "shop",
+  "store",
+  "selling",
+  "sells",
+  "specialising",
+  "specializing",
+  "primarily",
+  "mainly",
+  "locally",
+  /*
+   * Bare size words describe the business, not what it makes: "I run a small
+   * accounting practice" must not become "A Small practice, kept deliberately
+   * small." Meaningful qualifiers (family, independent, boutique) are kept.
+   */
+  "small",
+  "big",
+  "large",
+  "little",
+  "tiny",
+  "micro",
 ]);
 
 /**
@@ -2638,6 +3254,13 @@ function fill(template: string, values: Record<string, string>): string {
   output = output
     .replace(/\s{2,}/g, " ")
     .replace(/\s+([,.;:!?])/g, "$1")
+    /*
+     * An optional slot that emptied out at the start of a line ("{lead} work,
+     * built to be inspected") leaves a lowercase fragment. Every template is
+     * written as a sentence, so re-casing the first letter is always correct and
+     * keeps an empty slot from shipping a broken-looking heading.
+     */
+    .replace(/^[a-z]/, (letter) => letter.toUpperCase())
     .replace(/\s+·\s+·/g, " ·")
     .trim();
   return output.replace(/^[·,;:\-\s]+/, "").trim();
@@ -2688,7 +3311,7 @@ export function buildSiteCopy(
   return {
     name,
     descriptor: fill(
-      `A ${profile.concept.toLowerCase()}${place} — a premium concept website shaped from the visitor's description and ready for verified content.`,
+      `A ${profile.concept.toLowerCase()}${place}, shaped from your description and ready for verified content.`,
       values,
     ),
     offer: profile.offer,
@@ -2893,24 +3516,31 @@ export function buildSectionCopy(
   }
 
   if (planned.type === "listings") {
-    if (planned.variant === "comparison" || planned.variant === "index-list") {
-      return {
-        ...base,
-        eyebrow: profile.listing.eyebrow ?? "Options",
-        title: fill(profile.listing.title, values),
-        body: profile.listing.body,
-        items: profile.listing.items.map((item, position) => ({
-          ...item,
-          accent: `0${position + 1}`.slice(-2),
-        })),
-      };
-    }
+    // A business with several shelves (categories, protein, multivitamins,
+    // featured) gets a distinct bank per listings section instead of the same
+    // three cards repeated down the page.
+    const banks: ListingBank[] = [
+      profile.listing,
+      ...(profile.listingBanks ?? []),
+    ];
+    const occurrence = blueprint.sections
+      .filter((entry) => entry.type === "listings")
+      .findIndex((entry) => entry.id === planned.id);
+    const bank =
+      banks[
+        Math.max(0, Math.min(occurrence < 0 ? 0 : occurrence, banks.length - 1))
+      ] ?? profile.listing;
+    const eyebrow =
+      bank.eyebrow ??
+      (planned.variant === "comparison" || planned.variant === "index-list"
+        ? "Options"
+        : "Featured");
     return {
       ...base,
-      eyebrow: profile.listing.eyebrow ?? "Featured",
-      title: fill(profile.listing.title, values),
-      body: profile.listing.body,
-      items: profile.listing.items.map((item, position) => ({
+      eyebrow,
+      title: fill(bank.title, values),
+      body: bank.body,
+      items: bank.items.map((item, position) => ({
         ...item,
         accent: `0${position + 1}`.slice(-2),
       })),
