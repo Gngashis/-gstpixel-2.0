@@ -1,9 +1,17 @@
 import { z } from "zod";
 import type { WorkersAiBinding } from "../personalization/cloudflare-provider";
-import { refineDesignSpecWithWorkersAi } from "./cloudflare-provider";
+import {
+  planStudioChangeWithWorkersAi,
+  refineDesignSpecWithWorkersAi,
+} from "./cloudflare-provider";
+import {
+  applyStudioChangePlan,
+  planStudioChange,
+  studioEditorContextSchema,
+  type StudioChangeContext,
+} from "./change-plan";
 import {
   generateFallbackDesignSpec,
-  modifyDesignSpec,
   parseDesignSpec,
   type DesignSpec,
 } from "./domain";
@@ -41,6 +49,7 @@ const modifyRequestSchema = z
     action: z.literal("modify"),
     instruction: safeText(600, 2),
     spec: z.unknown(),
+    context: studioEditorContextSchema.optional(),
   })
   .strict();
 
@@ -168,14 +177,24 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
     }
 
     let fallback: DesignSpec;
+    let changeContext: StudioChangeContext | null = null;
+    let fallbackPlan: ReturnType<typeof planStudioChange> | null = null;
     try {
-      fallback =
-        parsed.data.action === "generate"
-          ? generateFallbackDesignSpec(parsed.data.prompt)
-          : modifyDesignSpec(
-              parseDesignSpec(parsed.data.spec),
-              parsed.data.instruction,
-            );
+      if (parsed.data.action === "generate") {
+        fallback = generateFallbackDesignSpec(parsed.data.prompt);
+      } else {
+        const currentSpec = parseDesignSpec(parsed.data.spec);
+        const editorContext = parsed.data.context ?? {
+          activePageSlug: "/",
+          selectedSectionId: currentSpec.pages[0]?.sections[0]?.id ?? null,
+          viewport: "desktop" as const,
+          recentTurns: [],
+          previousThemes: [],
+        };
+        changeContext = { spec: currentSpec, ...editorContext };
+        fallbackPlan = planStudioChange(parsed.data.instruction, changeContext);
+        fallback = applyStudioChangePlan(changeContext, fallbackPlan).spec;
+      }
     } catch {
       return jsonResponse(
         { error: "The website request could not be validated." },
@@ -184,12 +203,48 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
     }
 
     const guard = options?.guard ?? sharedGuard;
-    if (!guard.enter())
-      return jsonResponse({ spec: fallback, source: "fallback" }, 200);
+    const fallbackPayload =
+      parsed.data.action === "modify" && fallbackPlan && changeContext
+        ? (() => {
+            const result = applyStudioChangePlan(changeContext, fallbackPlan);
+            return {
+              spec: result.spec,
+              plan: fallbackPlan,
+              summary: fallbackPlan.summary,
+              unsupported: fallbackPlan.unsupported,
+              changed: result.changed,
+              source: "fallback" as const,
+            };
+          })()
+        : { spec: fallback, source: "fallback" as const };
+
+    if (!guard.enter()) return jsonResponse(fallbackPayload, 200);
     try {
-      if (!env?.AI)
-        return jsonResponse({ spec: fallback, source: "fallback" }, 200);
+      if (!env?.AI) return jsonResponse(fallbackPayload, 200);
       try {
+        if (parsed.data.action === "modify" && fallbackPlan && changeContext) {
+          const plan = await withTimeout(
+            planStudioChangeWithWorkersAi({
+              ai: env.AI,
+              instruction: parsed.data.instruction,
+              context: changeContext,
+              draftPlan: fallbackPlan,
+            }),
+          );
+          const result = applyStudioChangePlan(changeContext, plan);
+          result.spec.metadata.source = "ai";
+          return jsonResponse(
+            {
+              spec: parseDesignSpec(result.spec),
+              plan,
+              summary: plan.summary,
+              unsupported: plan.unsupported,
+              changed: result.changed,
+              source: "ai",
+            },
+            200,
+          );
+        }
         const spec = await withTimeout(
           refineDesignSpecWithWorkersAi({
             ai: env.AI,
@@ -204,7 +259,7 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
         spec.metadata.source = "ai";
         return jsonResponse({ spec: parseDesignSpec(spec), source: "ai" }, 200);
       } catch {
-        return jsonResponse({ spec: fallback, source: "fallback" }, 200);
+        return jsonResponse(fallbackPayload, 200);
       }
     } finally {
       guard.leave();

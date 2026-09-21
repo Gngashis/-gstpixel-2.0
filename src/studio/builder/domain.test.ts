@@ -109,4 +109,37 @@ describe("Website Studio V2 DesignSpec", () => {
       original.pages[0]?.sections[0]?.variant,
     );
   });
+
+  it("art-directs substantially different structures for seven business types", () => {
+    const prompts = [
+      "Create a premium luxury resort near Jaigaon with rooms, mountain views and a restaurant.",
+      "Create a bright editorial café with warm cream, terracotta and a simple menu.",
+      "Create a bold high-energy fitness studio with programs, coaches and memberships.",
+      "Create a minimal futuristic Apple-style technology company website for a software platform.",
+      "Create a cinematic travel agency website with destinations and signature journeys.",
+      "Create a sophisticated professional services website with expertise and contact.",
+      "Create a premium online shop for considered home objects and product collections.",
+    ];
+    const specs = prompts.map(generateFallbackDesignSpec);
+    const signatures = specs.map((spec) => ({
+      kind: spec.site.businessKind,
+      hero: spec.pages[0]?.sections[0]?.variant,
+      sections: spec.pages[0]?.sections.map(
+        (section) => `${section.type}:${section.variant}`,
+      ),
+      mood: spec.theme.mood,
+    }));
+
+    expect(
+      new Set(signatures.map((signature) => signature.hero)).size,
+    ).toBeGreaterThanOrEqual(6);
+    expect(
+      new Set(signatures.map((signature) => signature.sections?.join("|")))
+        .size,
+    ).toBe(7);
+    expect(specs[3]?.site.name).toBe("SIGNAL SYSTEMS");
+    expect(specs[3]?.theme.mood).toBe("technical");
+    expect(specs[4]?.pages[0]?.sections[1]?.type).toBe("services");
+    expect(specs[6]?.pages[0]?.sections[1]?.type).toBe("listings");
+  });
 });

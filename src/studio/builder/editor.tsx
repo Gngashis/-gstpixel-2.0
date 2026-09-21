@@ -27,7 +27,6 @@ import {
   createSectionForType,
   generateFallbackDesignSpec,
   getHomePage,
-  modifyDesignSpec,
   moveSection,
   paletteIds,
   parseDesignSpec,
@@ -40,6 +39,15 @@ import {
   type PaletteId,
   type SectionType,
 } from "./domain";
+import {
+  applyStudioChangePlan,
+  getContextualSuggestions,
+  parseStudioChangePlan,
+  planStudioChange,
+  type StudioChangeContext,
+  type StudioChangePlan,
+  type StudioConversationTurn,
+} from "./change-plan";
 import { WebsiteRenderer } from "./renderer";
 import "./v2-styles.css";
 
@@ -84,6 +92,10 @@ const buildApiPath = "/api/studio-build";
 type ServerBuildResult = {
   spec: DesignSpec;
   source: "ai" | "fallback";
+  plan?: StudioChangePlan;
+  summary?: string;
+  unsupported?: string[];
+  changed?: boolean;
 };
 
 async function requestServerSpec(
@@ -101,10 +113,26 @@ async function requestServerSpec(
     const payload = (await response.json()) as {
       spec?: unknown;
       source?: unknown;
+      plan?: unknown;
+      summary?: unknown;
+      unsupported?: unknown;
+      changed?: unknown;
     };
+    const plan = payload.plan ? parseStudioChangePlan(payload.plan) : undefined;
     return {
       spec: parseDesignSpec(payload.spec),
       source: payload.source === "ai" ? "ai" : "fallback",
+      ...(plan ? { plan } : {}),
+      ...(typeof payload.summary === "string"
+        ? { summary: payload.summary }
+        : {}),
+      ...(Array.isArray(payload.unsupported) &&
+      payload.unsupported.every((item) => typeof item === "string")
+        ? { unsupported: payload.unsupported }
+        : {}),
+      ...(typeof payload.changed === "boolean"
+        ? { changed: payload.changed }
+        : {}),
     };
   } catch {
     return null;
@@ -126,6 +154,12 @@ export function StudioBuilder() {
   const [generationStep, setGenerationStep] = useState(0);
   const [isChanging, setIsChanging] = useState(false);
   const [status, setStatus] = useState("");
+  const [intelligenceStage, setIntelligenceStage] = useState<
+    "idle" | "understanding" | "planning" | "applying" | "done"
+  >("idle");
+  const [conversation, setConversation] = useState<StudioConversationTurn[]>(
+    [],
+  );
   const [addType, setAddType] =
     useState<Exclude<SectionType, "hero">>("gallery");
   const reducedMotion = useReducedMotion();
@@ -190,6 +224,7 @@ export function StudioBuilder() {
     setSpec(next);
     setHistory([]);
     setFuture([]);
+    setConversation([]);
     setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
     setActivePageSlug("/");
     setPhase("editing");
@@ -217,27 +252,90 @@ export function StudioBuilder() {
     const value = instruction.replace(/\s+/g, " ").trim();
     if (value.length < 2) return;
     setIsChanging(true);
-    setStatus("Studio is reshaping the website…");
+    setIntelligenceStage("understanding");
+    setStatus("Understanding your request…");
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
-    const fallback = modifyDesignSpec(spec, value);
+    const context: StudioChangeContext = {
+      spec,
+      activePageSlug,
+      selectedSectionId,
+      viewport,
+      recentTurns: conversation.slice(-4),
+      previousThemes: history
+        .slice()
+        .reverse()
+        .slice(0, 10)
+        .map((entry) => entry.theme),
+    };
+    const fallbackPlan = planStudioChange(value, context);
+    const fallbackResult = applyStudioChangePlan(context, fallbackPlan);
+    await new Promise((resolve) =>
+      setTimeout(resolve, reducedMotion ? 10 : 140),
+    );
+    if (controller.signal.aborted) return;
+    setIntelligenceStage("planning");
+    setStatus("Planning coordinated changes…");
     const serverResult = await Promise.race([
       requestServerSpec(
-        { action: "modify", instruction: value, spec },
+        {
+          action: "modify",
+          instruction: value,
+          spec,
+          context: {
+            activePageSlug,
+            selectedSectionId,
+            viewport,
+            recentTurns: conversation.slice(-4),
+            previousThemes: context.previousThemes,
+          },
+        },
         controller.signal,
       ),
       new Promise<null>((resolve) =>
-        setTimeout(() => resolve(null), reducedMotion ? 50 : 460),
+        setTimeout(() => resolve(null), reducedMotion ? 250 : 8_000),
       ),
     ]);
     if (controller.signal.aborted) return;
-    setHistory((items) => [...items.slice(-9), spec]);
-    setFuture([]);
-    setSpec(serverResult?.spec ?? fallback);
+    setIntelligenceStage("applying");
+    setStatus("Applying the design plan…");
+    const nextSpec = serverResult?.spec ?? fallbackResult.spec;
+    const plan = serverResult?.plan ?? fallbackPlan;
+    const changed = serverResult?.changed ?? fallbackResult.changed;
+    const summary = serverResult?.summary ?? plan.summary;
+    const unsupported = serverResult?.unsupported ?? plan.unsupported;
+    if (changed) {
+      setHistory((items) => [...items.slice(-9), spec]);
+      setFuture([]);
+      setSpec(nextSpec);
+      setConversation((turns) => [
+        ...turns.slice(-3),
+        {
+          instruction: value,
+          summary,
+          pageSlug: activePageSlug,
+          sectionId: selectedSectionId,
+          operationTypes: plan.operations.map((operation) => operation.type),
+          operations: plan.operations,
+        },
+      ]);
+    }
     setInstruction("");
-    setStatus("Your instruction changed the website.");
-    window.setTimeout(() => setIsChanging(false), reducedMotion ? 20 : 520);
+    setIntelligenceStage("done");
+    setStatus(
+      changed
+        ? `${summary}${unsupported.length ? ` ${unsupported.join(" ")}` : ""}`
+        : (unsupported[0] ??
+            "Studio could not make a meaningful safe change from that request."),
+    );
+    window.setTimeout(
+      () => {
+        setIsChanging(false);
+        setIntelligenceStage("idle");
+      },
+      reducedMotion ? 20 : 520,
+    );
   };
 
   const undo = () => {
@@ -257,6 +355,25 @@ export function StudioBuilder() {
     setSpec(next);
     setStatus("Change restored.");
   };
+
+  const suggestions = useMemo(
+    () =>
+      spec
+        ? getContextualSuggestions({
+            spec,
+            activePageSlug,
+            selectedSectionId,
+            viewport,
+            recentTurns: conversation.slice(-4),
+            previousThemes: history
+              .slice()
+              .reverse()
+              .slice(0, 10)
+              .map((entry) => entry.theme),
+          })
+        : [],
+    [spec, activePageSlug, selectedSectionId, viewport, conversation, history],
+  );
 
   if (phase === "landing") {
     return (
@@ -552,6 +669,20 @@ export function StudioBuilder() {
             </div>
             <span className="studio-v2-change-sweep" aria-hidden="true" />
           </div>
+          <div
+            className="studio-v2-smart-suggestions"
+            aria-label="Suggested changes"
+          >
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                onClick={() => setInstruction(suggestion)}
+              >
+                {suggestion}
+              </button>
+            ))}
+          </div>
           <form className="studio-v2-ai-bar" onSubmit={submitInstruction}>
             <Sparkles size={18} aria-hidden="true" />
             <label className="sr-only" htmlFor="studio-v2-instruction">
@@ -575,6 +706,17 @@ export function StudioBuilder() {
           </form>
           <div className="studio-v2-status" aria-live="polite">
             <span className={isChanging ? "is-working" : undefined} />
+            <strong>
+              {intelligenceStage === "understanding"
+                ? "Understanding"
+                : intelligenceStage === "planning"
+                  ? "Planning changes"
+                  : intelligenceStage === "applying"
+                    ? "Applying"
+                    : intelligenceStage === "done"
+                      ? "Done"
+                      : "Studio"}
+            </strong>
             {status}
           </div>
         </main>

@@ -171,6 +171,12 @@ const sectionSchema = z
       .object({
         alignment: z.enum(["left", "center", "right"]),
         density: z.enum(["airy", "balanced", "compact"]),
+        height: z
+          .enum(["compact", "balanced", "immersive"])
+          .default("balanced"),
+        textScale: z
+          .enum(["compact", "balanced", "expressive"])
+          .default("balanced"),
         fullBleed: z.boolean(),
       })
       .strict(),
@@ -182,6 +188,7 @@ const sectionSchema = z
       })
       .strict(),
     motion: z.enum(["quiet", "reveal", "drift", "snap"]),
+    tone: z.enum(["inherit", "dark", "light", "accent"]).default("inherit"),
   })
   .strict();
 
@@ -226,6 +233,13 @@ export const designSpecSchema = z
         radius: z.enum(["sharp", "subtle", "rounded"]),
         surface: z.enum(["matte", "soft", "glass", "layered"]),
         motion: z.enum(["quiet", "fluid", "cinematic", "energetic"]),
+        headingScale: z
+          .enum(["compact", "balanced", "expressive"])
+          .default("balanced"),
+        bodyScale: z.enum(["small", "balanced", "large"]).default("balanced"),
+        buttonStyle: z
+          .enum(["sharp", "subtle", "rounded", "pill"])
+          .default("subtle"),
       })
       .strict(),
     navigation: z
@@ -254,6 +268,20 @@ export const designSpecSchema = z
         mobileHero: z.enum(["stacked", "cropped", "type-first"]),
         mobileDensity: z.enum(["compact", "balanced"]),
         collapseNavigation: z.boolean(),
+        overrides: z
+          .object({
+            simplified: z.boolean(),
+            heroHeight: z.enum(["compact", "balanced"]),
+            headingScale: z.enum(["compact", "balanced"]),
+            navigation: z.enum(["minimal", "standard"]),
+          })
+          .strict()
+          .default({
+            simplified: false,
+            heroHeight: "balanced",
+            headingScale: "balanced",
+            navigation: "standard",
+          }),
       })
       .strict(),
     metadata: z
@@ -369,6 +397,18 @@ function inferPalette(prompt: string, kind: BusinessKind): PaletteId {
 
 function inferMood(prompt: string, kind: BusinessKind): Mood {
   const value = prompt.toLowerCase();
+  if (
+    includesAny(value, [
+      "technology",
+      "software",
+      "platform",
+      "futuristic",
+      "apple-style",
+      "apple like",
+      "apple-like",
+    ])
+  )
+    return "technical";
   for (const mood of moods) if (value.includes(mood)) return mood;
   if (includesAny(value, ["elegant", "luxurious", "premium"])) return "luxury";
   if (kind === "restaurant") return "warm";
@@ -386,10 +426,13 @@ function section(
   options: Partial<Pick<DesignSection, "motion">> & {
     alignment?: DesignSection["layout"]["alignment"];
     density?: DesignSection["layout"]["density"];
+    height?: DesignSection["layout"]["height"];
+    textScale?: DesignSection["layout"]["textScale"];
     fullBleed?: boolean;
     media?: DesignSection["visualTreatment"]["media"];
     contrast?: DesignSection["visualTreatment"]["contrast"];
     surface?: DesignSection["visualTreatment"]["surface"];
+    tone?: DesignSection["tone"];
   } = {},
 ): DesignSection {
   return {
@@ -409,6 +452,8 @@ function section(
     layout: {
       alignment: options.alignment ?? "left",
       density: options.density ?? "balanced",
+      height: options.height ?? "balanced",
+      textScale: options.textScale ?? "balanced",
       fullBleed: options.fullBleed ?? false,
     },
     visualTreatment: {
@@ -417,6 +462,7 @@ function section(
       surface: options.surface ?? "plain",
     },
     motion: options.motion ?? "reveal",
+    tone: options.tone ?? "inherit",
   };
 }
 
@@ -722,7 +768,7 @@ const cafeSections = (): DesignSection[] => [
   ),
 ];
 
-function genericSections(kind: BusinessKind): DesignSection[] {
+function genericSections(kind: BusinessKind, mood: Mood): DesignSection[] {
   const labels: Record<
     BusinessKind,
     { name: string; title: string; offer: string }
@@ -763,72 +809,134 @@ function genericSections(kind: BusinessKind): DesignSection[] {
       offer: "Menu",
     },
   };
-  const copy = labels[kind];
-  return [
-    section(
-      "hero",
-      "hero",
-      kind === "retail"
-        ? "product-focused"
+  const copy =
+    kind === "generic" && mood === "technical"
+      ? {
+          name: "SIGNAL SYSTEMS",
+          title: "Technology that disappears into the work.",
+          offer: "Products",
+        }
+      : labels[kind];
+  const hero = section(
+    "hero",
+    "hero",
+    kind === "retail"
+      ? "product-focused"
+      : kind === "fitness"
+        ? "bold-typographic"
+        : kind === "travel"
+          ? "immersive-image"
+          : kind === "professional"
+            ? "split-composition"
+            : mood === "technical"
+              ? "minimal-luxury"
+              : "cinematic-editorial",
+    {
+      eyebrow: copy.name,
+      title: copy.title,
+      body: "A premium, adaptable website concept built from the business description — ready for real details and imagery.",
+      primaryCta:
+        kind === "retail" ? "Explore the collection" : "Start a conversation",
+      secondaryCta: `Discover ${copy.offer.toLowerCase()}`,
+    },
+    {
+      fullBleed: true,
+      contrast: "high",
+      surface: mood === "technical" ? "plain" : "immersive",
+      media:
+        kind === "travel"
+          ? "panoramic"
+          : kind === "retail"
+            ? "portrait"
+            : mood === "technical"
+              ? "none"
+              : "abstract",
+      density: kind === "fitness" ? "compact" : "airy",
+      height: mood === "technical" ? "compact" : "immersive",
+      motion:
+        kind === "fitness" ? "snap" : mood === "technical" ? "quiet" : "drift",
+    },
+  );
+  const about = section(
+    "about",
+    "about",
+    kind === "professional"
+      ? "editorial-story"
+      : kind === "fitness"
+        ? "values"
+        : mood === "technical"
+          ? "minimal-intro"
+          : "asymmetric-media",
+    {
+      eyebrow: "The point of view",
+      title: "Designed to make the business understood and remembered.",
+      body: "Clear hierarchy, deliberate pacing and useful calls to action create a website that feels specific rather than generic.",
+    },
+    {
+      media:
+        kind === "travel"
+          ? "panoramic"
+          : mood === "technical"
+            ? "none"
+            : "portrait",
+      density: mood === "technical" ? "airy" : "balanced",
+    },
+  );
+  const offerings = section(
+    "offerings",
+    kind === "retail" ? "listings" : "services",
+    kind === "retail"
+      ? "premium-listing"
+      : kind === "travel"
+        ? "immersive-panels"
         : kind === "fitness"
-          ? "bold-typographic"
-          : "cinematic-editorial",
-      {
-        eyebrow: copy.name,
-        title: copy.title,
-        body: "A premium, adaptable website concept built from the business description — ready for real details and imagery.",
-        primaryCta:
-          kind === "retail" ? "Explore the collection" : "Start a conversation",
-        secondaryCta: `Discover ${copy.offer.toLowerCase()}`,
-      },
-      {
-        fullBleed: true,
-        contrast: "high",
-        surface: "immersive",
-        media: "abstract",
-      },
-    ),
-    section(
-      "about",
-      "about",
-      "asymmetric-media",
-      {
-        eyebrow: "The point of view",
-        title: "Designed to make the business understood and remembered.",
-        body: "Clear hierarchy, deliberate pacing and useful calls to action create a website that feels specific rather than generic.",
-      },
-      { media: "portrait" },
-    ),
-    section(
-      "offerings",
-      kind === "retail" ? "listings" : "services",
-      kind === "retail" ? "premium-listing" : "visual-grid",
-      {
-        eyebrow: copy.offer,
-        title: `A focused way to explore ${copy.offer.toLowerCase()}.`,
-        items: [
-          {
-            title: `${copy.offer} one`,
-            body: "Replace this conceptual description with a verified offering.",
-            meta: "Featured",
-            accent: "01",
-          },
-          {
-            title: `${copy.offer} two`,
-            body: "A second clear path for visitors with a different need.",
-            meta: "Considered",
-            accent: "02",
-          },
-          {
-            title: `${copy.offer} three`,
-            body: "A final supporting option without unnecessary complexity.",
-            meta: "Flexible",
-            accent: "03",
-          },
-        ],
-      },
-    ),
-    section("features", "features", "visual-blocks", {
+          ? "horizontal-showcase"
+          : kind === "professional"
+            ? "editorial-list"
+            : mood === "technical"
+              ? "compact-cards"
+              : "visual-grid",
+    {
+      eyebrow: copy.offer,
+      title: `A focused way to explore ${copy.offer.toLowerCase()}.`,
+      items: [
+        {
+          title: `${copy.offer} one`,
+          body: "Replace this conceptual description with a verified offering.",
+          meta: "Featured",
+          accent: "01",
+        },
+        {
+          title: `${copy.offer} two`,
+          body: "A second clear path for visitors with a different need.",
+          meta: "Considered",
+          accent: "02",
+        },
+        {
+          title: `${copy.offer} three`,
+          body: "A final supporting option without unnecessary complexity.",
+          meta: "Flexible",
+          accent: "03",
+        },
+      ],
+    },
+    {
+      density:
+        kind === "professional" || mood === "technical"
+          ? "compact"
+          : "balanced",
+      surface: kind === "travel" ? "immersive" : "plain",
+    },
+  );
+  const features = section(
+    "features",
+    "features",
+    kind === "professional"
+      ? "structured-editorial"
+      : kind === "fitness"
+        ? "icon-list"
+        : "visual-blocks",
+    {
       eyebrow: "Why it works",
       title: "The useful details, given visual presence.",
       items: [
@@ -851,21 +959,60 @@ function genericSections(kind: BusinessKind): DesignSection[] {
           accent: "03",
         },
       ],
-    }),
-    section(
-      "contact",
-      "cta",
-      "split",
-      {
-        eyebrow: "Next step",
-        title: "Turn interest into a real conversation.",
-        body: "Use a clear enquiry action and add verified contact details before publishing.",
-        primaryCta: "Get in touch",
-        secondaryCta: "Learn more",
-      },
-      { fullBleed: true, surface: "elevated" },
-    ),
-  ];
+    },
+    { density: kind === "fitness" ? "compact" : "balanced" },
+  );
+  const contact = section(
+    "contact",
+    "cta",
+    mood === "technical"
+      ? "minimal"
+      : kind === "travel"
+        ? "cinematic"
+        : kind === "professional"
+          ? "contact-focused"
+          : "split",
+    {
+      eyebrow: "Next step",
+      title: "Turn interest into a real conversation.",
+      body: "Use a clear enquiry action and add verified contact details before publishing.",
+      primaryCta: "Get in touch",
+      secondaryCta: "Learn more",
+    },
+    {
+      fullBleed: true,
+      surface: "elevated",
+      alignment: mood === "technical" ? "center" : "left",
+    },
+  );
+  const gallery = section(
+    "gallery",
+    "gallery",
+    kind === "travel" ? "full-bleed" : "editorial-grid",
+    {
+      eyebrow: kind === "travel" ? "The journey in view" : "In context",
+      title:
+        kind === "travel"
+          ? "Places that make the route worth taking."
+          : "Objects, details and the world around them.",
+      items: [
+        { title: "First impression", body: "", meta: "View", accent: "01" },
+        { title: "A closer detail", body: "", meta: "Detail", accent: "02" },
+        { title: "In use", body: "", meta: "Experience", accent: "03" },
+      ],
+    },
+    { media: "mosaic", contrast: "high", surface: "immersive" },
+  );
+
+  if (kind === "travel")
+    return [hero, offerings, gallery, about, features, contact];
+  if (kind === "retail")
+    return [hero, offerings, gallery, about, features, contact];
+  if (kind === "fitness") return [hero, features, offerings, about, contact];
+  if (kind === "professional")
+    return [hero, offerings, about, features, contact];
+  if (mood === "technical") return [hero, features, offerings, about, contact];
+  return [hero, about, offerings, features, contact];
 }
 
 function extractLocation(prompt: string): string {
@@ -893,7 +1040,7 @@ export function generateFallbackDesignSpec(prompt: string): DesignSpec {
       ? hotelSections()
       : isCafe
         ? cafeSections()
-        : genericSections(kind);
+        : genericSections(kind, mood);
   const siteName =
     kind === "hotel"
       ? "MOUNTAIN HOUSE"
@@ -968,6 +1115,9 @@ export function generateFallbackDesignSpec(prompt: string): DesignSpec {
             : mood === "minimal" || mood === "professional"
               ? "quiet"
               : "fluid",
+      headingScale: "balanced",
+      bodyScale: "balanced",
+      buttonStyle: isCafe ? "rounded" : "subtle",
     },
     navigation: {
       style: isCafe
@@ -1008,6 +1158,12 @@ export function generateFallbackDesignSpec(prompt: string): DesignSpec {
           : "cropped",
       mobileDensity: "balanced",
       collapseNavigation: true,
+      overrides: {
+        simplified: false,
+        heroHeight: "balanced",
+        headingScale: "balanced",
+        navigation: "standard",
+      },
     },
     metadata: {
       source: "fallback",

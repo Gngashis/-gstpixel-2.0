@@ -46,11 +46,17 @@ async function tellStudio(
   page: Parameters<typeof safeGoto>[0],
   instruction: string,
 ) {
-  await page.getByLabel("Tell Studio what to change").fill(instruction);
-  await page.getByRole("button", { name: "Apply change" }).click();
-  await expect(
-    page.getByText("Your instruction changed the website."),
-  ).toBeVisible();
+  const input = page.getByLabel("Tell Studio what to change");
+  const apply = page.getByRole("button", { name: "Apply change" });
+  await input.fill(instruction);
+  await apply.click();
+  await expect(input).toHaveValue("", { timeout: 10_000 });
+  await expect(page.locator(".studio-v2-canvas")).not.toHaveClass(
+    /is-changing/,
+  );
+  await expect(page.locator(".studio-v2-status")).not.toContainText(
+    /Understanding|Planning changes|Applying/,
+  );
 }
 
 test.describe("Website Studio V2", () => {
@@ -179,6 +185,151 @@ test.describe("Website Studio V2", () => {
     await expect(
       page.getByRole("button", { name: /^About\s+3$/ }),
     ).toBeVisible();
+  });
+
+  test("shows context-aware suggestions for selected sections and mobile mode", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+
+    const suggestions = page.getByLabel("Suggested changes");
+    await expect(
+      suggestions.getByRole("button", {
+        name: "Make this hero more cinematic",
+      }),
+    ).toBeVisible();
+    await expect(
+      suggestions.getByRole("button", { name: "Reduce the hero height" }),
+    ).toBeVisible();
+
+    await page
+      .getByTestId("studio-preview")
+      .locator('[data-section-type="services"]')
+      .click();
+    await expect(
+      suggestions.getByRole("button", {
+        name: "Make these services easier to scan",
+      }),
+    ).toBeVisible();
+    await expect(
+      suggestions.getByRole("button", { name: "Try a more editorial layout" }),
+    ).toBeVisible();
+
+    await page.getByRole("button", { name: /Mobile/i }).click();
+    await expect(
+      suggestions.getByRole("button", { name: "Simplify this for mobile" }),
+    ).toBeVisible();
+    await expect(suggestions).not.toContainText("testimpnoal");
+  });
+
+  test("executes a multi-intent instruction as one undoable transaction", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const preview = page.getByTestId("studio-preview");
+    const originalPalette = await preview.getAttribute("data-palette");
+    const originalOrder = await preview
+      .locator("[data-section-type]")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("data-section-type")),
+      );
+    const originalGalleryCount = await preview
+      .locator('[data-section-type="gallery"]')
+      .count();
+
+    await tellStudio(
+      page,
+      "Make it all black, shorten the hero, move services above about, and add a gallery after services.",
+    );
+    await expect(preview).toHaveAttribute("data-palette", "midnight-champagne");
+    await expect(preview.locator(".studio-v2-site-hero")).toHaveClass(
+      /height-compact/,
+    );
+    const changedOrder = await preview
+      .locator("[data-section-type]")
+      .evaluateAll((nodes) =>
+        nodes.map((node) => node.getAttribute("data-section-type")),
+      );
+    expect(changedOrder.indexOf("services")).toBeLessThan(
+      changedOrder.indexOf("about"),
+    );
+    await expect(preview.locator('[data-section-type="gallery"]')).toHaveCount(
+      originalGalleryCount + 1,
+    );
+    await expect(page.locator(".studio-v2-status")).toContainText(
+      /updated|refined|added|reordered/i,
+    );
+
+    await page.getByRole("button", { name: "Undo last change" }).click();
+    await expect(preview).toHaveAttribute("data-palette", originalPalette!);
+    expect(
+      await preview
+        .locator("[data-section-type]")
+        .evaluateAll((nodes) =>
+          nodes.map((node) => node.getAttribute("data-section-type")),
+        ),
+    ).toEqual(originalOrder);
+    await expect(preview.locator('[data-section-type="gallery"]')).toHaveCount(
+      originalGalleryCount,
+    );
+  });
+
+  test("keeps a short natural-language conversation scoped to the hero", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const hero = page
+      .getByTestId("studio-preview")
+      .locator('[data-section-type="hero"] section');
+
+    await tellStudio(page, "Make the hero dark.");
+    await expect(hero).toHaveClass(/tone-dark/);
+    await tellStudio(page, "More dramatic.");
+    await expect(hero).toHaveClass(/tone-dark/);
+    await expect(hero).toHaveClass(/height-immersive/);
+    await tellStudio(page, "Keep the darkness but make the text smaller.");
+    await expect(hero).toHaveClass(/tone-dark/);
+    await expect(hero).toHaveClass(/text-compact/);
+  });
+
+  test("respects selected-section scope and mobile-only scope", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const preview = page.getByTestId("studio-preview");
+    const originalPalette = await preview.getAttribute("data-palette");
+
+    const about = preview.locator('[data-section-type="about"]');
+    await about.click();
+    await tellStudio(page, "Change only this section to black.");
+    await expect(about.locator("section")).toHaveClass(/tone-dark/);
+    await expect(preview).toHaveAttribute("data-palette", originalPalette!);
+
+    const originalMood = await preview.getAttribute("data-mood");
+    await page.getByRole("button", { name: /Mobile/i }).click();
+    await tellStudio(page, "Make mobile cleaner but don't change desktop.");
+    await expect(preview).toHaveClass(/mobile-simplified/);
+    await expect(preview).toHaveClass(/mobile-nav-minimal/);
+    await expect(preview).toHaveAttribute("data-palette", originalPalette!);
+    await expect(preview).toHaveAttribute("data-mood", originalMood!);
+  });
+
+  test("reports unsupported logo uploads without changing history", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generateWebsite(page);
+    const undo = page.getByRole("button", { name: "Undo last change" });
+    await expect(undo).toBeDisabled();
+    await tellStudio(page, "Put my logo in the navigation.");
+    await expect(page.locator(".studio-v2-status")).toContainText(
+      "actual logo file",
+    );
+    await expect(undo).toBeDisabled();
   });
 
   test("produces an alternate version and supports undo and redo", async ({
@@ -387,3 +538,90 @@ for (const viewport of [
     });
   });
 }
+
+const businessVisualMatrix = [
+  {
+    slug: "luxury-resort",
+    prompt: resortPrompt,
+    hero: "hospitality-focused",
+  },
+  {
+    slug: "cafe",
+    prompt: cafePrompt,
+    hero: "split-composition",
+  },
+  {
+    slug: "fitness-studio",
+    prompt:
+      "Create a bold high-energy fitness studio website with programs, coaches, memberships and a trial enquiry.",
+    hero: "bold-typographic",
+  },
+  {
+    slug: "technology-company",
+    prompt:
+      "Create a minimal futuristic Apple-style technology company website for a premium software platform.",
+    hero: "minimal-luxury",
+  },
+  {
+    slug: "travel-agency",
+    prompt:
+      "Create a cinematic travel agency website with destinations, signature journeys and direct enquiries.",
+    hero: "immersive-image",
+  },
+  {
+    slug: "professional-services",
+    prompt:
+      "Create a sophisticated professional services website with expertise, process and contact.",
+    hero: "split-composition",
+  },
+  {
+    slug: "online-shop",
+    prompt:
+      "Create a premium online shop for considered home objects, product collections and editorial storytelling.",
+    hero: "product-focused",
+  },
+] as const;
+
+test("Website Studio V2 seven-business visual matrix", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  const directory = path.join(
+    process.cwd(),
+    "qa-screenshots",
+    "website-studio-intelligence",
+  );
+  fs.mkdirSync(directory, { recursive: true });
+  const signatures: string[] = [];
+
+  for (const business of businessVisualMatrix) {
+    await openStudio(page);
+    await generateWebsite(page, business.prompt);
+    const preview = page.getByTestId("studio-preview");
+    await expect(preview.locator(".studio-v2-site-hero")).toHaveClass(
+      new RegExp(`variant-${business.hero}`),
+    );
+    const signature = await preview
+      .locator("[data-section-type]")
+      .evaluateAll((nodes) =>
+        nodes
+          .map((node) => {
+            const section = node.querySelector("section");
+            return `${node.getAttribute("data-section-type")}:${section?.className ?? ""}`;
+          })
+          .join("|"),
+      );
+    signatures.push(signature);
+    await page.evaluate(() => {
+      if (document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      }
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+    await page.screenshot({
+      path: path.join(directory, `${business.slug}.png`),
+      fullPage: true,
+    });
+    await page.getByRole("button", { name: "Start a new website" }).click();
+  }
+
+  expect(new Set(signatures).size).toBe(businessVisualMatrix.length);
+});

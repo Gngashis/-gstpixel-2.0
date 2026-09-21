@@ -91,7 +91,7 @@ function Visual({
 function HeroSection({ section, businessKind }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-hero variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-hero variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <div className="studio-v2-site-hero-copy">
@@ -128,7 +128,7 @@ function SectionHeading({ section }: { section: DesignSection }) {
 function AboutSection({ section, businessKind }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-about variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-about variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <SectionHeading section={section} />
@@ -151,7 +151,7 @@ function AboutSection({ section, businessKind }: SectionProps) {
 function CardsSection({ section }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-cards type-${section.type} variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-cards type-${section.type} variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <SectionHeading section={section} />
@@ -186,7 +186,7 @@ function CardsSection({ section }: SectionProps) {
 function GallerySection({ section }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-gallery variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-gallery variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <SectionHeading section={section} />
@@ -211,7 +211,7 @@ function GallerySection({ section }: SectionProps) {
 function TestimonialsSection({ section }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-quotes variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-quotes variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <SectionHeading section={section} />
@@ -231,7 +231,7 @@ function TestimonialsSection({ section }: SectionProps) {
 function CtaSection({ section }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-cta variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-cta variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <SectionHeading section={section} />
@@ -243,7 +243,7 @@ function CtaSection({ section }: SectionProps) {
 function ContactSection({ section }: SectionProps) {
   return (
     <section
-      className={`studio-v2-section studio-v2-site-contact variant-${section.variant}`}
+      className={`studio-v2-section studio-v2-site-contact variant-${section.variant} density-${section.layout.density} height-${section.layout.height} text-${section.layout.textScale} tone-${section.tone} motion-${section.motion} contrast-${section.visualTreatment.contrast} surface-${section.visualTreatment.surface}`}
       id={section.id}
     >
       <SectionHeading section={section} />
@@ -292,7 +292,7 @@ export function WebsiteRenderer({
   } as CSSProperties;
   return (
     <article
-      className={`studio-v2-site palette-${spec.theme.palette} mood-${spec.theme.mood} type-${spec.theme.typography} radius-${spec.theme.radius} surface-${spec.theme.surface}`}
+      className={`studio-v2-site palette-${spec.theme.palette} mood-${spec.theme.mood} type-${spec.theme.typography} radius-${spec.theme.radius} surface-${spec.theme.surface} heading-${spec.theme.headingScale} body-${spec.theme.bodyScale} buttons-${spec.theme.buttonStyle} mobile-density-${spec.responsive.mobileDensity}${spec.responsive.overrides.simplified ? " mobile-simplified" : ""} mobile-hero-${spec.responsive.overrides.heroHeight} mobile-heading-${spec.responsive.overrides.headingScale} mobile-nav-${spec.responsive.overrides.navigation}`}
       data-testid="studio-preview"
       data-palette={spec.theme.palette}
       data-mood={spec.theme.mood}
