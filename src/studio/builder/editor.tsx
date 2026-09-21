@@ -20,8 +20,10 @@ import {
   WandSparkles,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
+import { Link } from "@tanstack/react-router";
 import { useReducedMotion } from "@/lib/motion";
 import { buildStudioWhatsappHref } from "../contact";
+import { consumeStudioIntakePrompt } from "../intake";
 import {
   createAlternateDesignSpec,
   createSectionForType,
@@ -165,8 +167,25 @@ export function StudioBuilder() {
   const reducedMotion = useReducedMotion();
   const controllerRef = useRef<AbortController | null>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
+  /* A description carried from the homepage quick-start lives only in module
+     memory and is consumed here, once, on mount. */
+  const [intakePrompt] = useState(() => consumeStudioIntakePrompt());
+  /* Guards the homepage handoff so the carried description generates exactly
+     once, even when passive effects reconnect during navigation churn. */
+  const intakeStartedRef = useRef(false);
 
-  useEffect(() => () => controllerRef.current?.abort(), []);
+  /* Abort in-flight generation when Studio truly unmounts. The abort is
+     deferred a tick because React briefly disconnects and reconnects passive
+     effects while a client-side navigation settles; a reconnect cancels the
+     pending abort, while a real unmount (which never reconnects) still lands
+     it. Without this, the churn cleanup aborts a generation that is already
+     running. */
+  useEffect(() => {
+    let abortTimer: number | undefined;
+    return () => {
+      abortTimer = window.setTimeout(() => controllerRef.current?.abort(), 50);
+    };
+  }, []);
 
   const activePage = useMemo(
     () =>
@@ -188,9 +207,9 @@ export function StudioBuilder() {
     });
   };
 
-  const generate = async (event?: FormEvent) => {
+  const generate = async (event?: FormEvent, override?: string) => {
     event?.preventDefault();
-    const value = prompt.replace(/\s+/g, " ").trim();
+    const value = (override ?? prompt).replace(/\s+/g, " ").trim();
     if (value.length < 10) {
       setStatus(
         "Describe the business and the website you want in a little more detail.",
@@ -235,6 +254,23 @@ export function StudioBuilder() {
     );
     revealCanvas();
   };
+
+  /* Homepage quick-start handoff: begin generating from the carried
+     description so the journey feels like one continuous step. The start is
+     deferred through a single timer: effect cleanup clears it and a reconnect
+     schedules it again, so generation begins only after the navigation's
+     passive-effect churn settles (~150 ms after route change), exactly once,
+     and never after a real unmount. */
+  useEffect(() => {
+    if (!intakePrompt || intakeStartedRef.current) return;
+    setPrompt(intakePrompt);
+    const timer = window.setTimeout(() => {
+      intakeStartedRef.current = true;
+      void generate(undefined, intakePrompt);
+    }, 250);
+    return () => window.clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [intakePrompt]);
 
   const applySpec = (next: DesignSpec, message: string) => {
     if (!spec) return;
@@ -718,6 +754,23 @@ export function StudioBuilder() {
                       : "Studio"}
             </strong>
             {status}
+          </div>
+          <div className="studio-v2-concept-cta">
+            <p>
+              <strong>This is an instant concept preview.</strong> Your final
+              website can be fully customised with your real content, branding,
+              images, integrations, SEO and business requirements.
+            </p>
+            <Link
+              to="/start-your-project"
+              search={{
+                interest: "website",
+                context: `I created a website concept for “${spec.site.name}” with GSTPIXEL Website Studio and would like to build the complete version.`,
+              }}
+              data-testid="studio-build-complete"
+            >
+              Build the complete version <ArrowRight size={14} />
+            </Link>
           </div>
         </main>
 

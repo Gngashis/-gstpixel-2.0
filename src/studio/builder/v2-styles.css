@@ -934,6 +934,65 @@
   border-radius: 0.4rem;
 }
 
+/* Concept → client conversion pathway: quiet, honest, and clearly separated
+   from the editing controls. */
+.studio-v2-concept-cta {
+  display: flex;
+  width: min(100%, 58rem);
+  align-items: center;
+  gap: 0.9rem;
+  margin: 0.9rem auto 0;
+  padding: 0.7rem 0.85rem;
+  background: rgb(255 255 255 / 3%);
+  border: 1px solid var(--v2-line);
+  border-radius: 0.6rem;
+}
+
+.studio-v2-concept-cta p {
+  flex: 1 1 18rem;
+  color: rgb(255 255 255 / 52%);
+  font-size: 0.66rem;
+  line-height: 1.55;
+}
+
+.studio-v2-concept-cta p strong {
+  color: rgb(255 255 255 / 82%);
+  font-weight: 650;
+}
+
+.studio-v2-concept-cta a {
+  display: inline-flex;
+  flex: 0 0 auto;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0 0.95rem;
+  color: #071012;
+  font-size: 0.66rem;
+  font-weight: 750;
+  white-space: nowrap;
+  background: var(--primary);
+  border-radius: 0.45rem;
+}
+
+.studio-v2-concept-cta a:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--primary) 80%, white);
+  outline-offset: 2px;
+}
+
+@media (max-width: 760px) {
+  .studio-v2-concept-cta {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .studio-v2-concept-cta a {
+    width: 100%;
+  }
+}
+
 .studio-v2-owner-cta svg:last-child {
   margin-left: auto;
 }

@@ -21,7 +21,8 @@ test.describe("keyboard accessibility", () => {
     await reduceMotion(page);
     await safeGoto(page, "/");
 
-    const cta = page.getByRole("link", { name: /Start your project/i }).first();
+    // The homepage's primary action is the Website Studio quick-start.
+    const cta = page.getByRole("button", { name: /Create my website/i });
     await cta.focus();
     await expect(cta).toBeFocused();
 

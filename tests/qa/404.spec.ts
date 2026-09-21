@@ -45,7 +45,12 @@ test.describe("404 recovery", () => {
       });
       await assertPageHealthy(page, { route: "/", viewport });
 
-      expect(errors).toHaveLength(0);
+      // The not-found route itself must respond with HTTP 404, which Chromium
+      // always logs as a console error. Everything else must be clean.
+      const unexpectedErrors = errors.filter(
+        (error) => !/the server responded with a status of 404/.test(error),
+      );
+      expect(unexpectedErrors).toHaveLength(0);
     });
   }
 });

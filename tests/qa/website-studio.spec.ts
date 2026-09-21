@@ -60,6 +60,86 @@ async function tellStudio(
 }
 
 test.describe("Website Studio V2", () => {
+  test("carries a homepage description into Studio and starts generating", async ({
+    page,
+  }) => {
+    await reduceMotion(page);
+    const errors = await safeGoto(page, "/");
+    await waitForHydration(page);
+
+    const input = page.getByLabel("Describe your business");
+    await expect(input).toBeVisible();
+    await input.fill(
+      "I run a gym in Jaigaon and need a modern website for memberships and personal training.",
+    );
+    await page.getByRole("button", { name: /Create my website/i }).click();
+
+    await expect(page).toHaveURL(/\/website-studio$/);
+    const preview = page.getByTestId("studio-preview");
+    await expect(preview).toBeVisible({ timeout: 10_000 });
+    await expect(preview).toContainText("FORM STUDIO");
+    expect(errors).toHaveLength(0);
+  });
+
+  test("homepage Studio entry submits from the keyboard", async ({ page }) => {
+    await reduceMotion(page);
+    await safeGoto(page, "/");
+    await waitForHydration(page);
+
+    const input = page.getByLabel("Describe your business");
+    await input.focus();
+    await expect(input).toBeFocused();
+    await input.fill(
+      "I run a gym in Jaigaon and need a modern website for memberships and personal training.",
+    );
+    await page.keyboard.press("Enter");
+
+    await expect(page).toHaveURL(/\/website-studio$/);
+    await expect(page.getByTestId("studio-preview")).toBeVisible({
+      timeout: 10_000,
+    });
+  });
+
+  test("homepage quick-start leaves no persisted prompt behind", async ({
+    page,
+  }) => {
+    await reduceMotion(page);
+    await safeGoto(page, "/");
+    await waitForHydration(page);
+    await page
+      .getByLabel("Describe your business")
+      .fill(
+        "I run a gym in Jaigaon and need a modern website for memberships and personal training.",
+      );
+    await page.getByRole("button", { name: /Create my website/i }).click();
+    await expect(page.getByTestId("studio-preview")).toBeVisible({
+      timeout: 10_000,
+    });
+
+    const storage = await page.evaluate(() => ({
+      local: Object.fromEntries(
+        Array.from({ length: localStorage.length }, (_, index) => {
+          const key = localStorage.key(index) ?? "";
+          return [key, localStorage.getItem(key)];
+        }),
+      ),
+      session: Object.fromEntries(
+        Array.from({ length: sessionStorage.length }, (_, index) => {
+          const key = sessionStorage.key(index) ?? "";
+          return [key, sessionStorage.getItem(key)];
+        }),
+      ),
+      url: window.location.href,
+    }));
+    expect(JSON.stringify(storage).toLowerCase()).not.toContain("gym");
+    expect(
+      Object.keys(storage.local).some((key) => key.includes("studio")),
+    ).toBe(false);
+    expect(
+      Object.keys(storage.session).some((key) => key.includes("studio")),
+    ).toBe(false);
+  });
+
   test("loads directly and preserves normal browser navigation", async ({
     page,
   }) => {

@@ -8,6 +8,7 @@ import { useReducedMotion } from "@/lib/motion";
 import { businessFacts } from "@/lib/content";
 
 const nav = [
+  ["Studio", "/website-studio"],
   ["Services", "/services"],
   ["Solutions", "/solutions"],
   ["Work", "/work"],
@@ -494,6 +495,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="footer-column">
               <p className="label">Begin</p>
+              <Link to="/website-studio">Website Studio</Link>
               <Link to="/start-your-project">Start your project</Link>
               <Link to="/privacy">Privacy</Link>
             </div>

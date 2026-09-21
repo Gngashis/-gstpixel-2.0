@@ -1,13 +1,16 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   ArrowRight,
   Braces,
   CircuitBoard,
   FileCheck2,
   Gauge,
+  MessageCircle,
   Sparkles,
+  WandSparkles,
 } from "lucide-react";
-import { Button, ButtonLink } from "@/components/ui/button";
+import { useRef, useState, type FormEvent } from "react";
+import { ButtonLink } from "@/components/ui/button";
 import {
   ScrollReveal,
   StaggeredReveal,
@@ -33,26 +36,27 @@ import {
   FounderHeroSignal,
   FounderSection,
 } from "@/components/founder-experience";
+import { setStudioIntakePrompt } from "@/studio/intake";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       {
-        title: "GSTPIXEL — Websites, AI Automation & GST Services in Jaigaon",
+        title: "GSTPIXEL — Website Studio & Website Development in Jaigaon",
       },
       {
         name: "description",
         content:
-          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India, Phuentsholing, and Bhutan.",
+          "Describe your business and GSTPIXEL Website Studio creates an instant website concept. GSTPIXEL builds complete websites, apps, software and AI automation — plus GST, FSSAI and business setup services from Jaigaon, West Bengal, for India and Bhutan.",
       },
       {
         property: "og:title",
-        content: "GSTPIXEL — Websites, AI Automation & GST Services in Jaigaon",
+        content: "GSTPIXEL — Website Studio & Website Development in Jaigaon",
       },
       {
         property: "og:description",
         content:
-          "GST registration and compliance assistance, FSSAI-related services, website and app development, and AI automation — from Jaigaon, West Bengal, for businesses across India, Phuentsholing, and Bhutan.",
+          "Describe your business and GSTPIXEL Website Studio creates an instant website concept. GSTPIXEL builds complete websites, apps, software and AI automation — plus GST, FSSAI and business setup services from Jaigaon, West Bengal, for India and Bhutan.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/") },
@@ -64,6 +68,66 @@ export const Route = createFileRoute("/")({
   }),
   component: Home,
 });
+
+/**
+ * Homepage quick-start into Website Studio.
+ *
+ * One plain-language field. On submit the description is handed to Studio
+ * through an in-memory channel (never the URL, never storage) and the visitor
+ * lands directly in the Studio generation flow.
+ */
+function StudioQuickStart() {
+  const navigate = useNavigate();
+  /* The field is uncontrolled and read from the DOM on submit: whatever the
+     visitor typed before React finished hydrating stays in the input instead
+     of being reset to the server-rendered empty state. */
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState("");
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const prompt = (inputRef.current?.value ?? "").replace(/\s+/g, " ").trim();
+    if (prompt.length < 10) {
+      setError(
+        "Tell us a little more about your business — one sentence is enough.",
+      );
+      return;
+    }
+    setStudioIntakePrompt(prompt);
+    void navigate({ to: "/website-studio" });
+  };
+
+  return (
+    <form className="hero-studio" onSubmit={submit} noValidate>
+      <label htmlFor="hero-studio-prompt">Describe your business</label>
+      <div className="hero-studio-row">
+        <input
+          id="hero-studio-prompt"
+          ref={inputRef}
+          type="text"
+          onChange={() => {
+            if (error) setError("");
+          }}
+          placeholder="Example: I run a gym in Jaigaon and need a modern website for memberships and personal training."
+          maxLength={300}
+          autoComplete="off"
+          enterKeyHint="go"
+        />
+        <button type="submit" className="tactile">
+          Create my website <WandSparkles size={16} aria-hidden="true" />
+        </button>
+      </div>
+      <p className="hero-studio-note">
+        Free instant concept · No sign-up · Used for this session only
+      </p>
+      {error && (
+        <p className="hero-studio-error" role="alert">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}
 
 function Home() {
   const heroCta = useMagnetic<HTMLSpanElement>();
@@ -100,44 +164,37 @@ function Home() {
           <div className="lg:col-span-6">
             <ScrollReveal variant="fadeInUp" delay={0}>
               <p className="label text-primary hero-kicker">
-                <span className="signal-dot" /> The GSTPIXEL Assembly
+                <span className="signal-dot" /> GSTPIXEL · Website Studio
               </p>
             </ScrollReveal>
             <ScrollReveal variant="maskIn" delay={0.1}>
-              <h1>
-                One system for how a business is built, automated, and run.
-              </h1>
+              <h1>Turn your business idea into a website.</h1>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
               <p className="hero-copy">
-                Business consulting and services, digital development, and
-                automation—connected into one coherent path, whether you are
-                starting a business, keeping it compliant, or taking it online.
-              </p>
-            </ScrollReveal>
-            <ScrollReveal variant="fadeInUp" delay={0.25}>
-              <p className="label text-primary hero-tagline">
-                {businessFacts.tagline}
+                Describe your business, see a professional website concept, and
+                refine it in plain language. When you are ready, GSTPIXEL builds
+                the complete website, app, or digital system for you.
               </p>
             </ScrollReveal>
             <ScrollReveal variant="scaleIn" delay={0.3}>
+              <StudioQuickStart />
+            </ScrollReveal>
+            <ScrollReveal variant="fadeInUp" delay={0.35}>
               <div className="hero-actions">
-                <div className="mt-9 flex flex-wrap gap-3">
+                <div className="mt-9 flex flex-wrap items-center gap-3">
                   <span ref={heroCta.ref} className="magnetic">
-                    <ButtonLink to="/start-your-project">
-                      Start your project <ArrowRight size={16} />
+                    <ButtonLink to="/start-your-project" variant="secondary">
+                      Start a custom project <ArrowRight size={16} />
                     </ButtonLink>
                   </span>
-                  <ButtonLink to="/services" variant="secondary">
-                    Explore services
-                  </ButtonLink>
                 </div>
                 <FounderHeroSignal />
               </div>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.4}>
               <div className="hero-meta">
-                <span>IDEA → GROWTH</span>
+                <span>IDEA → WEBSITE</span>
                 <span>GSTPIXEL / 02.0</span>
               </div>
             </ScrollReveal>
@@ -153,38 +210,61 @@ function Home() {
       <section
         className="content-band env-section"
         data-env-phase="0"
-        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+        style={{ "--env-glow-x": "55%", "--env-glow-y": "35%" }}
       >
-        <div className="site-container">
-          <SectionHeader
-            label="01 / Find your path"
-            title="Start with the outcome."
-          />
-          <StaggeredReveal
-            baseDelay={0.08}
-            variant="fadeInUp"
-            className="outcome-list outcome-list-cards"
-          >
-            {solutions.map((x, i) => (
-              <Link
-                key={x.slug}
-                to="/solutions/$slug"
-                params={{ slug: x.slug }}
-                className="assembly-panel"
-              >
-                {/* The node badge carries the stage number, so the card does
-                    not need a second overlapping counter. */}
-                <span className="assembly-node" aria-hidden="true">
-                  0{i + 1}
+        <div className="site-container editorial-split">
+          <div>
+            <SectionHeader
+              label="01 / Website Studio"
+              title="Describe it. Watch it become a website."
+            />
+            <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
+              <p className="section-copy">
+                Website Studio turns a plain-language description of your
+                business into a professional website concept in seconds — then
+                keeps refining it the same way. No templates to choose, nothing
+                to install, nothing to learn.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <ButtonLink
+                  to="/website-studio"
+                  className="luminous-edge"
+                  style={{ borderRadius: "0.5rem" }}
+                >
+                  Try Website Studio <ArrowRight size={16} />
+                </ButtonLink>
+              </div>
+              <p className="section-copy" style={{ marginTop: "1.25rem" }}>
+                Concepts are instant and free to explore. When you are ready,
+                GSTPIXEL builds the complete website — your real content,
+                branding, integrations, SEO and launch.
+              </p>
+            </StaggeredReveal>
+          </div>
+          <div className="operation-ledger">
+            <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
+              <div className="assembly-panel ledger-row">
+                <span>
+                  <MessageCircle size={18} />
                 </span>
-                <span className="outcome-card-body">
-                  <strong>{x.title}</strong>
-                  <p>{x.summary}</p>
-                </span>
-                <ArrowRight aria-hidden="true" />
-              </Link>
-            ))}
-          </StaggeredReveal>
+                <strong>Then keep talking to it</strong>
+                <Sparkles size={18} />
+              </div>
+              {[
+                "“Make it more premium”",
+                "“Use warmer colours”",
+                "“Add a gallery”",
+                "“Make the mobile version cleaner”",
+                "“Add a contact section”",
+              ].map((x, i) => (
+                <div key={x} className="assembly-panel ledger-row">
+                  <span>0{i + 1}</span>
+                  <strong>{x}</strong>
+                  <WandSparkles size={18} />
+                </div>
+              ))}
+            </StaggeredReveal>
+          </div>
         </div>
       </section>
 
@@ -301,13 +381,51 @@ function Home() {
 
       <section
         className="content-band env-section"
+        data-env-phase="2"
+        style={{ "--env-glow-x": "50%", "--env-glow-y": "50%" }}
+      >
+        <div className="site-container">
+          <SectionHeader
+            label="04 / Find your path"
+            title="Start with the outcome."
+          />
+          <StaggeredReveal
+            baseDelay={0.08}
+            variant="fadeInUp"
+            className="outcome-list outcome-list-cards"
+          >
+            {solutions.map((x, i) => (
+              <Link
+                key={x.slug}
+                to="/solutions/$slug"
+                params={{ slug: x.slug }}
+                className="assembly-panel"
+              >
+                {/* The node badge carries the stage number, so the card does
+                    not need a second overlapping counter. */}
+                <span className="assembly-node" aria-hidden="true">
+                  0{i + 1}
+                </span>
+                <span className="outcome-card-body">
+                  <strong>{x.title}</strong>
+                  <p>{x.summary}</p>
+                </span>
+                <ArrowRight aria-hidden="true" />
+              </Link>
+            ))}
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section
+        className="content-band env-section"
         data-env-phase="3"
         style={{ "--env-glow-x": "40%", "--env-glow-y": "60%" }}
       >
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="04 / Operate"
+              label="05 / Operate"
               title="Business essentials, made easier to navigate."
             />
             <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
@@ -371,7 +489,7 @@ function Home() {
           <div className="flex flex-wrap items-end justify-between gap-5">
             <div>
               <ScrollReveal variant="fadeInUp" delay={0}>
-                <p className="label text-primary">05 / Concept Lab</p>
+                <p className="label text-primary">06 / Concept Lab</p>
               </ScrollReveal>
               <ScrollReveal variant="fadeInUp" delay={0.1}>
                 <h2 className="section-title">
@@ -433,7 +551,7 @@ function Home() {
         <div className="site-container">
           <div className="flex flex-wrap items-end justify-between gap-5">
             <SectionHeader
-              label="06 / Useful tools"
+              label="07 / Useful tools"
               title="Move from uncertainty to a useful next step."
             />
             <ScrollReveal variant="scaleIn" delay={0.15}>
@@ -512,7 +630,7 @@ function Home() {
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="07 / Why GSTPIXEL"
+              label="08 / Why GSTPIXEL"
               title="Sophisticated inside. Simple outside."
             />
           </div>
@@ -554,7 +672,7 @@ function Home() {
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="08 / Where we work"
+              label="09 / Where we work"
               title="Rooted in Jaigaon. Relevant across India."
             />
             <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
@@ -644,7 +762,7 @@ function Home() {
       >
         <div className="site-container">
           <SectionHeader
-            label="09 / Process"
+            label="10 / Process"
             title="From first conversation to a working outcome."
           />
           <StaggeredReveal
@@ -676,7 +794,7 @@ function Home() {
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="10 / Resources"
+              label="11 / Resources"
               title="Useful guidance, when it is ready."
             />
           </div>
