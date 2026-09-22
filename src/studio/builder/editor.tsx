@@ -2010,8 +2010,8 @@ export function StudioBuilder() {
           {/* The headline action stays outside the groups: it is the one
               control a visitor reaches for before anything else. */}
           <div className="studio-v2-alternate">
-            <button type="button" onClick={createFreshVersion}>
-              <MonitorSmartphone size={16} /> Show another version
+            <button type="button" onClick={createFreshVersion} data-testid="studio-alternate">
+              <MonitorSmartphone size={16} /> Try another design
             </button>
           </div>
           <details className="studio-v2-control-group" open>
@@ -2173,7 +2173,35 @@ export function StudioBuilder() {
             />
           </details>
           <details className="studio-v2-control-group">
-            <summary>Motion character</summary>
+            <summary>Animation</summary>
+            <ChoiceRow
+              label="Level"
+              value={spec.metadata.motionLevel ?? (activeBlueprint?.motion.family === "cinematic" ? "cinematic" : activeBlueprint?.motion.family === "luxury" ? "premium" : "subtle")}
+              options={[
+                { value: "none", label: "None" },
+                { value: "subtle", label: "Subtle" },
+                { value: "premium", label: "Premium" },
+                { value: "cinematic", label: "Cinematic" },
+              ]}
+              onSelect={(value) => {
+                const level = value as "none" | "subtle" | "premium" | "cinematic";
+                const family = level === "cinematic" ? "cinematic" : level === "premium" ? "luxury" : level === "none" ? "quiet" : "editorial";
+                applySpec(
+                  {
+                    ...spec,
+                    theme: {
+                      ...spec.theme,
+                      motion: level === "none" ? "quiet" : level === "cinematic" ? "cinematic" : "fluid",
+                    },
+                    metadata: {
+                      ...spec.metadata,
+                      motionLevel: level,
+                    },
+                  },
+                  `Animation set to ${titleCase(value)}.`,
+                );
+              }}
+            />
             <ChoiceRow
               label="Feel"
               value={activeBlueprint?.motion.family}
@@ -2188,7 +2216,7 @@ export function StudioBuilder() {
                       family: value as (typeof motionFamilies)[number],
                     },
                   },
-                  `Motion set to ${titleCase(value)}.`,
+                  `Motion style set to ${titleCase(value)}.`,
                 )
               }
             />

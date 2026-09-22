@@ -1025,6 +1025,12 @@ function creativeTheme(
     matched = true;
   }
   if (
+    includesAny(value, ["blue", "change to blue", "make it blue", "ocean", "cobalt"])
+  ) {
+    theme.palette = "cobalt-cream";
+    matched = true;
+  }
+  if (
     includesAny(value, [
       "luxury",
       "luxurious",
@@ -1323,7 +1329,7 @@ export function planStudioChange(
       ? "section"
       : "site";
   const wantsAlternateDirection =
-    /\b(completely different|totally different|another version|another direction|different version|start over|surprise me)\b/.test(
+    /\b(try another design|another design|different design|completely different|totally different|another version|another direction|different version|start over|surprise me)\b/.test(
       value,
     );
   if (wantsAlternateDirection) {
