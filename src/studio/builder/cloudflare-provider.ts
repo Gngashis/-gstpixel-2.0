@@ -42,7 +42,15 @@ Security and output rules:
 - You never write copy: no titles, body text, testimonials, prices, dates, statistics, awards, certifications or claims.
 - Do not invent customers, ratings, years in business, addresses, staff or factual history.
 - Different businesses must receive genuinely different creative directions: vary hero family, composition, typography character, colour environment, navigation family, art direction, motion and the section families.
-- The supplied candidate is already functional and safe. Improve it only where the description clearly justifies a different direction.`;
+- The supplied candidate is already functional and safe. Improve it only where the description clearly justifies a different direction.
+
+Before you respond, critique your own draft once against these anti-template checks:
+- Would this composition look generic, or like a SaaS template?
+- Are there too many rounded cards, or is every section a three-column grid?
+- Are the section rhythms repetitive, or is the hero wrong for this specific business?
+- Do the typography, palette, page architecture and CTA genuinely fit this business?
+- Is there enough visual hierarchy, and do unrelated industries avoid the same composition?
+If the draft fails any check, revise it once and return only the final, improved patch. Never mention the critique, the draft or your process — the response is the finished patch only.`;
 
 function modelFor(env?: Record<string, unknown>): string {
   return resolveStudioAiRuntime(env).model;
