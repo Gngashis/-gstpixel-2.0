@@ -415,7 +415,7 @@ export const designSpecSchema = z
       .strict(),
     metadata: z
       .object({
-        source: z.enum(["fallback", "ai", "modified"]),
+        source: z.enum(["fallback", "ai", "modified", "nvidia"]),
         conceptLabel: normalizedText(60, 1),
         revision: z.number().int().min(1).max(999),
         /**

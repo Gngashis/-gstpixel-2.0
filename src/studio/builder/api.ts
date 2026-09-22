@@ -5,6 +5,10 @@ import {
   planStudioChangeWithWorkersAi,
 } from "./cloudflare-provider";
 import {
+  planCreativeBlueprintWithNvidia,
+  resolveNvidiaRuntime,
+} from "./nvidia-provider";
+import {
   applyStudioChangePlan,
   planStudioChange,
   shouldEscalateStudioInstruction,
@@ -28,6 +32,9 @@ export type StudioBuildEnv = {
   AI?: WorkersAiBinding;
   STUDIO_AI_MODEL?: string;
   STUDIO_AI_PROVIDER?: string;
+  NVIDIA_API_KEY?: string;
+  NVIDIA_MODEL?: string;
+  NVIDIA_BASE_URL?: string;
 };
 
 const safeText = (max: number, min: number) =>
@@ -229,19 +236,18 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
 
     if (!guard.enter()) return jsonResponse(fallbackPayload, 200);
     try {
-      if (!env?.AI) return jsonResponse(fallbackPayload, 200);
-      try {
-        const request = parsed.data;
-        if (request.action === "modify") {
-          const context = changeContext;
-          const draftPlan = fallbackPlan;
-          if (
-            !context ||
-            !draftPlan ||
-            !shouldEscalateStudioInstruction(request.instruction, draftPlan)
-          ) {
-            return jsonResponse(fallbackPayload, 200);
-          }
+      const request = parsed.data;
+      if (request.action === "modify") {
+        const context = changeContext;
+        const draftPlan = fallbackPlan;
+        if (!env?.AI) return jsonResponse(fallbackPayload, 200);
+        if (
+          !context ||
+          !draftPlan ||
+          !shouldEscalateStudioInstruction(request.instruction, draftPlan)
+        ) {
+          return jsonResponse(fallbackPayload, 200);
+        }
           const plan = await withTimeout(
             planStudioChangeWithWorkersAi({
               ai: env.AI,
@@ -268,25 +274,63 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
         }
         const terms = extractPromptTerms(request.prompt);
         const candidate = planCreativeBlueprint(request.prompt);
-        const patch = await withTimeout(
-          planCreativeBlueprintWithWorkersAi({
-            ai: env.AI,
-            visitorText: request.prompt,
-            candidate,
-            env,
-          }),
-        );
-        const blueprint = applyBlueprintPatch(candidate, patch);
-        const refined = blueprintToDesignSpec(blueprint, terms);
-        refined.metadata.source = "ai";
-        return jsonResponse(
-          { spec: parseDesignSpec(refined), source: "ai" },
-          200,
-        );
+
+        // 1. NVIDIA NIM — optional server-side intelligence. Any failure is
+        //    discarded and we fall through to Cloudflare AI, then the
+        //    deterministic planner. Generation can never break.
+        const nvidia = resolveNvidiaRuntime(env);
+        if (nvidia.configured) {
+          try {
+            const patch = await withTimeout(
+              planCreativeBlueprintWithNvidia({
+                visitorText: request.prompt,
+                candidate,
+                apiKey: nvidia.apiKey as string,
+                model: nvidia.model,
+                baseUrl: nvidia.baseUrl,
+              }),
+            );
+            const blueprint = applyBlueprintPatch(candidate, patch);
+            const refined = blueprintToDesignSpec(blueprint, terms);
+            refined.metadata.source = "nvidia";
+            return jsonResponse(
+              { spec: parseDesignSpec(refined), source: "nvidia" },
+              200,
+            );
+          } catch {
+            // fall through to Cloudflare Workers AI, then fallback
+          }
+        }
+
+        // 2. Existing Cloudflare Workers AI provider.
+        if (env?.AI) {
+          try {
+            const patch = await withTimeout(
+              planCreativeBlueprintWithWorkersAi({
+                ai: env.AI,
+                visitorText: request.prompt,
+                candidate,
+                env,
+              }),
+            );
+            const blueprint = applyBlueprintPatch(candidate, patch);
+            const refined = blueprintToDesignSpec(blueprint, terms);
+            refined.metadata.source = "ai";
+            return jsonResponse(
+              { spec: parseDesignSpec(refined), source: "ai" },
+              200,
+            );
+          } catch {
+            return jsonResponse(fallbackPayload, 200);
+          }
+        }
+
+        // 3. Deterministic engine always remains.
+        return jsonResponse(fallbackPayload, 200);
       } catch {
         return jsonResponse(fallbackPayload, 200);
       }
-    } finally {
+    finally {
       guard.leave();
     }
   };
