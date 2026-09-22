@@ -18,12 +18,13 @@ export const STUDIO_AI_PROVIDER_DEFAULT = "cloudflare" as const;
 
 /** Preferred free-plan candidate. */
 export const STUDIO_AI_MODEL_DEFAULT =
-  "@cf/nvidia/nemotron-3-120b-a12b" as const;
+  "@cf/meta/llama-3.1-8b-instruct" as const;
 
 /** Used only if a deployment explicitly overrides the default. */
 export const STUDIO_AI_MODEL_ALTERNATES = [
+  "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "@cf/qwen/qwen2.5-coder-32b-instruct",
   "@cf/zai-org/glm-4.7-flash",
-  "@cf/meta/llama-3.1-8b-instruct",
 ] as const;
 
 export type StudioAiRuntime = {

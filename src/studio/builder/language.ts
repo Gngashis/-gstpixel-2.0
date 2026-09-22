@@ -423,14 +423,44 @@ export function extractLocationPhrase(prompt: string): {
   if (!capture) return { location: "", place: "" };
 
   const words = capture.split(/\s+/);
-  while (
-    words.length &&
-    locationNoise.has(words[words.length - 1]!.toLowerCase())
-  ) {
-    words.pop();
-  }
-  const kept = words.filter((word) => !locationNoise.has(word.toLowerCase()));
+  /*
+   * A place name ends where the next clause begins: "in Bhutan with mountain
+   * views" is Bhutan, not "Bhutan Mountain". Cut at the first clause word
+   * instead of filtering afterwards so descriptors never leak in.
+   */
+  const clauseWords = new Set([
+    ...locationNoise,
+    "offering",
+    "offers",
+    "serving",
+    "serves",
+    "selling",
+    "sells",
+    "featuring",
+    "includes",
+    "including",
+    "using",
+    "built",
+    "made",
+    "by",
+    "from",
+    "on",
+    "in",
+    "at",
+  ]);
+  let end = words.findIndex((word) => clauseWords.has(word.toLowerCase()));
+  if (end === -1) end = words.length;
+  const kept = words.slice(0, end);
   if (!kept.length || kept.length > 2) return { location: "", place: "" };
+  /*
+   * "Bhutan mountains" / "Siliguri district" — a capitalised place followed by
+   * a lowercase descriptor keeps only the place. Two capitalised words
+   * ("West Bengal", "New Delhi") are a genuine multi-word location.
+   */
+  const isLower = (word: string) => word === word.toLowerCase();
+  if (kept.length === 2 && !isLower(kept[0]!) && isLower(kept[1]!)) {
+    kept.length = 1;
+  }
   if (placeBlocklist.has(kept[0]!.toLowerCase()))
     return { location: "", place: "" };
   if (kept.some((word) => genericPlaceWords.has(word.toLowerCase()))) {

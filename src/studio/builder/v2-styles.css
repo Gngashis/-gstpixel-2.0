@@ -896,8 +896,13 @@
 
 .studio-v2-palette-control > div {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* Bounded swatches: never let a full-width panel stretch 4 columns into
+     giant 150px+ circles. 54px max matches the desktop sidebar size and stays
+     a comfortable touch target. */
+  grid-template-columns: repeat(4, minmax(2.4rem, 3.4rem));
+  justify-content: start;
   gap: 0.45rem;
+  max-width: 15rem;
   margin-top: 0.7rem;
 }
 

@@ -89,6 +89,7 @@ export function guardDesignSpec(input: DesignSpec): QualityGuardResult {
     "healthcare",
     "professional",
     "realestate",
+    "construction",
     "events",
   ].includes(spec.site.businessKind);
   if (

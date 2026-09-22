@@ -17,6 +17,7 @@ export const businessKinds = [
   "education",
   "fashion",
   "realestate",
+  "construction",
   "automotive",
   "beauty",
   "events",

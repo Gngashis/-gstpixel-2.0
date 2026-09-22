@@ -455,7 +455,7 @@ const food: Profile = {
 
 const retail: Profile = {
   kind: "retail",
-  defaultNames: ["THE STORE ROOM", "LOCAL GOODS"],
+  defaultNames: ["THE STORE ROOM", "LOCAL GOODS", "CORNER & CO", "THE GOODS ROOM"],
   nouns: ["Store", "Objects", "Supply"],
   offer: "Collections",
   offerNoun: "collection",
@@ -606,7 +606,7 @@ const retail: Profile = {
 
 const fashion: Profile = {
   kind: "fashion",
-  defaultNames: ["STUDIO NOIR", "OFF SEASON"],
+  defaultNames: ["STUDIO NOIR", "OFF SEASON", "ATELIER SIX", "THE WARDROBE"],
   nouns: ["Studio", "Label", "Wardrobe"],
   offer: "Collection",
   offerNoun: "collection",
@@ -969,7 +969,7 @@ const technology: Profile = {
 
 const creative: Profile = {
   kind: "creative",
-  defaultNames: ["STUDIO FORM", "NINE & CO"],
+  defaultNames: ["STUDIO FORM", "NINE & CO", "FRAME & FIELD", "THE LIGHT ROOM"],
   nouns: ["Studio", "Collective", "Practice"],
   offer: "Work & services",
   offerNoun: "work",
@@ -1342,7 +1342,7 @@ const wellness: Profile = {
 
 const healthcare: Profile = {
   kind: "healthcare",
-  defaultNames: ["BRIGHT CLINIC", "CARE POINT"],
+  defaultNames: ["BRIGHT CLINIC", "CARE POINT", "CLEARLINE PRACTICE", "THE CLINIC ROOM"],
   nouns: ["Clinic", "Centre", "Practice"],
   offer: "Care & services",
   offerNoun: "services",
@@ -2858,8 +2858,8 @@ const supplements: Profile = {
 };
 
 const construction: Profile = {
-  kind: "realestate",
-  defaultNames: ["GROUNDWORKS", "STONE & SPAN"],
+  kind: "construction",
+  defaultNames: ["GROUNDWORKS", "STONE & SPAN", "THE BUILD ROOM", "NORTHFRAME"],
   nouns: ["Works", "Projects"],
   offer: "Construction & interiors",
   offerNoun: "projects",
@@ -3513,9 +3513,15 @@ export function buildSiteCopy(
 ): SiteCopy {
   const values = slots(profile, terms);
   const statedName = quotedName(terms.prompt);
+  /*
+   * Different prompts in the same family must not all receive the family's
+   * first concept name. The seed is stable per description, so the same
+   * description always gets the same editable concept name while unrelated
+   * businesses diverge.
+   */
   const curatedName =
     profile.defaultNames[
-      Math.max(0, variation) % profile.defaultNames.length
+      (terms.seed + Math.max(0, variation)) % profile.defaultNames.length
     ] ?? "NEW PROJECT";
   const name = statedName || curatedName;
   const place = terms.place ? ` near ${terms.place}` : "";

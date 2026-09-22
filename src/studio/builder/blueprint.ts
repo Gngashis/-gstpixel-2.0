@@ -883,8 +883,6 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
       "diagnostic",
       "physiotherapy",
       "health",
-      "medical",
-      "pharmacy",
     ],
   ],
   [
@@ -1023,14 +1021,13 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
   [
     "events",
     [
-      "wedding",
+      "wedding planner",
+      "wedding planning",
       "events",
       "event",
       "planner",
       "decor",
       "venue",
-      "photography",
-      "photographer",
       "caterer",
     ],
   ],
@@ -1077,6 +1074,12 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
       "pr ",
       "media",
       "production house",
+      "photography",
+      "photographer",
+      "photo studio",
+      "portrait photography",
+      "wedding photography",
+      "commercial photography",
     ],
   ],
   [
@@ -1152,6 +1155,19 @@ function detectCategory(value: string): BusinessCategory {
   const canonical = canonicalBusinessText(value);
   const padded = ` ${canonical} `;
   /*
+   * A pharmacy, chemist or medical store is a shop first: it carries
+   * categories, product information, store details and delivery rather than
+   * clinic-style treatments and appointments. Checked against the raw visitor
+   * wording because canonicalisation expands "chemist" into healthcare terms.
+   */
+  if (
+    /\b(?:pharmacy|pharmacies|chemist|medical store|medical shop|medicine shop|medicines shop|drugstore|drug store)\b/.test(
+      value,
+    )
+  ) {
+    return "retail";
+  }
+  /*
    * Score every category instead of stopping at the first keyword hit. A
    * description like "a gym with a supplement counter" names more than one
    * domain; the category with the strongest and earliest signal is the one the
@@ -1180,10 +1196,11 @@ function detectCategory(value: string): BusinessCategory {
    * *business* also names selling, a shop, a store or local custom, the retail
    * structure is the honest answer: it carries collections, new arrivals,
    * visiting details and local delivery, which a brand campaign page does not.
+   * Tested against the raw wording because canonicalisation drops "shop".
    */
   const sellingLocally =
     /\b(?:shop|store|sell|sells|selling|showroom|outlet|retail|local|locally|nearby|wholesale|distributor)\b/.test(
-      canonical,
+      value,
     );
   if (
     best &&
@@ -1400,7 +1417,7 @@ const biases: Record<BusinessCategory, Bias> = {
       "geometric-composition",
     ],
     typography: ["condensed-poster", "grotesk-modern", "expressive-display"],
-    palette: ["midnight-champagne", "paper-ink", "plum-brass", "graphite-lime"],
+    palette: ["midnight-champagne", "paper-ink", "plum-brass", "slate-coral"],
     mood: "bold",
     intensity: "dramatic",
     premium: "refined",
@@ -1424,7 +1441,7 @@ const biases: Record<BusinessCategory, Bias> = {
     composition: ["modular-bento", "index-driven", "asymmetric-grid"],
     art: ["geometric-composition", "grid-technical", "organic-halo"],
     typography: ["grotesk-modern", "humanist-warm", "geometric-technical"],
-    palette: ["paper-ink", "stone-sage", "cobalt-cream", "graphite-lime"],
+    palette: ["paper-ink", "stone-sage", "cobalt-cream", "ocean-copper"],
     mood: "modern",
     intensity: "considered",
     premium: "refined",
@@ -1437,7 +1454,7 @@ const biases: Record<BusinessCategory, Bias> = {
     environment: "light",
   },
   construction: {
-    kind: "realestate",
+    kind: "construction",
     hero: [
       "asymmetric-story",
       "technical-grid",
@@ -1448,7 +1465,7 @@ const biases: Record<BusinessCategory, Bias> = {
     composition: ["asymmetric-grid", "technical-grid", "split-dual"],
     art: ["geometric-composition", "monolith", "grid-technical"],
     typography: ["geometric-technical", "grotesk-modern", "condensed-poster"],
-    palette: ["charcoal-amber", "graphite-lime", "stone-sage", "paper-ink"],
+    palette: ["charcoal-amber", "stone-sage", "paper-ink", "slate-coral"],
     mood: "modern",
     intensity: "considered",
     premium: "refined",
@@ -2372,18 +2389,8 @@ const sequences: Record<BusinessCategory, PlannedStep[]> = {
     },
     {
       type: "features",
-      purpose: "prove",
-      variants: ["capability-grid", "bento-grid", "stats-band"],
-    },
-    {
-      type: "features",
       purpose: "inform",
       variants: ["process-timeline", "numbered-features", "faq-list"],
-    },
-    {
-      type: "features",
-      purpose: "prove",
-      variants: ["trust-band", "stats-band", "comparison-table"],
     },
     {
       type: "about",
@@ -2939,6 +2946,7 @@ function applyInsight(
   bias: Bias,
   insight: Insight,
   seed: number,
+  variation = 0,
 ): Pick<
   CreativeBlueprint,
   "direction" | "typography" | "colour" | "layout" | "motion"
@@ -2986,10 +2994,18 @@ function applyInsight(
         : "editorial") as CreativeBlueprint["typography"]["treatment"],
   };
   const colour = {
+    /*
+     * Version 1 keeps the family's signature palette so a category reads as
+     * itself; later versions rotate for variety, and an explicit visitor hint
+     * always wins. Previously every version rotated from a global list, which
+     * made unrelated businesses collide on the same palette.
+     */
     palette:
       insight.palette && bias.palette.includes(insight.palette)
         ? insight.palette
-        : rotate(bias.palette, seed, 3),
+        : variation === 0
+          ? bias.palette[0]!
+          : rotate(bias.palette, seed, 3),
     mood: bias.mood,
     environment: bias.environment,
     contrast: (bias.intensity === "dramatic"
@@ -3211,7 +3227,7 @@ export function planCreativeBlueprint(
   const bias = biases[terms.category];
   const seed = hashString(`${terms.prompt.toLowerCase()}#${variation}`);
   const insight = readInsight(terms.prompt.toLowerCase(), terms.category);
-  const shifted = applyInsight(bias, insight, seed);
+  const shifted = applyInsight(bias, insight, seed, variation);
   // Variation 0 is the category's signature look (or the family the visitor
   // explicitly asked for); every later variation is a genuinely different hero.
   const signatureHero =
@@ -4290,6 +4306,8 @@ function categoryFromKind(
       return "education";
     case "realestate":
       return "realestate";
+    case "construction":
+      return "construction";
     case "automotive":
       return "automotive";
     case "events":

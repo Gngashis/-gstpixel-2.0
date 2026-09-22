@@ -143,6 +143,43 @@ async function withTimeout<T>(promise: Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * Map schema failures to stable product-facing errors. Raw library messages
+ * ("String must contain at least 10 character(s)") must never reach visitors.
+ */
+function friendlyValidationError(error: z.ZodError): {
+  error: string;
+  code: string;
+} {
+  const issue = error.issues[0];
+  const field = issue?.path.join(".") ?? "";
+  const message = issue?.message ?? "";
+  if (field === "prompt" || field === "instruction") {
+    if (/at least/i.test(message)) {
+      return {
+        error: "Please describe the website in a little more detail.",
+        code: "PROMPT_TOO_SHORT",
+      };
+    }
+    if (/at most|too big|too_big/i.test(message)) {
+      return {
+        error: "That description is a little too long. Please shorten it.",
+        code: "PROMPT_TOO_LONG",
+      };
+    }
+    if (/unsupported content/i.test(message)) {
+      return {
+        error: "Please remove any code or unsupported characters and try again.",
+        code: "PROMPT_UNSUPPORTED",
+      };
+    }
+  }
+  return {
+    error: "Check the request and try again.",
+    code: "REQUEST_INVALID",
+  };
+}
+
 export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
   return async function handleStudioBuild(
     request: Request,
@@ -181,14 +218,7 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
 
     const parsed = buildRequestSchema.safeParse(json);
     if (!parsed.success) {
-      return jsonResponse(
-        {
-          error:
-            parsed.error.issues[0]?.message ??
-            "Check the request and try again.",
-        },
-        400,
-      );
+      return jsonResponse(friendlyValidationError(parsed.error), 400);
     }
 
     let fallback: DesignSpec;
@@ -297,7 +327,12 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
               { spec: parseDesignSpec(refined), source: "nvidia" },
               200,
             );
-          } catch {
+          } catch (error) {
+            // Safe operational signal only: failure class, never prompt text.
+            console.warn(
+              "[studio] nvidia provider failed",
+              error instanceof Error ? error.name : "unknown",
+            );
             // fall through to Cloudflare Workers AI, then fallback
           }
         }
@@ -320,7 +355,11 @@ export function createStudioBuildHandler(options?: { guard?: RequestGuard }) {
               { spec: parseDesignSpec(refined), source: "ai" },
               200,
             );
-          } catch {
+          } catch (error) {
+            console.warn(
+              "[studio] cloudflare provider failed",
+              error instanceof Error ? error.name : "unknown",
+            );
             return jsonResponse(fallbackPayload, 200);
           }
         }

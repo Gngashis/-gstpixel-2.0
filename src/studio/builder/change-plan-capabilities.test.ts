@@ -458,7 +458,9 @@ describe("Studio conversational capabilities", () => {
     const church = generateFallbackDesignSpec(
       "Create a modern church website for a Christian ministry",
     );
-    expect(church.site.name).toMatch(/church|chapel|parish|grace|community/i);
+    expect(church.site.name).toMatch(
+      /church|chapel|parish|grace|community|fellowship/i,
+    );
     const headlines: string[] = [];
     for (const page of church.pages)
       for (const section of page.sections)
