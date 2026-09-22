@@ -348,6 +348,36 @@ test.describe("Website Studio V3", () => {
     );
   });
 
+  test("selects sections visually and manages pages without developer terminology", async ({
+    page,
+  }) => {
+    await openStudio(page);
+    await generate(page, scenarios.clothing);
+    const preview = page.getByTestId("studio-preview");
+    const firstEditable = preview.locator("[data-section-id]").nth(1);
+    await firstEditable.click();
+    await expect(firstEditable).toHaveClass(/is-selected/);
+    await expect(page.getByText("Selected section")).toBeVisible();
+
+    const duplicate = page.getByRole("button", { name: /Duplicate$/i });
+    await expect(duplicate).toBeVisible();
+    await duplicate.click();
+    await expect(page.locator(".studio-v2-status")).toContainText(
+      /duplicated/i,
+    );
+
+    const pages = page.getByTestId("studio-pages");
+    const before = await pages.getByRole("button").count();
+    await page
+      .getByTestId("studio-page-actions")
+      .getByRole("button", { name: "Duplicate page" })
+      .click();
+    await expect(pages.getByRole("button")).toHaveCount(before + 1);
+    await expect(page.locator(".studio-v2-status")).toContainText(
+      /duplicated/i,
+    );
+  });
+
   test("integrates a session-only logo without uploading it", async ({
     page,
   }) => {

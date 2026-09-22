@@ -33,6 +33,7 @@ import {
   pageKinds,
   type SitePageKind,
 } from "./site-pages";
+import { planDesignIntent, type IntentScope } from "./design-intent";
 import {
   createSectionForType,
   designSpecSchema,
@@ -1219,6 +1220,82 @@ export function planStudioChange(
       : desktopOnly
         ? { kind: "desktop" as const, pageSlug: context.activePageSlug }
         : { kind: "site" as const };
+
+  /*
+   * Design-intent layer: ordinary design language ("make the buttons
+   * sharper", "move this section up", "put a huge lion logo behind the hero")
+   * is reasoned about once here and emitted as the same allowlisted
+   * operations every other path uses. When the instruction is not design
+   * language this engine recognises, planning continues untouched below.
+   */
+  const intentScope: IntentScope = mobileOnly
+    ? "mobile"
+    : sectionOnly ||
+        (selected !== null && /\b(this|that) (section|one)\b/.test(value))
+      ? "section"
+      : "site";
+  const wantsAlternateDirection =
+    /\b(completely different|totally different|another version|another direction|different version|start over|surprise me)\b/.test(
+      value,
+    );
+  if (wantsAlternateDirection) {
+    return studioChangePlanSchema.parse({
+      version: STUDIO_CHANGE_PLAN_VERSION,
+      scope: { kind: "site" },
+      operations: [{ type: "alternate", target: "site" }],
+      summary: "Created a new visual direction from scratch.",
+      unsupported: [],
+    });
+  }
+  /* Only route genuinely new conversational intents through this layer. The
+     established planner remains authoritative for its larger language matrix
+     (luxury, cinematic, mobile, palette, and section-premium commands). */
+  const needsDesignIntent =
+    /\b(sharp|sharper|squared|crisp|angular|less round|less rounded|no rounded?)\b/.test(
+      value,
+    ) ||
+    /\b(typography|type|font)\b[^.]{0,24}\b(smaller|small|compact|tighter)\b/.test(
+      value,
+    ) ||
+    (selected !== null &&
+      /\b(this|that) section\b/.test(value) &&
+      /\b(dark|darker|night|moody)\b/.test(value)) ||
+    (selected !== null &&
+      /\b(move|shift|bring|send|take)\b[^.]{0,24}\b(up|higher)\b|\bmove up\b/.test(
+        value,
+      )) ||
+    /\b(lion|eagle|tiger|elephant|dragon|horse|lotus)\b[^.]{0,30}\b(logo|emblem|hero|header|banner)\b/.test(
+      value,
+    );
+  const intent = needsDesignIntent
+    ? planDesignIntent(instruction, {
+        spec: context.spec,
+        scope: intentScope,
+        sectionId: selected?.id ?? null,
+        activePageSlug: context.activePageSlug,
+      })
+    : null;
+  if (intent) {
+    return studioChangePlanSchema.parse({
+      version: STUDIO_CHANGE_PLAN_VERSION,
+      scope:
+        intentScope === "section"
+          ? {
+              kind: "section",
+              pageSlug: context.activePageSlug,
+              sectionId: selected?.id,
+            }
+          : intentScope === "mobile"
+            ? { kind: "mobile", pageSlug: context.activePageSlug }
+            : { kind: "site" },
+      operations: [...operations, ...intent.operations],
+      summary:
+        intent.description.length > 0
+          ? `Changed ${intent.description}.`
+          : "Updated the design.",
+      unsupported: intent.notes,
+    });
+  }
 
   if (
     includesAny(value, ["upload", "use my logo", "put my logo", "add my logo"])

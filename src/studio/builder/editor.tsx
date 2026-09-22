@@ -909,6 +909,106 @@ export function StudioBuilder() {
     setSelectedSectionId(next.pages[0]?.sections[0]?.id ?? null);
   };
 
+  const renamePage = (slug: string) => {
+    if (!spec) return;
+    const page = spec.pages.find((entry) => entry.slug === slug);
+    if (!page) return;
+    const nextLabel = window
+      .prompt("Name this page", page.navigationLabel)
+      ?.trim();
+    if (!nextLabel || nextLabel === page.navigationLabel) return;
+    const next = parseDesignSpec({
+      ...spec,
+      pages: spec.pages.map((entry) =>
+        entry.slug === slug
+          ? { ...entry, title: nextLabel, navigationLabel: nextLabel }
+          : entry,
+      ),
+      navigation: {
+        ...spec.navigation,
+        items: spec.navigation.items.map((item) =>
+          item.target === slug ? { ...item, label: nextLabel } : item,
+        ),
+      },
+    });
+    applySpec(next, "Page name updated.");
+  };
+
+  const duplicatePage = (slug: string) => {
+    if (!spec || spec.pages.length >= 8) {
+      setStatus("This concept is at its page limit — remove one first.");
+      return;
+    }
+    const source = spec.pages.find((entry) => entry.slug === slug);
+    if (!source) return;
+    const base = `${slug === "/" ? "/home" : slug}-copy`.replace(/\/+/g, "/");
+    let nextSlug = base;
+    let copyNumber = 2;
+    while (spec.pages.some((entry) => entry.slug === nextSlug)) {
+      nextSlug = `${base}-${copyNumber++}`;
+    }
+    const copy = structuredClone(source);
+    copy.slug = nextSlug;
+    copy.title = `${source.title} copy`;
+    copy.navigationLabel = `${source.navigationLabel} copy`;
+    copy.sections = copy.sections.map((section, index) => ({
+      ...section,
+      id: `${section.id}-copy${index + 1}`.slice(0, 49),
+    }));
+    const sourceIndex = spec.pages.findIndex((entry) => entry.slug === slug);
+    const pages = [...spec.pages];
+    pages.splice(sourceIndex + 1, 0, copy);
+    const navIndex = spec.navigation.items.findIndex(
+      (item) => item.target === slug,
+    );
+    const items = [...spec.navigation.items];
+    items.splice(navIndex + 1, 0, {
+      label: copy.navigationLabel,
+      target: nextSlug,
+    });
+    const next = parseDesignSpec({
+      ...spec,
+      pages,
+      navigation: { ...spec.navigation, items },
+    });
+    applySpec(next, "Page duplicated in the same design language.");
+    setActivePageSlug(nextSlug);
+    setSelectedSectionId(copy.sections[0]?.id ?? null);
+  };
+
+  const movePage = (slug: string, direction: -1 | 1) => {
+    if (!spec || slug === "/") return;
+    const index = spec.pages.findIndex((page) => page.slug === slug);
+    const nextIndex = index + direction;
+    if (index < 0 || nextIndex < 1 || nextIndex >= spec.pages.length) return;
+    const pages = [...spec.pages];
+    const [page] = pages.splice(index, 1);
+    pages.splice(nextIndex, 0, page!);
+    const items = spec.navigation.items.filter((item) => item.target !== "/");
+    const itemIndex = items.findIndex((item) => item.target === slug);
+    if (itemIndex >= 0) {
+      const [item] = items.splice(itemIndex, 1);
+      items.splice(
+        Math.max(0, Math.min(items.length, itemIndex + direction)),
+        0,
+        item!,
+      );
+    }
+    const home = spec.navigation.items.find((item) => item.target === "/");
+    const next = parseDesignSpec({
+      ...spec,
+      pages,
+      navigation: {
+        ...spec.navigation,
+        items: home ? [home, ...items] : items,
+      },
+    });
+    applySpec(
+      next,
+      direction < 0 ? "Page moved earlier." : "Page moved later.",
+    );
+  };
+
   /* ------------------------------------------------------------------
      Session-only media
 
@@ -1379,6 +1479,36 @@ export function StudioBuilder() {
                 <small>{page.sections.length}</small>
               </button>
             ))}
+          </div>
+          <div
+            className="studio-v2-page-actions"
+            data-testid="studio-page-actions"
+          >
+            <button type="button" onClick={() => renamePage(activePage.slug)}>
+              Rename page
+            </button>
+            <button
+              type="button"
+              onClick={() => duplicatePage(activePage.slug)}
+            >
+              Duplicate page
+            </button>
+            {activePage.slug !== "/" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => movePage(activePage.slug, -1)}
+                >
+                  Move earlier
+                </button>
+                <button
+                  type="button"
+                  onClick={() => movePage(activePage.slug, 1)}
+                >
+                  Move later
+                </button>
+              </>
+            )}
           </div>
           <div className="studio-v2-add-page">
             <label htmlFor="studio-v2-add-page-kind">Add a page</label>
@@ -2226,6 +2356,30 @@ export function StudioBuilder() {
                     }
                   >
                     <ArrowDown size={15} /> Down
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = structuredClone(spec);
+                      const page = next.pages.find(
+                        (entry) => entry.slug === activePage.slug,
+                      );
+                      if (!page || page.sections.length >= 14) return;
+                      const sourceIndex = page.sections.findIndex(
+                        (entry) => entry.id === selectedSection.id,
+                      );
+                      const copy = structuredClone(selectedSection);
+                      copy.id =
+                        `${copy.id}-copy-${Date.now().toString(36)}`.slice(
+                          0,
+                          49,
+                        );
+                      page.sections.splice(sourceIndex + 1, 0, copy);
+                      applySpec(parseDesignSpec(next), "Section duplicated.");
+                      setSelectedSectionId(copy.id);
+                    }}
+                  >
+                    <Copy size={15} /> Duplicate
                   </button>
                   <button
                     type="button"

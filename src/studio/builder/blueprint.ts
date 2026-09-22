@@ -31,6 +31,7 @@ import {
   type PageArchetype,
   type SitePageKind,
 } from "./site-pages";
+import { guardDesignSpec } from "./quality-guard";
 
 /**
  * CreativeBlueprint — the art-direction layer that sits between the visitor's
@@ -956,6 +957,13 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
       "trust",
       "social impact",
       "volunteer",
+      "church",
+      "ministry",
+      "congregation",
+      "worship",
+      "faith organization",
+      "mosque",
+      "temple",
     ],
   ],
   [
@@ -4016,7 +4024,8 @@ export function generateFallbackDesignSpec(
 ): DesignSpec {
   const terms = extractPromptTerms(prompt);
   const blueprint = planCreativeBlueprint(prompt, options);
-  return blueprintToDesignSpec(blueprint, terms, options);
+  const generated = blueprintToDesignSpec(blueprint, terms, options);
+  return guardDesignSpec(generated).spec;
 }
 
 export function blueprintFromSpec(spec: DesignSpec): CreativeBlueprint {
