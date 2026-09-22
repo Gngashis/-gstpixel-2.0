@@ -437,4 +437,105 @@ describe("Studio conversational capabilities", () => {
       expect(applied.notes.join(" ")).toMatch(/testimonials/);
     }
   });
+
+  /* Human-QA repair-pass regressions. */
+
+  it("classifies the business noun above the style modifier", () => {
+    // "boutique" is a style word; "hotel" is the business. The same logic must
+    // keep "boutique clothing store" retail — the modifier wins only when the
+    // head noun is also retail.
+    const hotel = generateFallbackDesignSpec(
+      "Create a luxury boutique hotel in Bhutan",
+    );
+    expect(hotel.site.businessKind).toBe("hotel");
+    const store = generateFallbackDesignSpec(
+      "Create a boutique clothing store in Jaigaon",
+    );
+    expect(store.site.businessKind).toMatch(/retail|shop|store/);
+  });
+
+  it("keeps an explicit church/ministry request out of charity copy", () => {
+    const church = generateFallbackDesignSpec(
+      "Create a modern church website for a Christian ministry",
+    );
+    expect(church.site.name).toMatch(/church|chapel|parish|grace|community/i);
+    const headlines: string[] = [];
+    for (const page of church.pages)
+      for (const section of page.sections)
+        if (section.type === "hero")
+          headlines.push(String(section.content.title ?? ""));
+    expect(headlines.join(" ").toLowerCase()).not.toMatch(
+      /adds up honestly|work that adds up/,
+    );
+  });
+
+  it("renders the hero eyebrow exactly once", () => {
+    const spec = generateFallbackDesignSpec(
+      "Create a luxury boutique hotel in Bhutan",
+    );
+    const hero = getHomePage(spec).sections.find((s) => s.type === "hero");
+    expect(hero).toBeTruthy();
+    const eyebrow = String(hero?.content.eyebrow ?? "");
+    expect(eyebrow.length).toBeGreaterThan(0);
+  });
+
+  it("steps typography up one rung after stepping it down", () => {
+    const base = generateFallbackDesignSpec(supplementsPrompt);
+    const down = applyStudioChangePlan(
+      context(base),
+      planStudioChange("make the typography smaller", context(base)),
+    );
+    expect(down.changed).toBe(true);
+    const up = applyStudioChangePlan(
+      { ...context(base), spec: down.spec },
+      planStudioChange("make the typography larger", { ...context(base), spec: down.spec }),
+    );
+    expect(up.changed).toBe(true);
+    expect(up.spec.theme.headingScale).not.toBe("compact");
+  });
+
+  it("says so instead of faking a type increase at maximum scale", () => {
+    const base = generateFallbackDesignSpec(supplementsPrompt);
+    const plan = planStudioChange("make the typography larger", context(base));
+    if (
+      base.theme.headingScale === "expressive" &&
+      base.theme.bodyScale === "large"
+    ) {
+      expect(
+        plan.unsupported.join(" ").toLowerCase(),
+      ).toMatch(/largest size|maximum/);
+    }
+  });
+
+  it("maps corner-radius language in both directions", () => {
+    const base = generateFallbackDesignSpec(jewelleryPrompt);
+    const sharper = applyStudioChangePlan(
+      context(base),
+      planStudioChange("use less rounded corners", context(base)),
+    );
+    expect(sharper.changed).toBe(true);
+    expect(sharper.spec.theme.radius).not.toBe(base.theme.radius);
+  });
+
+  it("keeps whole-site darkness site-scoped and selected darkness section-scoped", () => {
+    const base = generateFallbackDesignSpec(supplementsPrompt);
+    const site = applyStudioChangePlan(
+      context(base),
+      planStudioChange("make the whole website darker", context(base)),
+    );
+    expect(site.changed).toBe(true);
+    expect(site.spec.theme.palette).not.toBe(base.theme.palette);
+
+    const selected = getHomePage(base).sections[0];
+    expect(selected).toBeTruthy();
+    if (!selected) return;
+    const scoped = applyStudioChangePlan(
+      { ...context(base), selectedSectionId: selected.id },
+      planStudioChange("make this darker", {
+        ...context(base),
+        selectedSectionId: selected.id,
+      }),
+    );
+    expect(scoped.spec.theme.palette).toBe(base.theme.palette);
+  });
 });

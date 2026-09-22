@@ -936,11 +936,78 @@ function summaryFromOperations(operations: StudioChangeOperation[]) {
   );
 }
 
+/**
+ * Phrases that ask for a typography SIZE step rather than an absolute scale.
+ * Shared between the theme matcher and the "already at maximum" honesty note.
+ */
+const TYPOGRAPHY_LARGER_WORDS = [
+  "text larger",
+  "larger text",
+  "text bigger",
+  "bigger text",
+  "typography larger",
+  "larger typography",
+  "bigger typography",
+  "larger type",
+  "bigger type",
+  "bigger fonts",
+  "larger fonts",
+  "increase the font size",
+  "increase font size",
+  "font size up",
+  "make the typography larger",
+  "make typography larger",
+  "make the type larger",
+  "make text bigger",
+];
+const TYPOGRAPHY_SMALLER_WORDS = [
+  "text smaller",
+  "smaller text",
+  "typography smaller",
+  "smaller typography",
+  "smaller type",
+  "smaller fonts",
+  "decrease the font size",
+  "decrease font size",
+  "font size down",
+  "make the typography smaller",
+  "make typography smaller",
+];
+
 function creativeTheme(
   value: string,
+  current?: { headingScale: string; bodyScale: string },
 ): z.infer<typeof setThemeOperation> | null {
   const theme: z.infer<typeof setThemeOperation> = { type: "setTheme" };
   let matched = false;
+  // Relative typography steps: "larger"/"smaller" move one rung up or down the
+  // existing scale ladder instead of jumping to an absolute size that may equal
+  // the current one (a silent no-op). Absolute words still pin exact values.
+  const relativeTypeLarger =
+    includesAny(value, TYPOGRAPHY_LARGER_WORDS) &&
+    !includesAny(value, ["smaller", "less large"]);
+  const relativeTypeSmaller =
+    includesAny(value, TYPOGRAPHY_SMALLER_WORDS) ||
+    includesAny(value, ["less large"]);
+  if (relativeTypeLarger && current) {
+    theme.headingScale =
+      current.headingScale === "compact" ? "balanced" : "expressive";
+    theme.bodyScale = current.bodyScale === "small" ? "balanced" : "large";
+    matched = true;
+  } else if (relativeTypeSmaller && current) {
+    theme.headingScale =
+      current.headingScale === "expressive" ? "balanced" : "compact";
+    theme.bodyScale = current.bodyScale === "large" ? "balanced" : "small";
+    matched = true;
+  } else if (relativeTypeLarger) {
+    theme.headingScale = "expressive";
+    theme.bodyScale = "large";
+    matched = true;
+  } else if (relativeTypeSmaller) {
+    theme.headingScale = "compact";
+    theme.bodyScale = "small";
+    matched = true;
+  }
   if (
     includesAny(value, ["all black", "dark", "darker", "black", "night mode"])
   ) {
@@ -1155,13 +1222,34 @@ export function planStudioChange(
       "same thing",
       "do the same",
     ]);
-  const sectionOnly = includesAny(value, [
-    "only this section",
-    "this section only",
-    "change only this section",
-    "selected section",
-    "this section",
+  /*
+   * Selection-aware scope: with a section selected, "this", "this one" or
+   * "here" refer to THAT section, not the whole design system (QA: "make this
+   * darker" used to restyle the entire site). Whole-site wording always wins,
+   * so "make the whole website darker" stays global even with a selection.
+   */
+  const wholeSiteNamed = includesAny(value, [
+    "whole site",
+    "whole website",
+    "entire site",
+    "entire website",
+    "every page",
+    "all pages",
+    "site-wide",
+    "site wide",
+    "everything",
   ]);
+  const sectionOnly =
+    includesAny(value, [
+      "only this section",
+      "this section only",
+      "change only this section",
+      "selected section",
+      "this section",
+    ]) ||
+    (!wholeSiteNamed &&
+      selected !== null &&
+      /\b(this|that|here)\b/.test(value));
   /*
    * Mobile scoping is deliberately broader than the literal phrases below.
    * "make the mobile version simpler" names mobile as the subject, so the
@@ -1335,7 +1423,7 @@ export function planStudioChange(
     });
   }
 
-  const theme = creativeTheme(value);
+  const theme = creativeTheme(value, context.spec.theme);
   if (theme) {
     const scopedType = sectionOnly
       ? selected?.type
@@ -1400,6 +1488,22 @@ export function planStudioChange(
       });
     } else if (!mobileOnly || explicitGlobalTheme) {
       operations.push(theme);
+      // Honest limit: the typography step-up is a no-op when the site is
+      // already at the largest supported scale. Say so instead of letting the
+      // request look like it silently failed.
+      if (
+        includesAny(value, TYPOGRAPHY_LARGER_WORDS) &&
+        !includesAny(value, ["smaller", "less large"]) &&
+        context.spec.theme.headingScale === "expressive" &&
+        context.spec.theme.bodyScale === "large" &&
+        Object.keys(theme)
+          .filter((key) => key !== "type")
+          .every((key) => key === "headingScale" || key === "bodyScale")
+      ) {
+        unsupported.push(
+          'Type is already at the largest size in this design system. Try "make the headings dramatic" for more display impact, or adjust a section instead.',
+        );
+      }
     }
   }
 
@@ -1732,7 +1836,16 @@ export function planStudioChange(
       value,
     );
 
-  if (wantsCategories || wantsProducts) {
+  /* "add a products page" names a PAGE: the page path below owns it. Emitting
+     the section too would add both a page and a stray section on the current
+     page, so a page-shaped product request skips the section operation. */
+  const productsPageRequest =
+    wantsProducts &&
+    /\b(?:add|create|build|include|need|want|set up|make|give me|also)\b[a-z ]{0,24}\bpages?\b/i.test(
+      value,
+    );
+
+  if ((wantsCategories || wantsProducts) && !productsPageRequest) {
     const subject = productSubject(instruction);
     const count = requestedCount(value);
     const onPage = pageSectionTypes(context);
@@ -1966,8 +2079,17 @@ export function planStudioChange(
   const addMatch = value.match(
     /add (?:a |an )?(gallery|contact|services?|features?|testimonials?|about)(?: section)?(?: after (services?|about|gallery|features?|contact))?/,
   );
+  /* "add a gallery page" names a PAGE; the page operation below owns it.
+     Emitting the section as well would both add a page AND drop a stray
+     gallery section onto the current page. */
+  const addSectionIsPageRequest =
+    !!addMatch &&
+    /\b(?:add|create|build|include|need|want|set up|make|give me|also)\b[a-z ]{0,24}\bpages?\b/i.test(
+      value,
+    );
   if (
     addMatch &&
+    !addSectionIsPageRequest &&
     !(addMatch[1] === "testimonial" || addMatch[1] === "testimonials")
   ) {
     const type = sectionTypeFromText(addMatch[1]!) as Exclude<

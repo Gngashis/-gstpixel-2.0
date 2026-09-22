@@ -71,6 +71,7 @@ export const businessCategories = [
   "events",
   "logistics",
   "nonprofit",
+  "faith",
   "agriculture",
   "personal",
   "generic",
@@ -640,6 +641,25 @@ const stopWords = new Set([
   "launches",
   "launching",
   "located",
+  /*
+   * Prompt framing that survives tokenisation ("create me a site that sells
+   * health supplements" used to yield the lead "Me Health"). Pronouns and
+   * pure domain-category adjectives are never a business descriptor.
+   */
+  "i",
+  "me",
+  "my",
+  "we",
+  "our",
+  "ours",
+  "health",
+  "high-end",
+  "high",
+  "end",
+  "premium",
+  "luxury",
+  "modern",
+  "elegant",
   "make",
   "makes",
   "making",
@@ -957,13 +977,33 @@ const categoryKeywords: ReadonlyArray<readonly [BusinessCategory, string[]]> = [
       "trust",
       "social impact",
       "volunteer",
+    ],
+  ],
+  /*
+   * Faith/community outranks nonprofit: a church or ministry is its own
+   * archetype, not a charity with a different palette. Worship nouns score
+   * here, and because this entry sits after "nonprofit" the plain word
+   * "trust" (a legal nonprofit form) still reads as charity, while
+   * "church"/"ministry"/"worship" read as faith.
+   */
+  [
+    "faith",
+    [
       "church",
+      "churches",
       "ministry",
+      "ministries",
       "congregation",
       "worship",
-      "faith organization",
+      "pastor",
+      "parish",
+      "chaplaincy",
+      "gospel",
+      "christian",
       "mosque",
       "temple",
+      "gurdwara",
+      "faith community",
     ],
   ],
   [
@@ -1805,6 +1845,39 @@ const biases: Record<BusinessCategory, Bias> = {
     cta: "enquiry",
     environment: "light",
   },
+  /*
+   * Faith/community: warm, human, gathering-first. Reuses the nonprofit's
+   * visual neighbourhood (paper surfaces, editorial type) but leads with the
+   * services/gatherings structure and a hospitality-leaning hero.
+   */
+  faith: {
+    kind: "nonprofit",
+    hero: [
+      "editorial-typography",
+      "centered-luxury",
+      "split-composition",
+      "asymmetric-story",
+    ],
+    nav: ["minimal-centered", "editorial-split", "compact-professional"],
+    composition: [
+      "editorial-single-column",
+      "centered-symmetric",
+      "asymmetric-grid",
+    ],
+    art: ["organic-halo", "grain-field", "editorial-rule"],
+    typography: ["editorial-serif", "humanist-warm", "grotesk-modern"],
+    palette: ["sand-olive", "forest-gold", "stone-sage", "midnight-champagne"],
+    mood: "serene",
+    intensity: "considered",
+    premium: "approachable",
+    balance: "editorial",
+    shape: "rounded",
+    surface: "paper",
+    whitespace: "cadenced",
+    motion: "editorial",
+    cta: "enquiry",
+    environment: "light",
+  },
   agriculture: {
     kind: "agriculture",
     hero: [
@@ -2525,6 +2598,38 @@ const sequences: Record<BusinessCategory, PlannedStep[]> = {
       type: "contact",
       purpose: "convert",
       variants: ["detailed", "booking-enquiry", "map-led"],
+    },
+  ],
+  faith: [
+    {
+      type: "about",
+      purpose: "establish",
+      variants: ["editorial-narrative", "image-led-story", "values-grid"],
+    },
+    {
+      type: "services",
+      purpose: "showcase",
+      variants: ["editorial-list", "bento-grid", "numbered-narrative"],
+    },
+    {
+      type: "listings",
+      purpose: "inform",
+      variants: ["index-list", "editorial-list", "collection-rail"],
+    },
+    {
+      type: "gallery",
+      purpose: "showcase",
+      variants: ["gallery-strip", "art-collage"],
+    },
+    {
+      type: "features",
+      purpose: "orient",
+      variants: ["structured-editorial", "icon-list", "trust-band"],
+    },
+    {
+      type: "cta",
+      purpose: "invite",
+      variants: ["conversion-band", "split", "statement-cta"],
     },
   ],
   nonprofit: [

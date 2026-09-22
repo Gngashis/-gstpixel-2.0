@@ -772,6 +772,13 @@ const categoryPlans: Record<string, readonly SitePageKind[]> = {
   events: ["services", "gallery", "results", "about", "enquiry"],
   logistics: ["services", "capabilities", "process", "about", "contact"],
   nonprofit: ["impact", "projects", "story", "about", "contact"],
+  /*
+   * Faith/community: a church or ministry is not a charity. Gatherings,
+   * ministries and visiting details lead; giving is present but never the
+   * structural focus, and nothing is fabricated (no service times, no names).
+   * Reuses existing archetypes so the renderer needs no new components.
+   */
+  faith: ["services", "about", "story", "contact"],
   agriculture: ["collections", "process", "story", "about", "contact"],
   personal: ["projects", "services", "story", "contact"],
   generic: ["services", "about", "contact"],
@@ -779,6 +786,11 @@ const categoryPlans: Record<string, readonly SitePageKind[]> = {
 
 /** Extra pages worth adding when the visitor names the thing themselves. */
 const keywordPages: ReadonlyArray<readonly [RegExp, SitePageKind]> = [
+  /* Faith pages the visitor names themselves ("add a ministries page",
+     "create a giving page") reuse the programmes/impact archetypes. */
+  [/\b(ministr(?:y|ies)|gatherings?)\b/, "programmes"],
+  [/\b(giving|tithes?|offerings?)\b/, "impact"],
+  [/\b(services? page|service times?)\b/, "services"],
   [
     /\b(shop|store|boutique|ecommerce|e-commerce|online store|products?)\b/,
     "shop",

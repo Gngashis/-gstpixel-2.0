@@ -100,6 +100,7 @@ import {
   type StudioConversationTurn,
 } from "./change-plan";
 import { WebsiteRenderer } from "./renderer";
+import { detectBusinessIdeas, type BusinessIdea } from "./language";
 import "./v2-styles.css";
 
 const creativeSuggestions = [
@@ -323,9 +324,29 @@ async function requestServerSpec(
   }
 }
 
+/**
+ * Shown only before React has attached to the server-rendered page. The studio
+ * markup looks interactive from the first paint, but clicks and typing are
+ * silently dropped until hydration completes — the veil absorbs those dead
+ * first taps instead of letting them vanish. Its label only fades in if
+ * hydration is genuinely slow (see .studio-v2-warmup span). It is
+ * pointer-events-none and aria-hidden: the page beneath stays reachable, the
+ * veil is purely a visual readiness signal.
+ */
+function StudioWarmupVeil() {
+  return (
+    <div className="studio-v2-warmup" aria-hidden="true">
+      <span>Preparing the studio…</span>
+    </div>
+  );
+}
+
 export function StudioBuilder() {
   const [phase, setPhase] = useState<BuilderPhase>("landing");
   const [prompt, setPrompt] = useState("");
+  /* Unrelated-business clarification: two named businesses get a choice
+     instead of a silent merge. */
+  const [ideas, setIdeas] = useState<BusinessIdea[]>([]);
   const [instruction, setInstruction] = useState("");
   /*
    * Session versions.
@@ -458,6 +479,11 @@ export function StudioBuilder() {
   /* A description carried from the homepage quick-start lives only in module
      memory and is consumed here, once, on mount. */
   const [intakePrompt] = useState(() => consumeStudioIntakePrompt());
+  // Flips true once the client bundle has hydrated and interactions work.
+  const [isReady, setIsReady] = useState(false);
+  useEffect(() => {
+    setIsReady(true);
+  }, []);
   /* Guards the homepage handoff so the carried description generates exactly
      once, even when passive effects reconnect during navigation churn. */
   const intakeStartedRef = useRef(false);
@@ -527,6 +553,18 @@ export function StudioBuilder() {
     if (value.length < 10) {
       setStatus(
         "Describe the business and the website you want in a little more detail.",
+      );
+      return;
+    }
+    /* Two unrelated businesses in one description cannot share one website.
+       Ask which to build first instead of silently picking one (QA: "a
+       clothing shop and a dental clinic" used to become a dental site). */
+    const ideas = detectBusinessIdeas(value);
+    if (ideas.length > 1) {
+      setIdeas(ideas);
+      setPhase("landing");
+      setStatus(
+        "It sounds like you mentioned two different businesses. Choose which website to create first — you can always create the other one afterwards.",
       );
       return;
     }
@@ -1156,6 +1194,7 @@ export function StudioBuilder() {
   if (phase === "landing") {
     return (
       <div className="studio-v2-shell is-landing">
+        {!isReady && <StudioWarmupVeil />}
         <section
           className="studio-v2-landing"
           aria-labelledby="studio-v2-title"
@@ -1259,6 +1298,41 @@ export function StudioBuilder() {
               </div>
             </section>
           )}
+          {ideas.length > 1 && (
+            <section
+              className="studio-v2-ideas"
+              role="group"
+              aria-labelledby="studio-v2-ideas-title"
+            >
+              <p id="studio-v2-ideas-title">
+                We found more than one business in your description. Which
+                website should we create first?
+              </p>
+              <div className="studio-v2-ideas-list">
+                {ideas.map((idea) => (
+                  <button
+                    key={idea.domain}
+                    type="button"
+                    className="tactile"
+                    onClick={() => {
+                      setIdeas([]);
+                      setPrompt(idea.prompt);
+                      void generate(undefined, idea.prompt);
+                    }}
+                  >
+                    {idea.label}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className="studio-v2-ideas-dismiss"
+                onClick={() => setIdeas([])}
+              >
+                Use my full description instead
+              </button>
+            </section>
+          )}
           <form
             className="studio-v2-composer"
             onSubmit={generate}
@@ -1316,6 +1390,7 @@ export function StudioBuilder() {
   if (phase === "generating") {
     return (
       <div className="studio-v2-shell is-generating">
+        {!isReady && <StudioWarmupVeil />}
         <section
           className="studio-v2-generation"
           aria-live="polite"
@@ -1361,6 +1436,7 @@ export function StudioBuilder() {
 
   return (
     <div className="studio-v2-shell is-editing" ref={canvasRef} tabIndex={-1}>
+      {!isReady && <StudioWarmupVeil />}
       <header className="studio-v2-editor-topbar">
         <div>
           <button
@@ -1774,8 +1850,8 @@ export function StudioBuilder() {
           <div className="studio-v2-identity" data-testid="studio-identity">
             <small>Design identity · {identity?.identity.name}</small>
             <div>
-              {identityChips.map((chip) => (
-                <span key={chip}>{chip}</span>
+              {identityChips.map((chip, chipIndex) => (
+                <span key={`${chip}-${chipIndex}`}>{chip}</span>
               ))}
             </div>
           </div>
@@ -1799,8 +1875,8 @@ export function StudioBuilder() {
                   <small>{`${String(direction.index).padStart(2, "0")} — ${direction.summary}`}</small>
                   <strong>{direction.name}</strong>
                   <div>
-                    {direction.character.map((chip) => (
-                      <span key={chip}>{chip}</span>
+                    {direction.character.map((chip, chipIndex) => (
+                      <span key={`${chip}-${chipIndex}`}>{chip}</span>
                     ))}
                   </div>
                   <button

@@ -449,8 +449,11 @@ function HeroBody({
             {section.content.body && <span>{section.content.body}</span>}
             <Actions section={section} />
           </div>
+          {/* Decorative runner strip. It repeats the visible concept note,
+              never the eyebrow — the eyebrow already renders once above, and a
+              repeated line read as a rendering bug. */}
           <p className="studio-v2-site-hero-marker" aria-hidden="true">
-            {section.content.eyebrow || "Concept"}
+            {section.content.note || "Concept"}
           </p>
           {artNode && !section.layout.fullBleed ? (
             <div className="studio-v2-site-hero-band">{artNode}</div>

@@ -564,6 +564,21 @@ function matchesPhrase(canonical: string, phrase: string): boolean {
   return regex.test(canonical);
 }
 
+/**
+ * Modifier words that describe *style or positioning*, never the industry. A
+ * standalone "boutique" implies clothing retail, but "boutique hotel" names a
+ * hotel — the head noun wins. When one of these modifiers sits directly in
+ * front of an explicit industry noun, the synonym expansion is skipped so the
+ * modifier cannot inject a competing head noun ("clothing boutique retail"
+ * used to outrank the hotel and turn a hotel into a shop).
+ */
+const modifierGuardPhrases: ReadonlyArray<readonly [RegExp, string]> = [
+  [/\bboutique\s+(hotel|hotels|resort|resorts|homestay|villas?|lodges?|guest\s?houses?|hostels?|retreats?|inns?|stays?)\b/g, "$1"],
+  [/\bboutique\s+(dental|clinic|medical|pharmacy|law|legal|consult)\w*\b/g, "$1"],
+  [/\bboutique\s+(jewellery|jewelry|gold|diamond)\w*\b/g, "$1"],
+  [/\bboutique\s+(farm|bakery|cafe|café|restaurant|builder|construction|gym|fitness|studio|agency)\b/g, "$1"],
+];
+
 export function canonicalBusinessText(prompt: string): string {
   let value = prompt
     .toLowerCase()
@@ -577,6 +592,12 @@ export function canonicalBusinessText(prompt: string): string {
     .split(" ")
     .map((token) => repairToken(token))
     .join(" ");
+
+  // Head-noun precedence: collapse "modifier + explicit industry noun" to the
+  // noun BEFORE synonym expansion can add a competing industry head noun.
+  for (const [pattern, replacement] of modifierGuardPhrases) {
+    value = value.replace(pattern, replacement);
+  }
 
   for (const [phrase, replacement] of phraseSynonyms) {
     if (value.includes(phrase)) {
@@ -906,6 +927,13 @@ const relatedDomains: ReadonlyArray<readonly [string, string]> = [
   ["travel", "hospitality"],
   ["creative", "technology"],
   ["professional", "creative"],
+  // A description that names design/photography choices alongside the real
+  // business ("café with … editorial photography") is one business with an
+  // art direction, not a café plus a studio.
+  ["food", "creative"],
+  ["retail", "creative"],
+  ["fashion", "creative"],
+  ["hospitality", "creative"],
 ];
 
 function domainsAreRelated(a: string, b: string): boolean {

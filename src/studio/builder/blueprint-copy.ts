@@ -2188,6 +2188,132 @@ const nonprofit: Profile = {
   concept: "Mission-led nonprofit concept",
 };
 
+/*
+ * Faith/community: a gathering-first voice. Worship nouns, welcome, services
+ * and belonging — deliberately NOT donation or impact language. All times,
+ * names and locations stay clearly sample; a real congregation fills them in.
+ */
+const faith: Profile = {
+  kind: "nonprofit",
+  defaultNames: ["GRACE COMMUNITY CHURCH", "THE WELLSPRING FELLOWSHIP"],
+  nouns: ["Church", "Fellowship", "Community"],
+  offer: "Services & ministries",
+  offerNoun: "gatherings",
+  audience: "the congregation, newcomers and families looking for a church home",
+  intent: "feel welcome, see when services happen and plan a first visit",
+  personality: "warm, reverent and welcoming",
+  priorities: ["Welcome", "Services", "Ministries", "Visit"],
+  eyebrow: "Welcome · worship · community",
+  heroTitles: [
+    "A place to belong, and to begin.",
+    "Everyone is welcome at the table.",
+    "A {lead} congregation, open to all.",
+  ],
+  heroBodies: [
+    "A church community that keeps the door open: service times, ministries and a friendly first visit, all clearly explained.",
+    "Worship, teaching and community life are placed first, so newcomers always know the way in.",
+  ],
+  about: {
+    title: "Who we are, and what we believe.",
+    body: "The church's story, values and leadership. Verified details about the congregation and its leadership belong here.",
+  },
+  offering: {
+    title: "Gatherings and ministries.",
+    body: "Weekly services and the ministries that carry the community through the week.",
+    items: [
+      {
+        title: "Sunday worship",
+        body: "The main weekly gathering: worship, teaching and communion.",
+        meta: "Gathering",
+      },
+      {
+        title: "Youth and children",
+        body: "Age-appropriate teaching and activities during services and midweek.",
+        meta: "Families",
+      },
+      {
+        title: "Small groups",
+        body: "Midweek groups meeting in homes for study and friendship.",
+        meta: "Community",
+      },
+    ],
+  },
+  listing: {
+    title: "Ways to be part of the church.",
+    body: "Ministries, volunteering and events — described warmly, without invented numbers.",
+    items: [
+      {
+        title: "Ministries",
+        body: "Music, outreach, hospitality and prayer teams serving the congregation.",
+        meta: "Serve",
+      },
+      {
+        title: "Events",
+        body: "Seasonal services, community meals and special gatherings.",
+        meta: "Calendar",
+      },
+      {
+        title: "Messages & resources",
+        body: "Sermons, studies and readings for the week ahead.",
+        meta: "Library",
+      },
+    ],
+  },
+  feature: {
+    title: "Planning your first visit.",
+    items: [
+      {
+        title: "Come as you are",
+        body: "No dress code and nothing to prepare — you are welcome exactly as you are.",
+        meta: "Welcome",
+      },
+      {
+        title: "Service times",
+        body: "When the church gathers each week. Verified times belong here.",
+        meta: "Sundays",
+      },
+      {
+        title: "Finding us",
+        body: "Location, parking and accessible entrance details. Verified address belongs here.",
+        meta: "Location",
+      },
+    ],
+  },
+  scenes: ["The congregation", "Sunday morning", "Ministries", "Community"],
+  process: {
+    title: "Your first Sunday, made simple.",
+    items: [
+      {
+        title: "Check the times",
+        body: "Service times and what to expect, published clearly.",
+        meta: "Step 01",
+      },
+      {
+        title: "Come and see",
+        body: "A warm welcome at the door, whatever your background.",
+        meta: "Step 02",
+      },
+      {
+        title: "Find your place",
+        body: "Meet the community and discover where you belong.",
+        meta: "Step 03",
+      },
+    ],
+  },
+  cta: {
+    title: "Plan your visit.",
+    body: "A friendly message is all it takes — we will help you feel at home.",
+    label: "Plan a visit",
+    secondary: "See service times",
+  },
+  contact: {
+    title: "Get in touch.",
+    body: "Add verified service times, address, contact details and prayer-request routes here.",
+  },
+  statement: "All are welcome.",
+  concept: "Faith community concept",
+};
+
 const agriculture: Profile = {
   kind: "agriculture",
   defaultNames: ["FIELDSIDE FARM", "THE HARVEST ROOM"],
@@ -2547,7 +2673,7 @@ const supplements: Profile = {
   priorities: ["Categories", "Protein", "Multivitamins", "Ordering"],
   eyebrow: "Protein · multivitamins · everyday nutrition",
   heroTitles: [
-    "{lead} ranges, sorted the way people shop.",
+    "{offerNoun}, sorted the way people shop.",
     "Supplements that explain themselves.",
     "A {lead} range, organised properly.",
   ],
@@ -3083,6 +3209,7 @@ export const profiles: Record<BusinessCategory, Profile> = {
   events,
   logistics,
   nonprofit,
+  faith,
   agriculture,
   personal,
   generic,
@@ -3225,11 +3352,84 @@ const leadNoise = new Set([
  * A short, honest descriptor taken from the visitor's own words, or nothing at
  * all. Style and framing words are dropped so templates stay grammatical.
  */
+/**
+ * Positioning adjectives that may describe *style* but make a broken or
+ * meaningless brand phrase when dropped into an adjectival slot. Anything
+ * ending in these suffixes is almost always a prompt adjective, not a
+ * business descriptor ("high-end", "top-rated", "5-star").
+ */
+const leadNoiseSuffixes: ReadonlyArray<string> = [
+  "end",
+  "rated",
+  "star",
+  "class",
+  "tech",
+  "friendly",
+  "driven",
+  "focused",
+  "based",
+  "oriented",
+  "first",
+];
+
+/** Words that only appear as prompt framing, never as a business descriptor. */
+const leadNoiseVerbs = new Set([
+  "health",
+  "wellness",
+  "digital",
+  "online",
+  "local",
+  "locally",
+  "custom",
+  "customised",
+  "customized",
+  "personalised",
+  "personalized",
+  "specialised",
+  "specialized",
+  "affordable",
+  "cheap",
+  "reliable",
+  "trusted",
+  "certified",
+  "leading",
+  "quick",
+  "fast",
+  "instant",
+  "smart",
+  "high-end",
+  "high",
+  "top-rated",
+  "five-star",
+  "5-star",
+  "world-class",
+  "state-of-the-art",
+  "cutting-edge",
+]);
+
 function descriptiveLead(terms: PromptTerms): string {
   if (!terms.lead) return "";
   const kept = terms.lead
     .split(/\s+/)
-    .filter((word) => word && !leadNoise.has(word.toLowerCase()))
+    .filter((word) => {
+      const lower = word.toLowerCase();
+      if (!word || leadNoise.has(lower)) return false;
+      // "High-End" / "5-Star" / "Top-Rated": a hyphenated compound whose tail
+      // is a positioning suffix is prompt styling, not a business noun. Test
+      // the whole word and each hyphen segment against both noise sets.
+      const segments = lower.split("-");
+      if (segments.some((part) => leadNoise.has(part))) return false;
+      if (segments.some((part) => leadNoiseVerbs.has(part))) return false;
+      if (leadNoiseVerbs.has(lower)) return false;
+      if (/\d/.test(word)) return false;
+      if (
+        word.includes("-") &&
+        segments[segments.length - 1] &&
+        leadNoiseSuffixes.includes(segments[segments.length - 1]!)
+      )
+        return false;
+      return true;
+    })
     .slice(-2);
   return kept.join(" ");
 }
@@ -3262,8 +3462,19 @@ function fill(template: string, values: Record<string, string>): string {
      */
     .replace(/^[a-z]/, (letter) => letter.toUpperCase())
     .replace(/\s+·\s+·/g, " ·")
+    /*
+     * Copy sanity: a slot that emptied out leaves orphaned openers ("A range
+     * worth a closer look." survives, but "{lead} ranges, sorted…" used to
+     * ship as " ranges, sorted…" or "A  wardrobe"). Collapse dangling
+     * articles/prepositions and any leading lowercase fragment so no heading
+     * starts mid-sentence.
+     */
+    .replace(/^(A|An|The)\s*$/i, "")
     .trim();
-  return output.replace(/^[·,;:\-\s]+/, "").trim();
+  // Never ship a heading that starts lowercase or with stray punctuation.
+  output = output.replace(/^[\s·,;:\-]+/, "");
+  if (output) output = output[0]!.toUpperCase() + output.slice(1);
+  return output.trim();
 }
 
 export type SiteCopy = {
