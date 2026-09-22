@@ -279,9 +279,18 @@ test.describe("Website Studio V2", () => {
       viewport: window.innerWidth,
     }));
     expect(widths.canvas).toBeLessThan(Math.min(widths.viewport, 430));
-    await expect(
-      page.getByTestId("studio-preview").locator("nav"),
-    ).toBeHidden();
+    /*
+     * The generated page links stay reachable on a phone. The mobile preview
+     * interprets the navigation (a slim, scrollable strip) instead of removing
+     * it, so a visitor can still move between the pages of their concept.
+     */
+    const siteNav = page
+      .getByTestId("studio-preview")
+      .locator(".studio-v2-site-nav nav");
+    await expect(siteNav).toBeVisible();
+    const navLinks = siteNav.getByRole("button");
+    expect(await navLinks.count()).toBeGreaterThan(1);
+    await expect(navLinks.first()).toBeVisible();
   });
 
   test("applies palette, mood, hero, copy, section and page instructions", async ({

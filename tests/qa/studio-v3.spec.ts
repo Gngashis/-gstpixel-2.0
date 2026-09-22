@@ -234,6 +234,24 @@ test.describe("Website Studio V3", () => {
     const compare = page.getByTestId("studio-compare");
     await expect(compare).toBeVisible();
     await expect(compare.locator("tbody tr").first()).toBeVisible();
+
+    // The comparison speaks the visitor's language, not schema vocabulary.
+    const labels = await compare.locator("tbody th").allInnerTexts();
+    const values = await compare.locator("tbody td").allInnerTexts();
+    expect(labels.join(" ")).toMatch(/Hero|Composition|Palette|Motion/);
+    for (const text of [...labels, ...values]) {
+      expect(text).not.toMatch(/[a-z]-[a-z]/);
+    }
+    // Structure is compared too, so a version that only differs in its pages
+    // still reads as different.
+    expect(labels.join(" ")).toMatch(/Pages/);
+    expect(values.join(" ")).toMatch(/Home|hero/);
+
+    // A duplicate is not a different design, and Studio says so rather than
+    // showing an empty table.
+    await rows.first().getByRole("button").nth(1).click();
+    await rows.nth(1).getByRole("button").nth(1).click();
+    await expect(page.getByTestId("studio-compare-identical")).toBeVisible();
   });
 
   test("edits pages and the design in plain language", async ({ page }) => {
@@ -389,6 +407,21 @@ test.describe("Website Studio V3", () => {
       "data-motion-level",
       /none|subtle|premium|cinematic/,
     );
+    // The identity's own mobile decisions reach the phone preview.
+    await expect(page.locator(".studio-v2-site").first()).toHaveClass(
+      /dna-mobile-hero-|dna-mobile-density-/,
+    );
+
+    /*
+     * A multi-page concept must stay navigable on a phone: whatever the mobile
+     * navigation treatment is, the generated page links have to remain
+     * reachable rather than being hidden behind a desktop-only nav.
+     */
+    const navLinks = page.getByTestId("studio-preview").locator("nav button");
+    expect(await navLinks.count()).toBeGreaterThan(1);
+    for (const index of [0, 1]) {
+      await expect(navLinks.nth(index)).toBeVisible();
+    }
   });
 
   test("turns one motion request into a whole-website motion level", async ({

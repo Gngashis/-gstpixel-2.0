@@ -49,6 +49,7 @@ import {
 import {
   designDnaFromBlueprint,
   describeDesignDna,
+  describeDesignDnaFacets,
   readDesignDna,
   motionLevels,
   type MotionLevel,
@@ -132,6 +133,25 @@ const generationSteps = [
   "Refining typography",
   "Preparing your website",
 ] as const;
+
+/**
+ * Section types in the visitor's language. Used wherever Studio lists what a
+ * page contains, so a comparison never shows a component name like "cta".
+ */
+const sectionLabels: Record<SectionType, string> = {
+  hero: "Opening",
+  about: "Story",
+  services: "Services",
+  gallery: "Gallery",
+  listings: "Products and listings",
+  testimonials: "Reviews",
+  features: "Highlights",
+  cta: "Closing call to action",
+  contact: "Contact",
+};
+
+const describeSections = (types: readonly SectionType[]) =>
+  types.map((type) => sectionLabels[type]).join(" · ");
 
 const paletteLabels: Record<PaletteId, string> = {
   "forest-gold": "Forest & gold",
@@ -964,10 +984,16 @@ export function StudioBuilder() {
     [identity],
   );
 
-  /* What actually differs between two session versions, in customer language. */
-  const compareRows = useMemo(() => {
+  /*
+   * What actually differs between two session versions, in customer language.
+   * The design identity is compared through its named facets rather than the
+   * raw theme tokens, and the site structure is compared page by page so a
+   * version that only differs in its pages still reads as different.
+   */
+  const compare = useMemo(() => {
     const other = versions.find((entry) => entry.id === compareVersionId);
-    if (!spec || !other || other.id === activeVersionId) return [];
+    if (!spec || !other || other.id === activeVersionId)
+      return { rows: [], identical: false };
     const rows: Array<{ label: string; mine: string; theirs: string }> = [];
     const push = (label: string, mine: string, theirs: string) => {
       if (mine !== theirs) rows.push({ label, mine, theirs });
@@ -978,36 +1004,45 @@ export function StudioBuilder() {
       spec.metadata.conceptLabel,
       otherSpec.metadata.conceptLabel,
     );
-    push("Mood", spec.theme.mood, otherSpec.theme.mood);
-    push("Palette", spec.theme.palette, otherSpec.theme.palette);
-    push("Typography", spec.theme.typography, otherSpec.theme.typography);
-    push("Spacing", spec.theme.spacing, otherSpec.theme.spacing);
-    push("Corners", spec.theme.radius, otherSpec.theme.radius);
-    push("Buttons", spec.theme.buttonStyle, otherSpec.theme.buttonStyle);
-    push("Surface", spec.theme.surface, otherSpec.theme.surface);
-    push("Navigation", spec.navigation.style, otherSpec.navigation.style);
-    push(
-      "Motion",
-      readDesignDna(spec).motion.level,
-      readDesignDna(otherSpec).motion.level,
-    );
-    push(
-      "Opening hero",
-      spec.pages[0]?.sections[0]?.variant ?? "",
-      otherSpec.pages[0]?.sections[0]?.variant ?? "",
-    );
+    const mine = describeDesignDnaFacets(readDesignDna(spec));
+    const theirs = describeDesignDnaFacets(readDesignDna(otherSpec));
+    for (const facet of mine) {
+      const counterpart = theirs.find((entry) => entry.label === facet.label);
+      push(facet.label, facet.value, counterpart?.value ?? "—");
+    }
+
+    /* Structure: which pages each version has, and how full its home page is. */
+    const minePages = spec.pages.map((page) => page.title);
+    const theirPages = otherSpec.pages.map((page) => page.title);
+    const added = minePages.filter((title) => !theirPages.includes(title));
+    const removed = theirPages.filter((title) => !minePages.includes(title));
     push(
       "Pages",
-      spec.pages.map((page) => page.title).join(", "),
-      otherSpec.pages.map((page) => page.title).join(", "),
+      `${minePages.length}${added.length ? ` (added ${added.join(", ")})` : ""}`,
+      `${theirPages.length}${removed.length ? ` (added ${removed.join(", ")})` : ""}`,
     );
     push(
-      "Home sections",
-      String(spec.pages[0]?.sections.length ?? 0),
-      String(otherSpec.pages[0]?.sections.length ?? 0),
+      "Pages in both",
+      minePages.filter((title) => theirPages.includes(title)).join(", "),
+      theirPages.filter((title) => minePages.includes(title)).join(", "),
     );
-    return rows;
+    for (const title of minePages.filter((entry) =>
+      theirPages.includes(entry),
+    )) {
+      const mineCount = spec.pages.find((page) => page.title === title);
+      const theirCount = otherSpec.pages.find((page) => page.title === title);
+      const mineSections = mineCount
+        ? describeSections(mineCount.sections.map((section) => section.type))
+        : "";
+      const theirSections = theirCount
+        ? describeSections(theirCount.sections.map((section) => section.type))
+        : "";
+      if (mineSections && theirSections)
+        push(title, mineSections, theirSections);
+    }
+    return { rows, identical: rows.length === 0 };
   }, [spec, versions, compareVersionId, activeVersionId]);
+  const compareRows = compare.rows;
 
   /* Object URLs are revoked when the Studio goes away. */
   useEffect(
@@ -1731,30 +1766,38 @@ export function StudioBuilder() {
                 <WandSparkles size={15} /> New version from a different design
               </button>
             </div>
-            {compareRows.length > 0 && (
+            {compareVersionId !== "" && (
               <div className="studio-v2-compare" data-testid="studio-compare">
                 <small>What differs</small>
-                <table>
-                  <thead>
-                    <tr>
-                      <th scope="col">Aspect</th>
-                      <th scope="col">{activeVersion?.label}</th>
-                      <th scope="col">
-                        {versions.find((entry) => entry.id === compareVersionId)
-                          ?.label ?? "Other"}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {compareRows.map((row) => (
-                      <tr key={row.label}>
-                        <th scope="row">{row.label}</th>
-                        <td>{row.mine}</td>
-                        <td>{row.theirs}</td>
+                {compare.identical ? (
+                  <p data-testid="studio-compare-identical">
+                    These two versions are the same right now — change something
+                    and the differences will appear here.
+                  </p>
+                ) : (
+                  <table>
+                    <thead>
+                      <tr>
+                        <th scope="col">Aspect</th>
+                        <th scope="col">{activeVersion?.label}</th>
+                        <th scope="col">
+                          {versions.find(
+                            (entry) => entry.id === compareVersionId,
+                          )?.label ?? "Other"}
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {compareRows.map((row) => (
+                        <tr key={row.label}>
+                          <th scope="row">{row.label}</th>
+                          <td>{row.mine}</td>
+                          <td>{row.theirs}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             )}
           </details>

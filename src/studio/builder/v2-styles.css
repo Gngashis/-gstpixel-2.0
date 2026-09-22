@@ -1861,11 +1861,39 @@
   font-size: clamp(2.25rem, 13vw, 3.5rem);
 }
 
+/*
+ * A minimal mobile navigation is a slim, horizontally scrollable strip — never
+ * hidden. The generated page links are how a visitor moves between the pages of
+ * their concept, so removing them on phones would strand them on one page.
+ */
 .studio-v2-canvas.is-mobile
   .studio-v2-site.mobile-nav-minimal
   .studio-v2-site-nav
   nav {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  padding-block: 0.35rem;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.mobile-nav-minimal
+  .studio-v2-site-nav
+  nav::-webkit-scrollbar {
   display: none;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.mobile-nav-minimal
+  .studio-v2-site-nav
+  nav
+  > * {
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
 
 .studio-v2-canvas.is-mobile
@@ -2244,14 +2272,11 @@
   text-align: center;
 }
 
-.studio-v2-site.composition-centered-symmetric
-  .studio-v2-site-heading {
+.studio-v2-site.composition-centered-symmetric .studio-v2-site-heading {
   margin-inline: auto;
 }
 
-.studio-v2-site.composition-centered-symmetric
-  .studio-v2-site-heading
-  h2 {
+.studio-v2-site.composition-centered-symmetric .studio-v2-site-heading h2 {
   margin-inline: auto;
 }
 
@@ -2307,7 +2332,11 @@
   align-content: start;
   padding-block: calc(clamp(3.5rem, 9vw, 8rem) * var(--preview-density));
   background:
-    linear-gradient(180deg, transparent 62%, color-mix(in oklab, var(--site-deep) 6%, transparent)),
+    linear-gradient(
+      180deg,
+      transparent 62%,
+      color-mix(in oklab, var(--site-deep) 6%, transparent)
+    ),
     var(--site-bg);
 }
 
@@ -2961,7 +2990,9 @@
 }
 
 .studio-v2-site-numbered li > span {
-  font: 700 clamp(1.6rem, 3vw, 2.4rem) / 1 "Inter Tight", sans-serif;
+  font:
+    700 clamp(1.6rem, 3vw, 2.4rem) / 1 "Inter Tight",
+    sans-serif;
   color: var(--site-muted);
 }
 
@@ -3263,7 +3294,9 @@
 }
 
 .studio-v2-site-stats-band dt {
-  font: 700 clamp(1.8rem, 4vw, 3rem) / 1 "Inter Tight", sans-serif;
+  font:
+    700 clamp(1.8rem, 4vw, 3rem) / 1 "Inter Tight",
+    sans-serif;
   color: var(--site-accent);
 }
 
@@ -3419,7 +3452,11 @@
   height: 11rem;
   background:
     radial-gradient(circle at 70% 25%, var(--site-accent), transparent 22%),
-    linear-gradient(150deg, var(--site-deep), color-mix(in oklab, var(--site-accent) 22%, var(--site-deep)));
+    linear-gradient(
+      150deg,
+      var(--site-deep),
+      color-mix(in oklab, var(--site-accent) 22%, var(--site-deep))
+    );
 }
 
 .studio-v2-site-strip span {
@@ -3621,7 +3658,8 @@
   border-color: rgb(255 255 255 / 45%);
 }
 
-.studio-v2-section[class*="composition-cta-"] .studio-v2-site-button.is-primary {
+.studio-v2-section[class*="composition-cta-"]
+  .studio-v2-site-button.is-primary {
   color: var(--site-deep);
   background: #f6f2e9;
   border-color: #f6f2e9;
@@ -4069,7 +4107,11 @@
   inset: 16%;
   background:
     radial-gradient(circle at 34% 30%, var(--site-accent), transparent 45%),
-    linear-gradient(160deg, var(--site-deep), color-mix(in oklab, var(--site-accent) 24%, var(--site-deep)));
+    linear-gradient(
+      160deg,
+      var(--site-deep),
+      color-mix(in oklab, var(--site-accent) 24%, var(--site-deep))
+    );
 }
 
 .art-plate {
@@ -4429,8 +4471,12 @@
   padding: 2.4rem 1.15rem;
 }
 
-.studio-v2-canvas.is-mobile .studio-v2-site-hero-layers > .studio-v2-site-visual,
-.studio-v2-canvas.is-mobile .studio-v2-site-hero-layers > .studio-v2-site-hero-copy {
+.studio-v2-canvas.is-mobile
+  .studio-v2-site-hero-layers
+  > .studio-v2-site-visual,
+.studio-v2-canvas.is-mobile
+  .studio-v2-site-hero-layers
+  > .studio-v2-site-hero-copy {
   position: relative;
   inset: auto;
 }
@@ -4523,7 +4569,9 @@
   }
 
   .studio-v2-site .studio-v2-site-hero-foot,
-  .studio-v2-site .composition-hero-asymmetric-story > .studio-v2-site-hero-foot {
+  .studio-v2-site
+    .composition-hero-asymmetric-story
+    > .studio-v2-site-hero-foot {
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
   }
@@ -4636,7 +4684,6 @@
   }
 }
 
-
 /* ==================================================================
    Typography safety guards
 
@@ -4713,11 +4760,7 @@
 .studio-v2-canvas .studio-v2-site .studio-v2-section.studio-v2-site-hero h1 {
   max-width: min(100%, var(--site-h1-measure));
   min-width: 0;
-  font-size: clamp(
-    2.05rem,
-    var(--site-h1-fluid, 7cqi),
-    var(--site-h1-max)
-  );
+  font-size: clamp(2.05rem, var(--site-h1-fluid, 7cqi), var(--site-h1-max));
   line-height: var(--site-h1-leading, 1);
   text-wrap: balance;
   overflow-wrap: break-word;
@@ -4751,7 +4794,10 @@
   --site-h1-measure: 16ch;
 }
 
-.studio-v2-canvas.is-mobile .studio-v2-site .studio-v2-section.studio-v2-site-hero h1 {
+.studio-v2-canvas.is-mobile
+  .studio-v2-site
+  .studio-v2-section.studio-v2-site-hero
+  h1 {
   max-width: min(100%, var(--site-h1-measure));
   font-size: clamp(1.85rem, var(--site-h1-fluid, 9.4cqi), var(--site-h1-max));
   line-height: var(--site-h1-leading, 1.08);
@@ -4759,6 +4805,91 @@
 
 .studio-v2-canvas.is-mobile .studio-v2-site .studio-v2-site-heading h2 {
   font-size: clamp(1.4rem, var(--site-h2-fluid, 6.4cqi), var(--site-h2-max));
+}
+
+/* ==================================================================
+   Design identity: mobile interpretation
+
+   The phone version is a designed interpretation of the same brand, not
+   a squeezed desktop. These rules read the identity's own mobile
+   decisions — hero height, navigation, density, type cap and which
+   action leads — and are written so desktop rendering is untouched.
+   ================================================================== */
+.studio-v2-canvas.is-mobile .studio-v2-site.dna-mobile-hero-compact {
+  --site-hero-min: 0;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-hero-compact
+  .studio-v2-site-hero {
+  min-height: 0;
+  padding-block: 1.75rem;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-hero-balanced
+  .studio-v2-site-hero {
+  min-height: min(78svh, 30rem);
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-nav-minimal
+  .studio-v2-site-nav
+  nav {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  font-size: 0.82rem;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-nav-minimal
+  .studio-v2-site-nav
+  nav::-webkit-scrollbar {
+  display: none;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-nav-minimal
+  .studio-v2-site-nav
+  nav
+  > * {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.studio-v2-canvas.is-mobile .studio-v2-site.dna-mobile-cap-compact :is(h1, h2) {
+  font-size: clamp(2.1rem, 11.5vw, 3.25rem);
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-density-compact
+  .studio-v2-section {
+  padding-block: 2.25rem;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-density-balanced
+  .studio-v2-section {
+  padding-block: 3.25rem;
+}
+
+/* The visitor's first action should be the one the identity leads with. */
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-cta-first-action
+  .studio-v2-site-cta
+  > :is(button, a, .studio-v2-site-button) {
+  order: -1;
+  width: 100%;
+}
+
+.studio-v2-canvas.is-mobile
+  .studio-v2-site.dna-mobile-cta-centred
+  .studio-v2-site-cta {
+  text-align: center;
+  align-items: center;
 }
 
 /* ==================================================================
@@ -5061,10 +5192,7 @@
    size, and a long one steps down again while widening its measure. Without
    this, a 100-character heading rendered at poster scale filled the entire
    frame with type. */
-.studio-v2-canvas
-  .studio-v2-site
-  .studio-v2-section.headline-considered
-  h1 {
+.studio-v2-canvas .studio-v2-site .studio-v2-section.headline-considered h1 {
   --site-h1-fluid: 7.4cqi;
   --site-h1-max: 3.9rem;
   --site-h1-measure: 20ch;
@@ -5577,7 +5705,9 @@
   border: 1px solid var(--site-line);
   border-radius: calc(999px * var(--dna-radius-scale, 1));
   cursor: pointer;
-  transition: color 0.2s ease, border-color 0.2s ease;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 .studio-v2-site-filters button:hover,

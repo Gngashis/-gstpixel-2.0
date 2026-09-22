@@ -649,8 +649,19 @@ export function designDnaClasses(dna: DesignDNA): string {
     `dna-nav-treatment-${dna.navigation.treatment}`,
     `dna-motion-${dna.motion.level}`,
     `dna-motion-choreography-${dna.motion.choreography}`,
+    /*
+     * The mobile interpretation is its own set of classes so the phone preview
+     * can honour the identity's mobile decisions — its own hero treatment,
+     * navigation, density, type cap and CTA priority — without ever changing
+     * how the desktop design renders.
+     */
     `dna-mobile-${dna.mobile.strategy}`,
     `dna-mobile-decoration-${dna.mobile.decoration}`,
+    `dna-mobile-hero-${dna.mobile.hero}`,
+    `dna-mobile-nav-${dna.mobile.navigation}`,
+    `dna-mobile-density-${dna.mobile.density}`,
+    `dna-mobile-cap-${dna.mobile.typographyCap}`,
+    `dna-mobile-cta-${dna.mobile.ctaPriority}`,
   ].join(" ");
 }
 
@@ -699,38 +710,83 @@ export function designDnaVariables(dna: DesignDNA): Record<string, string> {
   };
 }
 
+const personalityWords: Record<string, string> = {
+  restrained: "Restrained",
+  considered: "Considered",
+  expressive: "Expressive",
+  dramatic: "Dramatic",
+};
+const premiumWords: Record<string, string> = {
+  approachable: "Approachable",
+  refined: "Refined",
+  luxury: "Luxury",
+};
+const densityWords: Record<string, string> = {
+  sparse: "Airy",
+  measured: "Balanced",
+  rich: "Rich",
+};
+const motionWords: Record<MotionLevel, string> = {
+  none: "Still",
+  subtle: "Subtle motion",
+  premium: "Premium motion",
+  cinematic: "Cinematic motion",
+};
+
+/** "asymmetric-grid" → "Asymmetric grid" — never a raw schema token. */
+const words = (token: string) => capitalize(token.replaceAll("-", " "));
+
 /** Customer-language chips describing the identity — never schema vocabulary. */
 export function describeDesignDna(dna: DesignDNA): string[] {
-  const personality: Record<string, string> = {
-    restrained: "Restrained",
-    considered: "Considered",
-    expressive: "Expressive",
-    dramatic: "Dramatic",
-  };
-  const premium: Record<string, string> = {
-    approachable: "Approachable",
-    refined: "Refined",
-    luxury: "Luxury",
-  };
-  const density: Record<string, string> = {
-    sparse: "Airy",
-    measured: "Balanced",
-    rich: "Rich",
-  };
-  const motion: Record<MotionLevel, string> = {
-    none: "Still",
-    subtle: "Subtle motion",
-    premium: "Premium motion",
-    cinematic: "Cinematic motion",
-  };
   return [
-    personality[dna.identity.personality] ??
+    personalityWords[dna.identity.personality] ??
       capitalize(dna.identity.personality),
-    premium[dna.identity.premium] ?? capitalize(dna.identity.premium),
-    capitalize(dna.composition.family.replaceAll("-", " ")),
+    premiumWords[dna.identity.premium] ?? capitalize(dna.identity.premium),
+    words(dna.composition.family),
     capitalize(dna.typography.treatment),
-    density[dna.spacing.density] ?? "Balanced",
-    motion[dna.motion.level],
+    densityWords[dna.spacing.density] ?? "Balanced",
+    motionWords[dna.motion.level],
+  ];
+}
+
+/** One named aspect of the identity, spoken in the visitor's own language. */
+export type DesignDnaFacet = { label: string; value: string };
+
+/**
+ * The identity broken into named, comparable aspects. Used by the version
+ * comparison so a visitor reads "Editorial serif" rather than the schema token
+ * "editorial-serif", and so every axis of the identity can be compared rather
+ * than only the handful the legacy theme happens to expose.
+ */
+export function describeDesignDnaFacets(dna: DesignDNA): DesignDnaFacet[] {
+  return [
+    { label: "Visual personality", value: words(dna.identity.personality) },
+    { label: "Hero", value: words(dna.hero.family) },
+    { label: "Composition", value: words(dna.composition.family) },
+    { label: "Type character", value: words(dna.typography.display) },
+    { label: "Type treatment", value: words(dna.typography.treatment) },
+    {
+      label: "Palette",
+      value: `${words(dna.palette.id)} · ${words(dna.palette.environment)}`,
+    },
+    { label: "Background", value: words(dna.background.treatment) },
+    { label: "Decoration", value: words(dna.background.geometry) },
+    { label: "Art direction", value: words(dna.imagery.treatment) },
+    {
+      label: "Density",
+      value: densityWords[dna.spacing.density] ?? "Balanced",
+    },
+    { label: "Section rhythm", value: words(dna.spacing.sectionRhythm) },
+    { label: "Corners", value: words(dna.radius.language) },
+    { label: "Borders", value: words(dna.borders.weight) },
+    { label: "Buttons", value: words(dna.buttons.language) },
+    { label: "Navigation", value: words(dna.navigation.family) },
+    { label: "Motion", value: motionWords[dna.motion.level] },
+    { label: "Mobile layout", value: words(dna.mobile.strategy) },
+    {
+      label: "Mobile type cap",
+      value: words(dna.mobile.typographyCap),
+    },
   ];
 }
 
