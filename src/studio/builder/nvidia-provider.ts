@@ -48,7 +48,7 @@ export const NVIDIA_BASE_URL_DEFAULT =
   "https://integrate.api.nvidia.com/v1" as const;
 
 /** Hard ceiling for a single NVIDIA call before we fall back. */
-export const NVIDIA_TIMEOUT_MS = 8_000;
+export const NVIDIA_TIMEOUT_MS = 9_000;
 
 /** Provider-side prompt-length guard (mirrors the request schema ceiling). */
 export const NVIDIA_MAX_PROMPT_CHARS = 1_200;
@@ -105,7 +105,7 @@ Output rules:
 - YOU NEVER WRITE FABRICATED FACTS OR COPY: no titles, testimonials, prices, dates, statistics, awards, certifications, addresses, doctor/staff names, service times or inventory availability. offer/audience/intent/descriptor and CTA labels must stay short, generic, clearly sample concept text.
 - Different businesses must receive genuinely different creative directions: vary hero family, composition, typography character, colour environment, navigation family, art direction, motion and the section families.
 - When a description names two unrelated businesses, keep the dominant first business and rely on the existing clarification behaviour — never silently merge two businesses.
-- The supplied candidate is already functional and safe. Improve it only where the description clearly justifies a different direction.`;
+- The current safe creative blueprint is functional; improve it only where the description clearly justifies a different direction.`;
 
 const NVIDIA_PATCH_CONTRACT = {
   optionalGroups: [
@@ -135,10 +135,42 @@ function parseJsonContent(content: string): unknown {
     const firstBreak = trimmed.indexOf("\n");
     const closing = trimmed.lastIndexOf("```");
     if (firstBreak >= 0 && closing > firstBreak) {
-      return JSON.parse(trimmed.slice(firstBreak + 1, closing).trim());
+      return parseJsonContent(trimmed.slice(firstBreak + 1, closing).trim());
     }
   }
-  return JSON.parse(trimmed);
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // Models sometimes preface the JSON with a short "thinking" note. Fall
+    // back to extracting the first balanced JSON value so a valid patch is
+    // still recovered; anything untidy still fails and falls back safely.
+    const firstObject = trimmed.indexOf("{");
+    const firstArray = trimmed.indexOf("[");
+    let start = firstObject;
+    if (start === -1 || (firstArray !== -1 && firstArray < start)) {
+      start = firstArray;
+    }
+    if (start === -1) throw new Error("NVIDIA output contains no JSON.");
+    let depth = 0;
+    let inString = false;
+    let escaped = false;
+    for (let i = start; i < trimmed.length; i += 1) {
+      const ch = trimmed[i];
+      if (inString) {
+        if (escaped) escaped = false;
+        else if (ch === "\\") escaped = true;
+        else if (ch === '"') inString = false;
+        continue;
+      }
+      if (ch === '"') inString = true;
+      else if (ch === "{" || ch === "[") depth += 1;
+      else if (ch === "}" || ch === "]") {
+        depth -= 1;
+        if (depth === 0) return JSON.parse(trimmed.slice(start, i + 1));
+      }
+    }
+    throw new Error("NVIDIA output is not valid JSON.");
+  }
 }
 
 function extractJsonObject(response: unknown): unknown {
@@ -184,6 +216,49 @@ function parsePatchPayload(payload: unknown): CreativeBlueprintPatch {
     }
   }
   return patch;
+}
+
+/**
+ * A deliberately compact view of the deterministic candidate. Sending the full
+ * blueprint to NVIDIA would inflate tokens and latency for no gain; the model
+ * only needs the current shape so it can propose a validated creative patch.
+ */
+type CompactCandidate = {
+  businessKind: string;
+  category: string;
+  direction: { intensity: string; premium: string; density: string };
+  palette: string;
+  hero: string;
+  layout: string;
+  navigation: string;
+  motion: string;
+  mobile: string;
+  sections: Array<{ type: string; variant: string; purpose?: string }>;
+};
+
+function compactCandidateBlueprint(
+  candidate: CreativeBlueprint,
+): CompactCandidate {
+  return {
+    businessKind: candidate.business.kind,
+    category: candidate.business.category,
+    direction: {
+      intensity: candidate.direction.intensity,
+      premium: candidate.direction.premium,
+      density: candidate.direction.density,
+    },
+    palette: candidate.colour.palette,
+    hero: candidate.hero.family,
+    layout: candidate.layout.composition,
+    navigation: candidate.navigation.family,
+    motion: candidate.motion.family,
+    mobile: candidate.mobile.strategy,
+    sections: candidate.sections.map((section) => ({
+      type: section.type,
+      variant: section.variant,
+      ...(section.purpose ? { purpose: section.purpose } : {}),
+    })),
+  };
 }
 
 export type NvidiaFetch = typeof fetch;
@@ -234,7 +309,7 @@ export async function planCreativeBlueprintWithNvidia(options: {
             content: JSON.stringify({
               task: "Return a creative-direction patch for this business description.",
               untrustedVisitorDescription: visitorText,
-              safeCandidateBlueprint: candidate,
+              currentCreativeBlueprint: compactCandidateBlueprint(candidate),
               allowlists: {
                 businessCategories,
                 heroFamilies,
@@ -258,7 +333,7 @@ export async function planCreativeBlueprintWithNvidia(options: {
             }),
           },
         ],
-        max_tokens: 2_500,
+        max_tokens: 1_200,
         temperature: 0.35,
         top_p: 0.8,
         stream: false,
