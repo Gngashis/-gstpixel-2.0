@@ -224,15 +224,14 @@ function parsePatchPayload(payload: unknown): CreativeBlueprintPatch {
  * only needs the current shape so it can propose a validated creative patch.
  */
 type CompactCandidate = {
-  businessKind: string;
-  category: string;
+  business: { category: string; kind: string; location: string };
   direction: { intensity: string; premium: string; density: string };
-  palette: string;
-  hero: string;
-  layout: string;
-  navigation: string;
-  motion: string;
-  mobile: string;
+  colour: { palette: string };
+  hero: { family: string };
+  layout: { composition: string };
+  navigation: { family: string };
+  motion: { family: string };
+  mobile: { strategy: string };
   sections: Array<{ type: string; variant: string; purpose?: string }>;
 };
 
@@ -240,19 +239,22 @@ function compactCandidateBlueprint(
   candidate: CreativeBlueprint,
 ): CompactCandidate {
   return {
-    businessKind: candidate.business.kind,
-    category: candidate.business.category,
+    business: {
+      category: candidate.business.category,
+      kind: candidate.business.kind,
+      location: candidate.business.location,
+    },
     direction: {
       intensity: candidate.direction.intensity,
       premium: candidate.direction.premium,
       density: candidate.direction.density,
     },
-    palette: candidate.colour.palette,
-    hero: candidate.hero.family,
-    layout: candidate.layout.composition,
-    navigation: candidate.navigation.family,
-    motion: candidate.motion.family,
-    mobile: candidate.mobile.strategy,
+    colour: { palette: candidate.colour.palette },
+    hero: { family: candidate.hero.family },
+    layout: { composition: candidate.layout.composition },
+    navigation: { family: candidate.navigation.family },
+    motion: { family: candidate.motion.family },
+    mobile: { strategy: candidate.mobile.strategy },
     sections: candidate.sections.map((section) => ({
       type: section.type,
       variant: section.variant,
@@ -293,7 +295,7 @@ export async function planCreativeBlueprintWithNvidia(options: {
 
   const endpoint = `${baseUrl.replace(/\/+$/, "")}/chat/completions`;
 
-  const send = (signal: AbortSignal) =>
+  const send = (signal: AbortSignal, options: { jsonMode: boolean }) =>
     fetchImpl(endpoint, {
       method: "POST",
       headers: {
@@ -330,13 +332,43 @@ export async function planCreativeBlueprintWithNvidia(options: {
                 sectionVariants: sectionVariantRegistry,
               },
               patchContract: NVIDIA_PATCH_CONTRACT,
+              // Concrete nested shape the patch must follow. Without this the
+              // model mirrors the flat allowlist keys instead of the groups.
+              patchShape: {
+                business: {
+                  category: "<businessCategory>",
+                  location: "<short place>",
+                  priorities: ["<short priority>"],
+                },
+                direction: {
+                  intensity: "<visualIntensity>",
+                  premium: "<premiumLevel>",
+                  density: "<contentDensity>",
+                },
+                colour: { palette: "<paletteId>", environment: "<light|dark|tinted>" },
+                hero: { family: "<heroFamily>", height: "<compact|balanced|immersive|viewport>" },
+                layout: { composition: "<compositionFamily>" },
+                navigation: { family: "<navigationFamily>" },
+                motion: { family: "<motionFamily>" },
+                mobile: { strategy: "<mobileStrategy>" },
+                sections: [
+                  {
+                    type: "<sectionType>",
+                    variant: "<allowlisted variant for that type>",
+                    purpose: "<sectionPurpose>",
+                  },
+                ],
+              },
             }),
           },
         ],
         max_tokens: 1_200,
-        temperature: 0.35,
-        top_p: 0.8,
+        temperature: 0,
+        top_p: 1,
         stream: false,
+        // Structured extraction only: no visible reasoning trace before the JSON.
+        chat_template_kwargs: { enable_thinking: false },
+        ...(options.jsonMode ? { response_format: { type: "json_object" } } : {}),
       }),
       signal,
     });
@@ -344,8 +376,16 @@ export async function planCreativeBlueprintWithNvidia(options: {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const first = await send(controller.signal);
+    const first = await send(controller.signal, { jsonMode: true });
     if (first.ok) return parsePatchPayload(await first.json());
+
+    // Some hosted routes reject response_format. Retry once without it, keeping
+    // the robust JSON parsing/validation as the safety net.
+    if (first.status === 400 || first.status === 422) {
+      const compat = await send(controller.signal, { jsonMode: false });
+      if (compat.ok) return parsePatchPayload(await compat.json());
+      throw new Error(`NVIDIA request failed with status ${compat.status}.`);
+    }
 
     if (!retryableStatus(first.status)) {
       throw new Error(`NVIDIA request failed with status ${first.status}.`);
@@ -353,7 +393,7 @@ export async function planCreativeBlueprintWithNvidia(options: {
 
     // One controlled retry for rate-limit / transient server errors only.
     await delay(120);
-    const second = await send(controller.signal);
+    const second = await send(controller.signal, { jsonMode: true });
     if (second.ok) return parsePatchPayload(await second.json());
     throw new Error(`NVIDIA request failed with status ${second.status}.`);
   } finally {
