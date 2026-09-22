@@ -8,7 +8,7 @@ import { useReducedMotion } from "@/lib/motion";
 import { businessFacts } from "@/lib/content";
 
 const nav = [
-  ["Studio", "/website-studio"],
+  ["Website Studio", "/website-studio"],
   ["Services", "/services"],
   ["Solutions", "/solutions"],
   ["Work", "/work"],
