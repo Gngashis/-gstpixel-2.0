@@ -23,6 +23,7 @@ import {
   extractLocationPhrase,
 } from "./language";
 import { designDnaFromBlueprint, type DesignDNA } from "./design-dna";
+import { templateIds } from "./template-ids";
 import {
   pageArchetype,
   pageHeroTitle,
@@ -546,6 +547,13 @@ export const creativeBlueprintPatchSchema = z
         navigation: z.enum(["minimal", "standard"]).optional(),
         density: z.enum(["compact", "balanced"]).optional(),
         simplification: z.array(text(24, 1)).min(1).max(5).optional(),
+      })
+      .strict()
+      .optional(),
+    template: z
+      .object({
+        masterId: z.enum(templateIds),
+        variantId: z.number().int().min(0).max(99).optional(),
       })
       .strict()
       .optional(),

@@ -433,6 +433,19 @@ export const designSpecSchema = z
          * concept is rendered from. In-memory only, exactly like the blueprint.
          */
         designDna: z.unknown().optional(),
+        /**
+         * Premium template showroom selection (internal observability only —
+         * never surfaced to visitors).
+         */
+        template: z
+          .object({
+            masterId: z.string().min(1).max(48),
+            variantId: z.number().int().min(0).max(99).optional(),
+          })
+          .optional(),
+        motionLevel: z
+          .enum(["none", "subtle", "premium", "cinematic"])
+          .optional(),
       })
       .strict(),
   })
