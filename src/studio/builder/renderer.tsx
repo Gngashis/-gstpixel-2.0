@@ -24,6 +24,7 @@ import {
   Users,
 } from "lucide-react";
 import type { ComponentType, CSSProperties, KeyboardEvent } from "react";
+import { SplitWordReveal } from "./SplitWordReveal";
 import type { ArtDirection } from "./blueprint";
 import type { DesignSection, DesignSpec } from "./domain";
 import { getHomePage } from "./domain";
@@ -467,11 +468,27 @@ function HeroBody({
       return (
         <>
           {artNode}
-          <div className="studio-v2-site-hero-overlay">
+          <div className="studio-v2-site-hero-overlay is-cinematic">
             <div className="studio-v2-site-hero-copy">
-              {section.content.eyebrow && <p>{section.content.eyebrow}</p>}
-              <h1>{section.content.title}</h1>
-              {section.content.body && <span>{section.content.body}</span>}
+              {section.content.eyebrow && (
+                <p className="studio-v2-site-hero-eyebrow">
+                  <SplitWordReveal splitBy="word" variant="fade-up" stagger={30} delay={100}>
+                    {section.content.eyebrow}
+                  </SplitWordReveal>
+                </p>
+              )}
+              <h1 className="studio-v2-site-hero-title">
+                <SplitWordReveal splitBy="word" variant="fade-up" stagger={50} delay={200}>
+                  {section.content.title}
+                </SplitWordReveal>
+              </h1>
+              {section.content.body && (
+                <span className="studio-v2-site-hero-body">
+                  <SplitWordReveal splitBy="word" variant="fade-up" stagger={25} delay={400}>
+                    {section.content.body}
+                  </SplitWordReveal>
+                </span>
+              )}
               <Actions section={section} />
             </div>
             <Stats section={section} />
@@ -527,15 +544,33 @@ function HeroBody({
       return (
         <>
           {artNode}
-          <div className="studio-v2-site-hero-overlay is-bottom">
+          <div className="studio-v2-site-hero-overlay is-bottom is-cinematic">
             <div className="studio-v2-site-hero-copy">
-              {section.content.eyebrow && <p>{section.content.eyebrow}</p>}
-              <h1>{section.content.title}</h1>
-              {section.content.body && <span>{section.content.body}</span>}
+              {section.content.eyebrow && (
+                <p className="studio-v2-site-hero-eyebrow">
+                  <SplitWordReveal splitBy="word" variant="fade-up" stagger={30} delay={100}>
+                    {section.content.eyebrow}
+                  </SplitWordReveal>
+                </p>
+              )}
+              <h1 className="studio-v2-site-hero-title">
+                <SplitWordReveal splitBy="word" variant="fade-up" stagger={50} delay={200}>
+                  {section.content.title}
+                </SplitWordReveal>
+              </h1>
+              {section.content.body && (
+                <span className="studio-v2-site-hero-body">
+                  <SplitWordReveal splitBy="word" variant="fade-up" stagger={25} delay={400}>
+                    {section.content.body}
+                  </SplitWordReveal>
+                </span>
+              )}
               <Actions section={section} />
             </div>
             <span className="studio-v2-site-scroll-cue" aria-hidden="true">
-              Scroll
+              <SplitWordReveal splitBy="char" variant="slide-left" stagger={15} delay={800}>
+                Scroll
+              </SplitWordReveal>
             </span>
           </div>
         </>
@@ -575,11 +610,27 @@ function HeroBody({
       return (
         <>
           {artNode}
-          <div className="studio-v2-site-hero-overlay is-corner">
+          <div className="studio-v2-site-hero-overlay is-corner is-cinematic">
             <div className="studio-v2-site-hero-copy">
-              {section.content.eyebrow && <p>{section.content.eyebrow}</p>}
-              <h1>{section.content.title}</h1>
-              {section.content.body && <span>{section.content.body}</span>}
+              {section.content.eyebrow && (
+                <p className="studio-v2-site-hero-eyebrow">
+                  <SplitWordReveal splitBy="word" variant="fade-up" stagger={30} delay={100}>
+                    {section.content.eyebrow}
+                  </SplitWordReveal>
+                </p>
+              )}
+              <h1 className="studio-v2-site-hero-title">
+                <SplitWordReveal splitBy="word" variant="fade-up" stagger={50} delay={200}>
+                  {section.content.title}
+                </SplitWordReveal>
+              </h1>
+              {section.content.body && (
+                <span className="studio-v2-site-hero-body">
+                  <SplitWordReveal splitBy="word" variant="fade-up" stagger={25} delay={400}>
+                    {section.content.body}
+                  </SplitWordReveal>
+                </span>
+              )}
               <Actions section={section} />
             </div>
           </div>
