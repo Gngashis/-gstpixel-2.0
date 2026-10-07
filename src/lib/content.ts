@@ -46,6 +46,36 @@ export const toolCatalog = [
     title: "Business checklist",
     blurb: "Organize preparation steps before any registration process.",
   },
+  {
+    slug: "business-roadmap",
+    title: "Business idea roadmap",
+    blurb: "Turn an early idea into a practical digital sequence.",
+  },
+  {
+    slug: "website-requirements",
+    title: "Website requirements",
+    blurb: "Create a structured starting brief for a website project.",
+  },
+  {
+    slug: "digital-readiness",
+    title: "Digital readiness",
+    blurb: "Score the foundations behind your next digital move.",
+  },
+  {
+    slug: "website-improvement",
+    title: "Website improvement",
+    blurb: "Prioritise improvements from your own observations.",
+  },
+  {
+    slug: "project-planning",
+    title: "Project planning assistant",
+    blurb: "Shape phases and decisions for a useful first plan.",
+  },
+  {
+    slug: "website-requirement-generator",
+    title: "Website requirement generator",
+    blurb: "Turn a structured questionnaire into a polished website brief.",
+  },
 ] as const;
 
 const toolBySlug = Object.fromEntries(toolCatalog.map((t) => [t.slug, t]));

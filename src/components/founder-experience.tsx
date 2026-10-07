@@ -68,9 +68,6 @@ export function FounderHeroSignal() {
       aria-label="Meet Ashis Gurung, founder of GSTPIXEL"
       onClick={handleFounderJump}
     >
-      <span className="founder-signal-portrait" aria-hidden="true">
-        <FounderPicture chip />
-      </span>
       <span className="founder-signal-copy">
         <strong>{businessFacts.founder}</strong>
         <span>{businessFacts.founderTitleExtended} · Jaigaon</span>
@@ -150,48 +147,6 @@ export function FounderSection() {
       <div className="founder-environment" aria-hidden="true" />
       <div className="site-container founder-layout">
         <p className="label text-primary founder-label">FOUNDER / 01</p>
-        <div className="founder-visual">
-          <div className="founder-trace" aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </div>
-          <div className="founder-portrait-shell">
-            <div className="founder-frame-edge" aria-hidden="true" />
-            <div className="founder-portrait">
-              <FounderPicture />
-            </div>
-            <div className="founder-vignette" aria-hidden="true" />
-            <div className="founder-frame-reflection" aria-hidden="true" />
-            <span
-              className="founder-frame-corner founder-frame-corner-top"
-              aria-hidden="true"
-            />
-            <span
-              className="founder-frame-corner founder-frame-corner-bottom"
-              aria-hidden="true"
-            />
-          </div>
-          <div className="founder-glass" aria-hidden="true">
-            <span>HUMAN DIRECTION</span>
-            <span>ENGINEERED DELIVERY</span>
-          </div>
-          <div
-            className="founder-registration founder-registration-top"
-            aria-hidden="true"
-          >
-            <span>FOUNDER / 01</span>
-            <i />
-          </div>
-          <div
-            className="founder-registration founder-registration-bottom"
-            aria-hidden="true"
-          >
-            <i />
-            <span>JAIGAON, INDIA</span>
-          </div>
-        </div>
-
         <div className="founder-copy">
           <div className="founder-identity">
             <strong>{businessFacts.founder}</strong>

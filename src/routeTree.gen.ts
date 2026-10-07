@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SplatRouteImport } from './routes/$'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FreeItForChurchesRouteImport } from './routes/free-it-for-churches'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ServicesRouteRouteImport } from './routes/services.route'
@@ -21,6 +22,10 @@ import { Route as StartYourProjectRouteImport } from './routes/start-your-projec
 import { Route as ToolsRouteRouteImport } from './routes/tools.route'
 import { Route as WebsiteStudioRouteImport } from './routes/website-studio'
 import { Route as WorkRouteRouteImport } from './routes/work.route'
+import { Route as LocationsAlipurduarRouteImport } from './routes/locations.alipurduar'
+import { Route as LocationsHasimaraRouteImport } from './routes/locations.hasimara'
+import { Route as LocationsJaigaonRouteImport } from './routes/locations.jaigaon'
+import { Route as LocationsKalchiniRouteImport } from './routes/locations.kalchini'
 import { Route as LocationsPhuentsholingRouteImport } from './routes/locations.phuentsholing'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
@@ -58,6 +63,11 @@ const AboutRoute = AboutRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FreeItForChurchesRoute = FreeItForChurchesRouteImport.update({
+  id: '/free-it-for-churches',
+  path: '/free-it-for-churches',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InsightsRoute = InsightsRouteImport.update({
@@ -98,6 +108,26 @@ const WebsiteStudioRoute = WebsiteStudioRouteImport.update({
 const WorkRouteRoute = WorkRouteRouteImport.update({
   id: '/work',
   path: '/work',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsAlipurduarRoute = LocationsAlipurduarRouteImport.update({
+  id: '/locations/alipurduar',
+  path: '/locations/alipurduar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsHasimaraRoute = LocationsHasimaraRouteImport.update({
+  id: '/locations/hasimara',
+  path: '/locations/hasimara',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsJaigaonRoute = LocationsJaigaonRouteImport.update({
+  id: '/locations/jaigaon',
+  path: '/locations/jaigaon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocationsKalchiniRoute = LocationsKalchiniRouteImport.update({
+  id: '/locations/kalchini',
+  path: '/locations/kalchini',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LocationsPhuentsholingRoute = LocationsPhuentsholingRouteImport.update({
@@ -202,10 +232,15 @@ export interface FileRoutesByFullPath {
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/free-it-for-churches': typeof FreeItForChurchesRoute
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
   '/website-studio': typeof WebsiteStudioRoute
+  '/locations/alipurduar': typeof LocationsAlipurduarRoute
+  '/locations/hasimara': typeof LocationsHasimaraRoute
+  '/locations/jaigaon': typeof LocationsJaigaonRoute
+  '/locations/kalchini': typeof LocationsKalchiniRoute
   '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
@@ -230,10 +265,15 @@ export interface FileRoutesByTo {
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/free-it-for-churches': typeof FreeItForChurchesRoute
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
   '/website-studio': typeof WebsiteStudioRoute
+  '/locations/alipurduar': typeof LocationsAlipurduarRoute
+  '/locations/hasimara': typeof LocationsHasimaraRoute
+  '/locations/jaigaon': typeof LocationsJaigaonRoute
+  '/locations/kalchini': typeof LocationsKalchiniRoute
   '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
@@ -263,10 +303,15 @@ export interface FileRoutesById {
   '/$': typeof SplatRoute
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
+  '/free-it-for-churches': typeof FreeItForChurchesRoute
   '/insights': typeof InsightsRoute
   '/privacy': typeof PrivacyRoute
   '/start-your-project': typeof StartYourProjectRoute
   '/website-studio': typeof WebsiteStudioRoute
+  '/locations/alipurduar': typeof LocationsAlipurduarRoute
+  '/locations/hasimara': typeof LocationsHasimaraRoute
+  '/locations/jaigaon': typeof LocationsJaigaonRoute
+  '/locations/kalchini': typeof LocationsKalchiniRoute
   '/locations/phuentsholing': typeof LocationsPhuentsholingRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
@@ -297,10 +342,15 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/contact'
+    | '/free-it-for-churches'
     | '/insights'
     | '/privacy'
     | '/start-your-project'
     | '/website-studio'
+    | '/locations/alipurduar'
+    | '/locations/hasimara'
+    | '/locations/jaigaon'
+    | '/locations/kalchini'
     | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
@@ -325,10 +375,15 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/contact'
+    | '/free-it-for-churches'
     | '/insights'
     | '/privacy'
     | '/start-your-project'
     | '/website-studio'
+    | '/locations/alipurduar'
+    | '/locations/hasimara'
+    | '/locations/jaigaon'
+    | '/locations/kalchini'
     | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
@@ -357,10 +412,15 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/contact'
+    | '/free-it-for-churches'
     | '/insights'
     | '/privacy'
     | '/start-your-project'
     | '/website-studio'
+    | '/locations/alipurduar'
+    | '/locations/hasimara'
+    | '/locations/jaigaon'
+    | '/locations/kalchini'
     | '/locations/phuentsholing'
     | '/services/$slug'
     | '/solutions/$slug'
@@ -390,10 +450,15 @@ export interface RootRouteChildren {
   SplatRoute: typeof SplatRoute
   AboutRoute: typeof AboutRoute
   ContactRoute: typeof ContactRoute
+  FreeItForChurchesRoute: typeof FreeItForChurchesRoute
   InsightsRoute: typeof InsightsRoute
   PrivacyRoute: typeof PrivacyRoute
   StartYourProjectRoute: typeof StartYourProjectRoute
   WebsiteStudioRoute: typeof WebsiteStudioRoute
+  LocationsAlipurduarRoute: typeof LocationsAlipurduarRoute
+  LocationsHasimaraRoute: typeof LocationsHasimaraRoute
+  LocationsJaigaonRoute: typeof LocationsJaigaonRoute
+  LocationsKalchiniRoute: typeof LocationsKalchiniRoute
   LocationsPhuentsholingRoute: typeof LocationsPhuentsholingRoute
 }
 
@@ -425,6 +490,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/free-it-for-churches': {
+      id: '/free-it-for-churches'
+      path: '/free-it-for-churches'
+      fullPath: '/free-it-for-churches'
+      preLoaderRoute: typeof FreeItForChurchesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/insights': {
@@ -481,6 +553,34 @@ declare module '@tanstack/react-router' {
       path: '/work'
       fullPath: '/work'
       preLoaderRoute: typeof WorkRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/alipurduar': {
+      id: '/locations/alipurduar'
+      path: '/locations/alipurduar'
+      fullPath: '/locations/alipurduar'
+      preLoaderRoute: typeof LocationsAlipurduarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/hasimara': {
+      id: '/locations/hasimara'
+      path: '/locations/hasimara'
+      fullPath: '/locations/hasimara'
+      preLoaderRoute: typeof LocationsHasimaraRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/jaigaon': {
+      id: '/locations/jaigaon'
+      path: '/locations/jaigaon'
+      fullPath: '/locations/jaigaon'
+      preLoaderRoute: typeof LocationsJaigaonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/locations/kalchini': {
+      id: '/locations/kalchini'
+      path: '/locations/kalchini'
+      fullPath: '/locations/kalchini'
+      preLoaderRoute: typeof LocationsKalchiniRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/locations/phuentsholing': {
@@ -695,10 +795,15 @@ const rootRouteChildren: RootRouteChildren = {
   SplatRoute: SplatRoute,
   AboutRoute: AboutRoute,
   ContactRoute: ContactRoute,
+  FreeItForChurchesRoute: FreeItForChurchesRoute,
   InsightsRoute: InsightsRoute,
   PrivacyRoute: PrivacyRoute,
   StartYourProjectRoute: StartYourProjectRoute,
   WebsiteStudioRoute: WebsiteStudioRoute,
+  LocationsAlipurduarRoute: LocationsAlipurduarRoute,
+  LocationsHasimaraRoute: LocationsHasimaraRoute,
+  LocationsJaigaonRoute: LocationsJaigaonRoute,
+  LocationsKalchiniRoute: LocationsKalchiniRoute,
   LocationsPhuentsholingRoute: LocationsPhuentsholingRoute,
 }
 export const routeTree = rootRouteImport

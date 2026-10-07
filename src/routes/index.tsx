@@ -5,6 +5,7 @@ import {
   CircuitBoard,
   FileCheck2,
   Gauge,
+  HandHeart,
   MessageCircle,
   Sparkles,
   WandSparkles,
@@ -53,7 +54,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Describe your business and GSTPIXEL Website Studio creates an instant website concept. GSTPIXEL builds complete websites, apps, software and AI automation — plus GST, FSSAI and business setup services from Jaigaon, West Bengal, for India and Bhutan.",
+          "GSTPIXEL builds websites, software & automation for businesses in Jaigaon, Hasimara, Alipurduar and Bhutan. GST & FSSAI help too. Get a free quote.",
       },
       {
         property: "og:title",
@@ -62,7 +63,7 @@ export const Route = createFileRoute("/")({
       {
         property: "og:description",
         content:
-          "Describe your business and GSTPIXEL Website Studio creates an instant website concept. GSTPIXEL builds complete websites, apps, software and AI automation — plus GST, FSSAI and business setup services from Jaigaon, West Bengal, for India and Bhutan.",
+          "GSTPIXEL builds websites, software & automation for businesses in Jaigaon, Hasimara, Alipurduar and Bhutan. GST & FSSAI help too. Get a free quote.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: buildCanonical("/") },
@@ -273,6 +274,12 @@ function Home() {
               </div>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.4}>
+              <a href="/free-it-for-churches" className="hero-free-signal">
+                <HandHeart size={14} />
+                Free IT help for churches &amp; Christian organisations
+              </a>
+            </ScrollReveal>
+            <ScrollReveal variant="fadeInUp" delay={0.45}>
               <div className="hero-meta">
                 <span>IDEA → WEBSITE</span>
                 <span>GSTPIXEL / 02.0</span>
@@ -745,6 +752,91 @@ function Home() {
       </section>
 
       <section
+        className="content-band bg-ink text-ink-foreground env-section"
+        data-env-phase="5"
+        style={{ "--env-glow-x": "55%", "--env-glow-y": "45%" }}
+      >
+        <div className="site-container editorial-split">
+          <div>
+            <SectionHeader
+              label="09 / Free IT for churches"
+              title="Free technology help for churches and Christian organisations."
+            />
+            <ScrollReveal variant="fadeInUp" delay={0.15}>
+              <p className="section-copy">
+                GSTPIXEL builds websites, applications, and automation for
+                businesses. Through this initiative, the same work is available
+                at no cost to churches, pastors, and Christian organisations
+                that need it.
+              </p>
+              <p className="section-copy">
+                Requests are assessed individually. Not every request can be
+                taken on, and some work may be part-funded rather than fully
+                free — you will know where you stand before anything begins.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal variant="fadeInUp" delay={0.25}>
+              <div
+                className="flex flex-wrap items-center gap-3"
+                style={{ marginTop: "1.75rem" }}
+              >
+                <ButtonLink
+                  to="/start-your-project"
+                  search={{ interest: "free-it-church" }}
+                >
+                  Request free IT help <ArrowRight size={16} />
+                </ButtonLink>
+                <a
+                  href="/free-it-for-churches"
+                  style={{ color: "var(--ink-muted)" }}
+                  className="text-sm font-medium underline-offset-4 hover:underline"
+                >
+                  Read about the initiative
+                </a>
+              </div>
+            </ScrollReveal>
+          </div>
+          <StaggeredReveal
+            baseDelay={0.1}
+            variant="fadeInUp"
+            className="principles"
+          >
+            <div
+                className="assembly-panel"
+                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+              >
+                A first website or a rebuild of an outdated one
+              </div>
+              <div
+                className="assembly-panel"
+                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+              >
+                Simple web or mobile applications for ministry or
+                administration
+              </div>
+              <div
+                className="assembly-panel"
+                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+              >
+                Automation of repetitive admin and communication work
+              </div>
+              <div
+                className="assembly-panel"
+                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+              >
+                Business registration and related compliance support
+              </div>
+              <div
+                className="assembly-panel"
+                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+              >
+                General technology guidance for the work above
+              </div>
+          </StaggeredReveal>
+        </div>
+      </section>
+
+      <section
         className="content-band env-section"
         data-env-phase="5"
         style={{ "--env-glow-x": "45%", "--env-glow-y": "55%" }}
@@ -752,7 +844,7 @@ function Home() {
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="09 / Where we work"
+              label="10 / Where we work"
               title="Rooted in Jaigaon. Relevant across India."
             />
             <StaggeredReveal baseDelay={0.08} variant="fadeInUp">
@@ -842,7 +934,7 @@ function Home() {
       >
         <div className="site-container">
           <SectionHeader
-            label="10 / Process"
+            label="11 / Process"
             title="From first conversation to a working outcome."
           />
           <StaggeredReveal
@@ -874,7 +966,7 @@ function Home() {
         <div className="site-container editorial-split">
           <div>
             <SectionHeader
-              label="11 / Resources"
+              label="12 / Resources"
               title="Useful guidance, when it is ready."
             />
           </div>

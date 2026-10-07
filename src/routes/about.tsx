@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
 import { buildCanonical, organizationJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/json-ld";
-import { FounderPicture } from "@/components/founder-experience";
 import { businessFacts } from "@/lib/content";
 import {
   ArrowRight,
@@ -264,14 +263,10 @@ function AboutContent() {
                 padding: "2rem",
                 display: "grid",
                 gap: "2rem",
-                gridTemplateColumns: "minmax(8rem, 11rem) 1fr",
+                gridTemplateColumns: "1fr",
                 alignItems: "start",
               }}
             >
-              <div className="about-founder-portrait">
-                <FounderPicture />
-                <span aria-hidden="true" />
-              </div>
               <div>
                 <div
                   className="founder-title"
@@ -323,7 +318,7 @@ function AboutContent() {
                 >
                   <span
                     className="flex items-center gap-0.5"
-                    style={{ color: "var(--foreground)" }}
+                    style={{ color: "var(--muted-foreground)" }}
                   >
                     <MapPin size={16} aria-hidden="true" />{" "}
                     {businessFacts.location}
@@ -331,7 +326,7 @@ function AboutContent() {
                   <a
                     href={businessFacts.email.href}
                     className="flex items-center gap-0.5"
-                    style={{ color: "var(--foreground)" }}
+                    style={{ color: "var(--muted-foreground)" }}
                   >
                     <Mail size={16} aria-hidden="true" />{" "}
                     {businessFacts.email.label}
@@ -341,7 +336,7 @@ function AboutContent() {
                     target="_blank"
                     rel="noreferrer"
                     className="flex items-center gap-0.5"
-                    style={{ color: "var(--foreground)" }}
+                    style={{ color: "var(--muted-foreground)" }}
                   >
                     <MessageSquare size={16} aria-hidden="true" />{" "}
                     {businessFacts.whatsapp.label}

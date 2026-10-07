@@ -464,6 +464,27 @@ a {
 .hero-meta span + span {
   color: color-mix(in oklab, var(--primary) 70%, var(--ink-muted));
 }
+.hero-free-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.5rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid color-mix(in oklab, var(--primary) 32%, transparent);
+  border-radius: 0.45rem;
+  background: color-mix(in oklab, var(--primary) 7%, transparent);
+  color: var(--ink-foreground);
+  font: 500 0.62rem var(--font-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.hero-free-signal:hover,
+.hero-free-signal:focus-visible {
+  border-color: color-mix(in oklab, var(--primary) 62%, transparent);
+}
+.hero-free-signal svg {
+  color: var(--primary);
+}
 .hero-copy,
 .section-copy {
   max-width: 48ch;

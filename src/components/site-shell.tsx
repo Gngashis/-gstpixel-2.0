@@ -475,6 +475,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             aria-label="Footer"
             className="grid grid-cols-2 gap-6 text-sm sm:grid-cols-4"
           >
+            <style>{`@media (min-width:768px){.site-footer nav[aria-label=Footer]{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1024px){.site-footer nav[aria-label=Footer]{grid-template-columns:repeat(5,minmax(0,1fr))}}`}</style>
             <div className="footer-column">
               <p className="label">Explore</p>
               <Link to="/services">Services</Link>
@@ -494,9 +495,18 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
               <Link to="/contact">Contact</Link>
             </div>
             <div className="footer-column">
+              <p className="label">Locations</p>
+              <Link to="/locations/jaigaon">Jaigaon</Link>
+              <Link to="/locations/alipurduar">Alipurduar</Link>
+              <Link to="/locations/hasimara">Hasimara</Link>
+              <Link to="/locations/kalchini">Kalchini</Link>
+              <Link to="/locations/phuentsholing">Phuentsholing</Link>
+            </div>
+            <div className="footer-column">
               <p className="label">Begin</p>
               <Link to="/website-studio">Website Studio</Link>
               <Link to="/start-your-project">Start your project</Link>
+              <Link to="/free-it-for-churches">Free IT for churches</Link>
               <Link to="/privacy">Privacy</Link>
             </div>
           </nav>
