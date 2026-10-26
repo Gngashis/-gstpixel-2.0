@@ -2199,7 +2199,8 @@ const faith: Profile = {
   nouns: ["Church", "Fellowship", "Community"],
   offer: "Services & ministries",
   offerNoun: "gatherings",
-  audience: "the congregation, newcomers and families looking for a church home",
+  audience:
+    "the congregation, newcomers and families looking for a church home",
   intent: "feel welcome, see when services happen and plan a first visit",
   personality: "warm, reverent and welcoming",
   priorities: ["Welcome", "Services", "Ministries", "Visit"],
@@ -3472,7 +3473,7 @@ function fill(template: string, values: Record<string, string>): string {
     .replace(/^(A|An|The)\s*$/i, "")
     .trim();
   // Never ship a heading that starts lowercase or with stray punctuation.
-  output = output.replace(/^[\s·,;:\-]+/, "");
+  output = output.replace(/^[\s·,;:-]+/, "");
   if (output) output = output[0]!.toUpperCase() + output.slice(1);
   return output.trim();
 }

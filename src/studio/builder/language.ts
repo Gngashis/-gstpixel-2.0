@@ -573,10 +573,19 @@ function matchesPhrase(canonical: string, phrase: string): boolean {
  * used to outrank the hotel and turn a hotel into a shop).
  */
 const modifierGuardPhrases: ReadonlyArray<readonly [RegExp, string]> = [
-  [/\bboutique\s+(hotel|hotels|resort|resorts|homestay|villas?|lodges?|guest\s?houses?|hostels?|retreats?|inns?|stays?)\b/g, "$1"],
-  [/\bboutique\s+(dental|clinic|medical|pharmacy|law|legal|consult)\w*\b/g, "$1"],
+  [
+    /\bboutique\s+(hotel|hotels|resort|resorts|homestay|villas?|lodges?|guest\s?houses?|hostels?|retreats?|inns?|stays?)\b/g,
+    "$1",
+  ],
+  [
+    /\bboutique\s+(dental|clinic|medical|pharmacy|law|legal|consult)\w*\b/g,
+    "$1",
+  ],
   [/\bboutique\s+(jewellery|jewelry|gold|diamond)\w*\b/g, "$1"],
-  [/\bboutique\s+(farm|bakery|cafe|café|restaurant|builder|construction|gym|fitness|studio|agency)\b/g, "$1"],
+  [
+    /\bboutique\s+(farm|bakery|cafe|café|restaurant|builder|construction|gym|fitness|studio|agency)\b/g,
+    "$1",
+  ],
 ];
 
 export function canonicalBusinessText(prompt: string): string {

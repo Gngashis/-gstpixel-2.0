@@ -157,11 +157,11 @@ function Page() {
                 Alipurduar district — covering Alipurduar town, New Alipurduar,
                 Falakata, Kumargram, and the Buxa hills — runs on tourism, tea,
                 timber, and cross-border trade. Visitors search &quot;hotels
-                near Buxa&quot;, &quot;restaurants Alipurduar&quot;,
-                &quot;taxi Jayanti&quot; on mobile before they arrive. Traders
-                and professionals search for CA, legal, and GST services
-                locally. The businesses that capture that intent are the ones
-                with a credible, maintained web presence.
+                near Buxa&quot;, &quot;restaurants Alipurduar&quot;, &quot;taxi
+                Jayanti&quot; on mobile before they arrive. Traders and
+                professionals search for CA, legal, and GST services locally.
+                The businesses that capture that intent are the ones with a
+                credible, maintained web presence.
               </p>
               <p className="section-copy">
                 Justdial lists 250+ web designers in Alipurduar. Most are

@@ -488,7 +488,10 @@ describe("Studio conversational capabilities", () => {
     expect(down.changed).toBe(true);
     const up = applyStudioChangePlan(
       { ...context(base), spec: down.spec },
-      planStudioChange("make the typography larger", { ...context(base), spec: down.spec }),
+      planStudioChange("make the typography larger", {
+        ...context(base),
+        spec: down.spec,
+      }),
     );
     expect(up.changed).toBe(true);
     expect(up.spec.theme.headingScale).not.toBe("compact");
@@ -501,9 +504,9 @@ describe("Studio conversational capabilities", () => {
       base.theme.headingScale === "expressive" &&
       base.theme.bodyScale === "large"
     ) {
-      expect(
-        plan.unsupported.join(" ").toLowerCase(),
-      ).toMatch(/largest size|maximum/);
+      expect(plan.unsupported.join(" ").toLowerCase()).toMatch(
+        /largest size|maximum/,
+      );
     }
   });
 

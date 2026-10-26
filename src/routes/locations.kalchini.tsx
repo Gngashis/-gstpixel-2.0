@@ -148,8 +148,8 @@ function Page() {
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.1}>
               <h2>
-                Tea, tourism, and forest produce in the Dooars — businesses
-                here need digital reach that matches their product quality.
+                Tea, tourism, and forest produce in the Dooars — businesses here
+                need digital reach that matches their product quality.
               </h2>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
@@ -160,8 +160,8 @@ function Page() {
                 near Jaldapara&quot;, &quot;tea estate stay Dooars&quot;,
                 &quot;resort Chilapata&quot; on mobile before booking. Tea
                 growers and forest-produce traders need compliant, traceable
-                digital systems. The businesses that capture this demand are
-                the ones with a credible, maintained web presence and proper
+                digital systems. The businesses that capture this demand are the
+                ones with a credible, maintained web presence and proper
                 compliance.
               </p>
               <p className="section-copy">
@@ -288,9 +288,8 @@ function Page() {
               <p className="section-copy">
                 Describe the outcome — a website that brings eco-tourists
                 directly to your homestay, an online store for your tea or
-                forest produce, a GST return filed on time, a process that
-                stops repeating — and we will map the smallest useful first
-                step.
+                forest produce, a GST return filed on time, a process that stops
+                repeating — and we will map the smallest useful first step.
               </p>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
