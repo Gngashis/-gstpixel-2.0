@@ -802,36 +802,35 @@ function Home() {
             className="principles"
           >
             <div
-                className="assembly-panel"
-                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
-              >
-                A first website or a rebuild of an outdated one
-              </div>
-              <div
-                className="assembly-panel"
-                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
-              >
-                Simple web or mobile applications for ministry or
-                administration
-              </div>
-              <div
-                className="assembly-panel"
-                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
-              >
-                Automation of repetitive admin and communication work
-              </div>
-              <div
-                className="assembly-panel"
-                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
-              >
-                Business registration and related compliance support
-              </div>
-              <div
-                className="assembly-panel"
-                style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
-              >
-                General technology guidance for the work above
-              </div>
+              className="assembly-panel"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
+              A first website or a rebuild of an outdated one
+            </div>
+            <div
+              className="assembly-panel"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
+              Simple web or mobile applications for ministry or administration
+            </div>
+            <div
+              className="assembly-panel"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
+              Automation of repetitive admin and communication work
+            </div>
+            <div
+              className="assembly-panel"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
+              Business registration and related compliance support
+            </div>
+            <div
+              className="assembly-panel"
+              style={{ borderRadius: "0.5rem", padding: "1.5rem" }}
+            >
+              General technology guidance for the work above
+            </div>
           </StaggeredReveal>
         </div>
       </section>

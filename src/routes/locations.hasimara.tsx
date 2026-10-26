@@ -148,20 +148,19 @@ function Page() {
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.1}>
               <h2>
-                A logistics and trade hub on the India–Bhutan corridor —
-                digital visibility captures the traffic that passes through.
+                A logistics and trade hub on the India–Bhutan corridor — digital
+                visibility captures the traffic that passes through.
               </h2>
             </ScrollReveal>
             <ScrollReveal variant="fadeInUp" delay={0.2}>
               <p className="section-copy">
                 Hasimara sits on NH-31C, the main artery feeding the
                 Phuentsholing border gate. Every day, trucks, tourist vehicles,
-                and commuters pass through. The businesses that grow —
-                logistics firms, warehouses, clearing agents, hotels,
-                restaurants, and retailers — are the ones visible online when a
-                driver searches &quot;warehouse near Hasimara&quot;,
-                &quot;hotel Hasimara&quot;, &quot;customs agent
-                Phuentsholing&quot; on mobile.
+                and commuters pass through. The businesses that grow — logistics
+                firms, warehouses, clearing agents, hotels, restaurants, and
+                retailers — are the ones visible online when a driver searches
+                &quot;warehouse near Hasimara&quot;, &quot;hotel Hasimara&quot;,
+                &quot;customs agent Phuentsholing&quot; on mobile.
               </p>
               <p className="section-copy">
                 GSTPIXEL is based 15 km away in Jaigaon. We know the corridor,
@@ -252,8 +251,8 @@ function Page() {
                 We also serve the wider NH-31C corridor — Birpara, Madarihat,
                 Dalgaon — and nearby Alipurduar, Kalchini, Jaigaon, and across
                 the border in Phuentsholing and Bhutan. For Indian businesses,
-                we cover GST, FSSAI, Udyam, trade licence, and registration.
-                For Bhutan businesses, the focus is digital development and
+                we cover GST, FSSAI, Udyam, trade licence, and registration. For
+                Bhutan businesses, the focus is digital development and
                 automation.
               </p>
             </ScrollReveal>

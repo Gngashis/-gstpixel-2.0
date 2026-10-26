@@ -211,7 +211,11 @@ function Page() {
                 Request free IT help <ArrowRight size={16} />
               </ButtonLink>
               <span
-                style={{ display: "inline-flex", gap: "1.1rem", flexWrap: "wrap" }}
+                style={{
+                  display: "inline-flex",
+                  gap: "1.1rem",
+                  flexWrap: "wrap",
+                }}
               >
                 <a href={businessFacts.whatsapp.href} style={contactLink}>
                   <MessageCircle size={15} aria-hidden="true" /> WhatsApp
@@ -243,8 +247,8 @@ function Page() {
               style={{ maxWidth: "52ch", marginTop: "1rem" }}
             >
               GSTPIXEL remains a full commercial studio for businesses
-              everywhere. This initiative runs alongside that work — it does
-              not replace it.
+              everywhere. This initiative runs alongside that work — it does not
+              replace it.
             </p>
           </ScrollReveal>
           <ScrollReveal variant="scaleIn" delay={0.25}>
