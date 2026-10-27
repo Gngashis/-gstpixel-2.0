@@ -53,6 +53,7 @@ for (const width of MOBILE_WIDTHS) {
       await reduceMotion(page);
       await safeGoto(page, "/");
       await waitForHydration(page);
+      await page.waitForTimeout(1500);
 
       // Anchored before any scrolling.
       expect(await headerTop(page)).toBeLessThanOrEqual(1);
@@ -93,6 +94,7 @@ for (const width of MOBILE_WIDTHS) {
       await reduceMotion(page);
       await safeGoto(page, "/");
       await waitForHydration(page);
+      await page.waitForTimeout(1500);
       await scrollToFraction(page, 0.5);
 
       const yBefore = await page.evaluate(() => Math.round(window.scrollY));
@@ -160,6 +162,7 @@ for (const width of MOBILE_WIDTHS) {
       await reduceMotion(page);
       await safeGoto(page, "/");
       await waitForHydration(page);
+      await page.waitForTimeout(1500);
       await scrollToFraction(page, 0.5);
 
       // Outside tap closes without scrolling the header away.
@@ -186,6 +189,7 @@ test("desktop header behaviour is unchanged", async ({ page }) => {
   await reduceMotion(page);
   await safeGoto(page, "/");
   await waitForHydration(page);
+  await page.waitForTimeout(1500);
 
   const position = await page.evaluate(
     () =>
